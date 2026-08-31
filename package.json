@@ -1,13 +1,15 @@
 {
   "name": "liturgy-maker",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "fmt": "oxfmt",
+    "preview": "vite preview",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -18,9 +20,19 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "lint-staged": "^17.4.1",
     "oxc-transform-react": "^0.147.0",
+    "oxfmt": "^0.65.0",
     "oxlint": "^1.79.0",
+    "simple-git-hooks": "^2.14.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "npm run lint",
+    "*": "oxfmt --no-error-on-unmatched-pattern"
   }
 }
