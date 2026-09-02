@@ -1,6 +1,7 @@
 import * as formisch from "@formisch/react";
 import { useEffect } from "react";
-import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { useAuthState, useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { useNavigate } from "react-router";
 import * as v from "valibot";
 
 import { FormishFieldError } from "@/components/formisch-field-error";
@@ -22,8 +23,10 @@ const formSchema = v.object({
   password: v.pipe(v.string(), v.nonEmpty("Le mot de passe est requis")),
 });
 
-function Auth({ className, ...props }: React.ComponentProps<"div">) {
+function AuthRoute({ className, ...props }: React.ComponentProps<"div">) {
   const [signInWithEmailAndPassword, , , authError] = useSignInWithEmailAndPassword(firebaseAuth);
+  const navigate = useNavigate();
+  const [user] = useAuthState(firebaseAuth);
 
   const form = formisch.useForm({
     schema: formSchema,
@@ -39,6 +42,11 @@ function Auth({ className, ...props }: React.ComponentProps<"div">) {
     }
   }, [authError]);
 
+  if (user) {
+    navigate("/", { replace: true });
+    return null;
+  }
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 transition-[transform_opacity] duration-1000 md:p-10 starting:scale-95 starting:opacity-0">
       <div className="w-full max-w-sm">
@@ -52,7 +60,11 @@ function Auth({ className, ...props }: React.ComponentProps<"div">) {
               <formisch.Form
                 of={form}
                 onSubmit={async ({ email, password }) => {
-                  await signInWithEmailAndPassword(email, password);
+                  const credentials = await signInWithEmailAndPassword(email, password);
+
+                  if (credentials) {
+                    navigate("/", { replace: true });
+                  }
                 }}
               >
                 <FieldGroup>
@@ -124,4 +136,4 @@ function Auth({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-export { Auth };
+export { AuthRoute };

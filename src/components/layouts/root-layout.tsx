@@ -1,10 +1,12 @@
 import { useAuthState } from "react-firebase-hooks/auth";
+import { Outlet } from "react-router";
 
-import { Auth } from "@/components/auth";
-import { Spinner } from "@/components/ui/spinner";
 import { firebaseAuth } from "@/lib/firebase";
 
-function App() {
+import { AuthRoute } from "../routes/auth-route";
+import { Spinner } from "../ui/spinner";
+
+function RootLayout() {
   const [user, loading] = useAuthState(firebaseAuth);
 
   if (loading) {
@@ -16,10 +18,10 @@ function App() {
   }
 
   if (!user) {
-    return <Auth />;
+    return <AuthRoute />;
   }
 
-  return <h1 className="text-3xl font-bold underline">Connected</h1>;
+  return <Outlet />;
 }
 
-export default App;
+export { RootLayout };
