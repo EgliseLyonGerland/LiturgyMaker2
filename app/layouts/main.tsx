@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-function MainLayout() {
+export default function MainLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -37,5 +37,3 @@ function MainLayout() {
     </SidebarProvider>
   );
 }
-
-export { MainLayout };

@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { firebaseAuth } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
 
 const formSchema = v.object({
   email: v.pipe(
@@ -23,7 +22,7 @@ const formSchema = v.object({
   password: v.pipe(v.string(), v.nonEmpty("Le mot de passe est requis")),
 });
 
-function AuthRoute({ className, ...props }: React.ComponentProps<"div">) {
+export default function Auth() {
   const [signInWithEmailAndPassword, , , authError] = useSignInWithEmailAndPassword(firebaseAuth);
   const navigate = useNavigate();
   const [user] = useAuthState(firebaseAuth);
@@ -50,7 +49,7 @@ function AuthRoute({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 transition-[transform_opacity] duration-1000 md:p-10 starting:scale-95 starting:opacity-0">
       <div className="w-full max-w-sm">
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Connexion</CardTitle>
@@ -135,5 +134,3 @@ function AuthRoute({ className, ...props }: React.ComponentProps<"div">) {
     </div>
   );
 }
-
-export { AuthRoute };
