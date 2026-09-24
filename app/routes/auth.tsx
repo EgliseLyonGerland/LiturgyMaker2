@@ -1,7 +1,7 @@
 import * as formisch from "@formisch/react";
 import { useEffect } from "react";
 import { useAuthState, useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import * as v from "valibot";
 
 import { FormishFieldError } from "@/components/formisch-field-error";
@@ -23,6 +23,7 @@ const formSchema = v.object({
 });
 
 export default function Auth() {
+  const [searchParams] = useSearchParams();
   const [signInWithEmailAndPassword, , , authError] = useSignInWithEmailAndPassword(firebaseAuth);
   const navigate = useNavigate();
   const [user] = useAuthState(firebaseAuth);
@@ -42,7 +43,9 @@ export default function Auth() {
   }, [authError]);
 
   if (user) {
-    navigate("/", { replace: true });
+    const redirect = searchParams.get("redirect");
+
+    navigate(redirect || "/", { replace: true });
     return null;
   }
 
@@ -59,11 +62,7 @@ export default function Auth() {
               <formisch.Form
                 of={form}
                 onSubmit={async ({ email, password }) => {
-                  const credentials = await signInWithEmailAndPassword(email, password);
-
-                  if (credentials) {
-                    navigate("/", { replace: true });
-                  }
+                  await signInWithEmailAndPassword(email, password);
                 }}
               >
                 <FieldGroup>

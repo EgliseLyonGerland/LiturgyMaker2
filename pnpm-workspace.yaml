@@ -2,3 +2,5 @@ allowBuilds:
   "@firebase/util": true
   protobufjs: true
   simple-git-hooks: true
+minimumReleaseAgeExclude:
+  - "@types/node@26.6.2"
