@@ -152,9 +152,9 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
         render={
           <button
             type="button"
-            className="group text-muted-foreground flex h-5 w-full cursor-pointer items-center px-2 text-sm transition-[height] outline-none hover:h-15 hover:delay-300 focus-visible:h-15 aria-expanded:h-15"
+            className="group flex h-5 w-full cursor-pointer items-center px-2 text-sm text-muted-foreground transition-[height] outline-none hover:h-15 hover:delay-300 focus-visible:h-15 aria-expanded:h-15"
           >
-            <div className="bg-muted/50 group-hover:bg-muted group-aria-expanded:bg-muted group-focus-visible:bg-muted group-focus-visible:border-ring group-focus-visible:ring-ring w-full cursor-pointer rounded-md transition-colors group-hover:delay-50 group-focus-visible:ring-3">
+            <div className="w-full cursor-pointer rounded-md bg-muted/50 transition-colors group-hover:bg-muted group-hover:delay-50 group-focus-visible:border-ring group-focus-visible:bg-muted group-focus-visible:ring-3 group-focus-visible:ring-ring group-aria-expanded:bg-muted">
               <div className="flex h-0.5 items-center justify-center overflow-hidden transition-[height] group-hover:h-8 group-hover:delay-300 group-focus-visible:h-8 group-aria-expanded:h-8">
                 <span className="inline-flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 group-aria-expanded:opacity-100">
                   <PlusCircleIcon className="size-4" /> Ajouter un block
@@ -197,7 +197,7 @@ function AnnouncementsBlockForm({ index }: BlockFormProps) {
   const { fields } = useFieldArray({ control, name: `blocks.${index}.data.items` });
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Annonces</CardTitle>
       </CardHeader>
@@ -248,7 +248,7 @@ function SectionBlockForm({ index }: BlockFormProps) {
   const path = `blocks.${index}.data.title` as const;
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Section</CardTitle>
       </CardHeader>
@@ -275,7 +275,7 @@ function OpenDoorsBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<OpenDoorsBlockFieldValues>();
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Portes Ouvertes</CardTitle>
       </CardHeader>
@@ -293,7 +293,7 @@ function ReadingBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<ReadingBlockFieldValues>();
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Lecture</CardTitle>
       </CardHeader>
@@ -311,7 +311,7 @@ function RecitationBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<RecitationBlockFieldValues>();
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Récitation</CardTitle>
       </CardHeader>
@@ -332,7 +332,7 @@ function SermonBlockForm({ index }: BlockFormProps) {
   } = useFormContext<SermonBlockFieldValues>();
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Prédication</CardTitle>
       </CardHeader>
@@ -396,7 +396,7 @@ function SongsBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<SongsBlockFieldValues>();
 
   return (
-    <Card className="focus-within:ring-primary transition-[outline]">
+    <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
         <CardTitle>Chants</CardTitle>
       </CardHeader>
