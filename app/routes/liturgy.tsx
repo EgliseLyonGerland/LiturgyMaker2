@@ -1,19 +1,30 @@
 import * as formisch from "@formisch/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { clsx } from "clsx";
 import { doc, getDoc } from "firebase/firestore";
 import { PlusCircleIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
+  Controller,
   FormProvider,
   useFieldArray,
   useForm,
   useFormContext,
+  Watch,
   type FieldPath,
 } from "react-hook-form";
 
 import { FormishFieldError } from "@/components/formisch-field-error";
+import {
+  Autocomplete,
+  AutocompleteContent,
+  AutocompleteEmpty,
+  AutocompleteInput,
+  AutocompleteItem,
+  AutocompleteList,
+} from "@/components/reui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,7 +37,10 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { liturgyBlockNames, liturgyBlockTypes } from "@/config";
+import { books } from "@/config/bible";
+import { getPassage, validate } from "@/lib/bibleRef";
 import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
 import { firebaseDb } from "@/lib/firebase";
 import migrate from "@/lib/migrate";
@@ -77,8 +91,6 @@ export default function Liturgy({ loaderData }: Route.ComponentProps) {
 
   const [listElement] = useAutoAnimate();
 
-  console.log(liturgy);
-
   return (
     <FormProvider {...form}>
       <form
@@ -97,21 +109,21 @@ export default function Liturgy({ loaderData }: Route.ComponentProps) {
 
           <div ref={listElement} className="flex flex-col">
             {fieldArray.fields.map((field, index) => (
-              <>
+              <Fragment key={field.id}>
                 {field.type === "section" ? (
-                  <SectionBlockForm key={field.id} index={index} />
+                  <SectionBlockForm index={index} />
                 ) : field.type === "announcements" ? (
-                  <AnnouncementsBlockForm key={field.id} index={index} />
+                  <AnnouncementsBlockForm index={index} />
                 ) : field.type === "openDoors" ? (
-                  <OpenDoorsBlockForm key={field.id} index={index} />
+                  <OpenDoorsBlockForm index={index} />
                 ) : field.type === "reading" ? (
-                  <ReadingBlockForm key={field.id} index={index} />
+                  <ReadingBlockForm index={index} />
                 ) : field.type === "recitation" ? (
-                  <RecitationBlockForm key={field.id} index={index} />
+                  <RecitationBlockForm index={index} />
                 ) : field.type === "sermon" ? (
-                  <SermonBlockForm key={field.id} index={index} />
+                  <SermonBlockForm index={index} />
                 ) : (
-                  <SongsBlockForm key={field.id} index={index} />
+                  <SongsBlockForm index={index} />
                 )}
 
                 <AddBlockButton
@@ -119,7 +131,7 @@ export default function Liturgy({ loaderData }: Route.ComponentProps) {
                     fieldArray.insert(index + 1, createDefaultBlock(type));
                   }}
                 />
-              </>
+              </Fragment>
             ))}
           </div>
         </div>
@@ -285,20 +297,131 @@ function OpenDoorsBlockForm({ index }: BlockFormProps) {
   );
 }
 
+function isSimilar(value: string, prefix: string) {
+  const collator = new Intl.Collator("fr", { sensitivity: "base" });
+
+  const str1 = value.replace(/\s+/, "");
+  const str2 = prefix.replace(/\s+/, "");
+
+  return collator.compare(str1.slice(0, [...str2].length), str2) === 0;
+}
+
 interface ReadingBlockFieldValues extends LiturgyDocument {
   blocks: ReadingBlock[];
 }
 
 function ReadingBlockForm({ index }: BlockFormProps) {
-  const { control } = useFormContext<ReadingBlockFieldValues>();
+  const {
+    control,
+    register,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useFormContext<ReadingBlockFieldValues>();
+
+  const { fields } = useFieldArray({ control, name: `blocks.${index}.data.bibleRefs` });
 
   return (
     <Card className="transition-[outline] focus-within:ring-primary">
       <CardHeader>
-        <CardTitle>Lecture</CardTitle>
+        <CardTitle>
+          Lecture{" "}
+          <span className="ml-1 text-sm text-muted-foreground">
+            <Watch
+              control={control}
+              name={`blocks.${index}.title`}
+              render={(title) => title && `(${title})`}
+            />
+          </span>
+        </CardTitle>
       </CardHeader>
 
-      <CardContent></CardContent>
+      <CardContent>
+        {fields.map((field, fieldIndex) => (
+          <Fragment key={field.id}>
+            <Field>
+              <FieldLabel htmlFor={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}>
+                Référence
+              </FieldLabel>
+              <Autocomplete
+                items={books}
+                autoHighlight
+                filter={(item, query) => isSimilar(item.name, query)}
+              >
+                <Controller
+                  control={control}
+                  name={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}
+                  render={({ field }) => <AutocompleteInput {...field} />}
+                />
+                <AutocompleteContent className="data-empty:hidden">
+                  <AutocompleteList>
+                    {(item: (typeof books)[number]) => (
+                      <AutocompleteItem key={item.name} value={`${item.alt || item.name} `}>
+                        {item.alt || item.name}
+                      </AutocompleteItem>
+                    )}
+                  </AutocompleteList>
+                </AutocompleteContent>
+              </Autocomplete>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`}>
+                Extrait
+              </FieldLabel>
+              <Textarea
+                id={`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`}
+                className="field-sizing-content"
+                {...register(`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`)}
+                aria-invalid={!!errors.blocks?.[index]?.data?.bibleRefs?.[fieldIndex]?.excerpt}
+              />
+            </Field>
+            <Watch
+              control={control}
+              name={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}
+              render={(id) => {
+                const valid = validate(id);
+
+                return (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <div className="self-start">
+                          <Button
+                            variant="ghost"
+                            disabled={!valid}
+                            onClick={async () => {
+                              const result = await getPassage(
+                                getValues(`blocks.${index}.data.bibleRefs.${fieldIndex}.id`),
+                              );
+
+                              if (result) {
+                                setValue(
+                                  `blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`,
+                                  result,
+                                );
+                              }
+                            }}
+                          >
+                            Remplir automatiquement
+                          </Button>
+                        </div>
+                      }
+                    />
+                    {!valid && (
+                      <TooltipContent>
+                        <div>
+                          Pour utiliser le remplissage automatique, vous devez saisir une référence
+                          valide.
+                        </div>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                );
+              }}
+            />
+          </Fragment>
+        ))}
+      </CardContent>
     </Card>
   );
 }
@@ -368,20 +491,20 @@ function SermonPlanField({ index }: BlockFormProps) {
     formState: { errors },
   } = useFormContext<SermonBlockFieldValues>();
 
-  const path: FieldPath<SermonBlockFieldValues> = `blocks.${index}.data.plan`;
+  const name: FieldPath<SermonBlockFieldValues> = `blocks.${index}.data.plan`;
 
-  const { fields } = useFieldArray({ control, path });
+  const { fields } = useFieldArray({ control, name });
 
   return (
     <Field>
-      <FieldLabel htmlFor={`${path}.0`}>Plan</FieldLabel>
+      <FieldLabel htmlFor={`${name}.0`}>Plan</FieldLabel>
 
       {fields.map((field, index) => (
         <Input
           key={field.id}
-          id={`${path}.${index}`}
-          {...register(`${path}.${index}`)}
-          // aria-invalid={!!errors.blocks?.[index]?.data?.title}
+          id={`${name}.${index}`}
+          {...register(`${name}.${index}`)}
+          aria-invalid={!!errors.blocks?.[index]?.data?.title}
         />
       ))}
     </Field>

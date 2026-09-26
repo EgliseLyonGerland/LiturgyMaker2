@@ -2,6 +2,13 @@ import * as v from "valibot";
 
 import { liturgyDocumentVersion } from "@/config";
 
+import { validate } from "./bibleRef";
+
+const bibleRefSchema = v.pipe(
+  v.string(),
+  v.check((ref) => validate(ref), "Format de référence invalide"),
+);
+
 const lyricsSchema = v.array(
   v.object({
     type: v.picklist(["verse", "chorus"]),
@@ -23,11 +30,11 @@ const announcementsBlockSchema = v.object({
 
 const readingBlockSchema = v.object({
   type: v.literal("reading"),
+  title: v.string(),
   data: v.object({
-    title: v.string(),
     bibleRefs: v.array(
       v.object({
-        id: v.string(),
+        id: bibleRefSchema,
         excerpt: v.string(),
       }),
     ),
@@ -48,7 +55,7 @@ const sermonBlockSchema = v.object({
     author: v.string(),
     bibleRefs: v.array(
       v.object({
-        id: v.string(),
+        id: bibleRefSchema,
       }),
     ),
     plan: v.array(
