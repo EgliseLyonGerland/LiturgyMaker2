@@ -3,7 +3,8 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { doc, getDoc } from "firebase/firestore";
-import { CalendarIcon, PlusCircleIcon } from "lucide-react";
+import { CalendarIcon, PlusCircleIcon, TrashIcon } from "lucide-react";
+import { get } from "radashi";
 import { Fragment, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
@@ -34,7 +35,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
@@ -285,7 +293,6 @@ function AnnouncementsBlockForm({ index }: BlockFormProps) {
               </FieldLabel>
               <Textarea
                 id={`blocks.${index}.data.items.${fieldIndex}.detail`}
-                className="field-sizing-content"
                 {...register(`blocks.${index}.data.items.${fieldIndex}.detail`)}
                 aria-invalid={!!errors.blocks?.[index]?.data?.items?.[fieldIndex]?.detail}
               />
@@ -334,7 +341,17 @@ interface OpenDoorsBlockFieldValues extends LiturgyDocument {
 }
 
 function OpenDoorsBlockForm({ index }: BlockFormProps) {
-  const { control } = useFormContext<OpenDoorsBlockFieldValues>();
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<OpenDoorsBlockFieldValues>();
+
+  const titleName = `blocks.${index}.data.title` as const;
+  const detailName = `blocks.${index}.data.detail` as const;
+  const prayerTopicsName = `blocks.${index}.data.prayerTopics` as const;
+
+  const { fields, append, remove } = useFieldArray({ control, name: prayerTopicsName });
 
   return (
     <Card className="transition-[outline] focus-within:ring-primary/80">
@@ -342,7 +359,63 @@ function OpenDoorsBlockForm({ index }: BlockFormProps) {
         <CardTitle>Portes Ouvertes</CardTitle>
       </CardHeader>
 
-      <CardContent></CardContent>
+      <CardContent className="">
+        <Field>
+          <FieldLabel htmlFor={titleName}>Titre</FieldLabel>
+          <Input id={titleName} {...register(titleName)} aria-invalid={!!get(errors, titleName)} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={detailName}>Extrait</FieldLabel>
+          <Textarea
+            id={detailName}
+            {...register(detailName)}
+            aria-invalid={!!get(errors, detailName)}
+          />
+        </Field>
+        <FieldSeparator />
+        <FieldSet>
+          <FieldLegend>Sujets de prière</FieldLegend>
+          <FieldGroup>
+            {fields.map((field, fieldIndex) => {
+              const fieldName = `blocks.${index}.data.prayerTopics.${fieldIndex}.text` as const;
+
+              return (
+                <Field key={field.id}>
+                  <FieldLabel htmlFor={fieldName}>Sujet {fieldIndex + 1}</FieldLabel>
+                  <div className="flex gap-2">
+                    <Textarea
+                      id={fieldName}
+                      {...register(fieldName)}
+                      className="min-h-lh"
+                      aria-invalid={!!get(errors, fieldName)}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      disabled={fields.length <= 1}
+                      onClick={() => {
+                        remove(fieldIndex);
+                      }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </div>
+                </Field>
+              );
+            })}
+
+            {fields.length < 3 && (
+              <Button
+                onClick={() => {
+                  append({ text: "" });
+                }}
+              >
+                Ajouter un sujet
+              </Button>
+            )}
+          </FieldGroup>
+        </FieldSet>
+      </CardContent>
     </Card>
   );
 }
@@ -420,7 +493,6 @@ function ReadingBlockForm({ index }: BlockFormProps) {
               </FieldLabel>
               <Textarea
                 id={`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`}
-                className="field-sizing-content"
                 {...register(`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`)}
                 aria-invalid={!!errors.blocks?.[index]?.data?.bibleRefs?.[fieldIndex]?.excerpt}
               />
