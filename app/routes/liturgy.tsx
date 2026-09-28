@@ -1,10 +1,11 @@
-import * as formisch from "@formisch/react";
+import { Popover as PopoverPrimitive } from "@base-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { clsx } from "clsx";
+import { format } from "date-fns";
 import { doc, getDoc } from "firebase/firestore";
-import { PlusCircleIcon } from "lucide-react";
+import { CalendarIcon, PlusCircleIcon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
+import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import {
   Controller,
@@ -15,17 +16,17 @@ import {
   Watch,
   type FieldPath,
 } from "react-hook-form";
+import { useNavigate, useNavigation } from "react-router";
 
-import { FormishFieldError } from "@/components/formisch-field-error";
 import {
   Autocomplete,
   AutocompleteContent,
-  AutocompleteEmpty,
   AutocompleteInput,
   AutocompleteItem,
   AutocompleteList,
 } from "@/components/reui/autocomplete";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -43,6 +45,7 @@ import { books } from "@/config/bible";
 import { getPassage, validate } from "@/lib/bibleRef";
 import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
 import { firebaseDb } from "@/lib/firebase";
+import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import migrate from "@/lib/migrate";
 import {
   liturgySchema,
@@ -59,26 +62,40 @@ import {
 
 import type { Route } from "./+types/liturgy";
 
+const datePickerHandle = PopoverPrimitive.createHandle();
+
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { liturgyId } = params;
 
   const snapshot = await getDoc(doc(firebaseDb, "liturgies", liturgyId));
 
   if (!snapshot.exists()) {
-    return { liturgy: createDefaultLiturgy(liturgyId) };
+    return { liturgy: { ...createDefaultLiturgy(liturgyId), id: liturgyId } };
   }
 
   const data = migrate(snapshot.data()) as LiturgyDocument;
 
-  return { liturgy: data };
+  return { liturgy: { ...data, id: liturgyId } };
 }
 
-export default function Liturgy({ loaderData }: Route.ComponentProps) {
+export default function Liturgy(props: Route.ComponentProps) {
+  const { loaderData } = props;
+  const { liturgy } = loaderData;
+
+  return <Content key={liturgy.id} {...props} />;
+}
+
+function Content({ loaderData, params }: Route.ComponentProps) {
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+
+  const { liturgyId } = params;
   const { liturgy } = loaderData;
 
   const form = useForm({
     resolver: valibotResolver(liturgySchema),
     defaultValues: liturgy,
+    disabled: navigation.state !== "idle",
   });
 
   const {
@@ -91,55 +108,88 @@ export default function Liturgy({ loaderData }: Route.ComponentProps) {
 
   const [listElement] = useAutoAnimate();
 
+  const date = converToDate(liturgyId);
+
   return (
-    <FormProvider {...form}>
-      <form
-        onSubmit={handleSubmit((data) => {
-          console.log(data);
-        })}
-      >
-        <HeaderSlot>Hello, World!</HeaderSlot>
+    <>
+      <HeaderSlot>
+        <div className="flex items-center">
+          <div className="mr-2">Présidence du {format(date, "do MMMM y")}</div>
 
-        <div ref={listElement} className="max-w-xl p-4 px-8">
-          <AddBlockButton
-            onSelect={(type) => {
-              fieldArray.prepend(createDefaultBlock(type));
-            }}
-          />
+          <Popover handle={datePickerHandle}>
+            <PopoverTrigger
+              render={
+                <Button variant="ghost" size="icon">
+                  <CalendarIcon />
+                </Button>
+              }
+            />
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                locale={fr}
+                selected={date}
+                defaultMonth={date}
+                onSelect={(selectedDate) => {
+                  if (selectedDate) {
+                    datePickerHandle.close();
+                    navigate(`/liturgies/${convertToId(selectedDate)}`);
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
 
-          <div ref={listElement} className="flex flex-col">
-            {fieldArray.fields.map((field, index) => (
-              <Fragment key={field.id}>
-                {field.type === "section" ? (
-                  <SectionBlockForm index={index} />
-                ) : field.type === "announcements" ? (
-                  <AnnouncementsBlockForm index={index} />
-                ) : field.type === "openDoors" ? (
-                  <OpenDoorsBlockForm index={index} />
-                ) : field.type === "reading" ? (
-                  <ReadingBlockForm index={index} />
-                ) : field.type === "recitation" ? (
-                  <RecitationBlockForm index={index} />
-                ) : field.type === "sermon" ? (
-                  <SermonBlockForm index={index} />
-                ) : (
-                  <SongsBlockForm index={index} />
-                )}
-
-                <AddBlockButton
-                  onSelect={(type) => {
-                    fieldArray.insert(index + 1, createDefaultBlock(type));
-                  }}
-                />
-              </Fragment>
-            ))}
-          </div>
+          <Button className="ml-auto" type="submit" form="liturgy-form" disabled={!isDirty}>
+            Enregistrer
+          </Button>
         </div>
-        <Button type="submit" disabled={!isDirty}>
-          Enregistrer
-        </Button>
-      </form>
-    </FormProvider>
+      </HeaderSlot>
+      <FormProvider {...form}>
+        <form
+          id="liturgy-form"
+          onSubmit={handleSubmit((data) => {
+            console.log(data);
+          })}
+        >
+          <div ref={listElement} className="max-w-xl p-4 px-8">
+            <AddBlockButton
+              onSelect={(type) => {
+                fieldArray.prepend(createDefaultBlock(type));
+              }}
+            />
+
+            <div ref={listElement} className="flex flex-col gap-1">
+              {fieldArray.fields.map((field, index) => (
+                <Fragment key={field.id}>
+                  {field.type === "section" ? (
+                    <SectionBlockForm index={index} />
+                  ) : field.type === "announcements" ? (
+                    <AnnouncementsBlockForm index={index} />
+                  ) : field.type === "openDoors" ? (
+                    <OpenDoorsBlockForm index={index} />
+                  ) : field.type === "reading" ? (
+                    <ReadingBlockForm index={index} />
+                  ) : field.type === "recitation" ? (
+                    <RecitationBlockForm index={index} />
+                  ) : field.type === "sermon" ? (
+                    <SermonBlockForm index={index} />
+                  ) : (
+                    <SongsBlockForm index={index} />
+                  )}
+
+                  <AddBlockButton
+                    onSelect={(type) => {
+                      fieldArray.insert(index + 1, createDefaultBlock(type));
+                    }}
+                  />
+                </Fragment>
+              ))}
+            </div>
+          </div>
+        </form>
+      </FormProvider>
+    </>
   );
 }
 
@@ -164,9 +214,9 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
         render={
           <button
             type="button"
-            className="group flex h-5 w-full cursor-pointer items-center px-2 text-sm text-muted-foreground transition-[height] outline-none hover:h-15 hover:delay-300 focus-visible:h-15 aria-expanded:h-15"
+            className="group flex h-6 w-full cursor-pointer items-center px-2 text-sm text-primary-foreground transition-[height] outline-none hover:h-15 hover:delay-300 focus-visible:h-15 aria-expanded:h-15"
           >
-            <div className="w-full cursor-pointer rounded-md bg-muted/50 transition-colors group-hover:bg-muted group-hover:delay-50 group-focus-visible:border-ring group-focus-visible:bg-muted group-focus-visible:ring-3 group-focus-visible:ring-ring group-aria-expanded:bg-muted">
+            <div className="w-full cursor-pointer rounded-md bg-primary/50 transition-colors group-hover:bg-primary group-hover:delay-50 group-focus-visible:border-ring group-focus-visible:bg-primary group-focus-visible:ring-3 group-focus-visible:ring-ring group-aria-expanded:bg-primary">
               <div className="flex h-0.5 items-center justify-center overflow-hidden transition-[height] group-hover:h-8 group-hover:delay-300 group-focus-visible:h-8 group-aria-expanded:h-8">
                 <span className="inline-flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 group-aria-expanded:opacity-100">
                   <PlusCircleIcon className="size-4" /> Ajouter un block
@@ -209,7 +259,7 @@ function AnnouncementsBlockForm({ index }: BlockFormProps) {
   const { fields } = useFieldArray({ control, name: `blocks.${index}.data.items` });
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Annonces</CardTitle>
       </CardHeader>
@@ -260,7 +310,7 @@ function SectionBlockForm({ index }: BlockFormProps) {
   const path = `blocks.${index}.data.title` as const;
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Section</CardTitle>
       </CardHeader>
@@ -287,7 +337,7 @@ function OpenDoorsBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<OpenDoorsBlockFieldValues>();
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Portes Ouvertes</CardTitle>
       </CardHeader>
@@ -322,7 +372,7 @@ function ReadingBlockForm({ index }: BlockFormProps) {
   const { fields } = useFieldArray({ control, name: `blocks.${index}.data.bibleRefs` });
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>
           Lecture{" "}
@@ -434,7 +484,7 @@ function RecitationBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<RecitationBlockFieldValues>();
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Récitation</CardTitle>
       </CardHeader>
@@ -455,7 +505,7 @@ function SermonBlockForm({ index }: BlockFormProps) {
   } = useFormContext<SermonBlockFieldValues>();
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Prédication</CardTitle>
       </CardHeader>
@@ -519,7 +569,7 @@ function SongsBlockForm({ index }: BlockFormProps) {
   const { control } = useFormContext<SongsBlockFieldValues>();
 
   return (
-    <Card className="transition-[outline] focus-within:ring-primary">
+    <Card className="transition-[outline] focus-within:ring-primary/80">
       <CardHeader>
         <CardTitle>Chants</CardTitle>
       </CardHeader>

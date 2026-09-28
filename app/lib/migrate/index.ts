@@ -1,6 +1,5 @@
 import { liturgyDocumentVersion } from "@/config";
 
-import type { Liturgy } from "../schemas";
 import version2 from "./version2";
 import version3 from "./version3";
 import version4 from "./version4";

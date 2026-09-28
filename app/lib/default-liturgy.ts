@@ -1,4 +1,3 @@
-import { uid } from "uid";
 import * as v from "valibot";
 
 import { liturgyDocumentVersion } from "@/config";
@@ -111,7 +110,7 @@ export function createDefaultBlock<T extends LiturgyBlockType>(
   return functions[type](...args);
 }
 
-export function createDefaultLiturgy(id: string): v.InferOutput<typeof liturgySchema> {
+export function createDefaultLiturgy(): v.InferOutput<typeof liturgySchema> {
   return {
     uid: "",
     version: liturgyDocumentVersion,

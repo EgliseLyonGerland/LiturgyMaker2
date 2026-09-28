@@ -1,3 +1,7 @@
+import { setDefaultOptions } from "date-fns";
+import { fr } from "date-fns/locale";
+
+import "./style.css";
 import { LucideProvider } from "lucide-react";
 import {
   isRouteErrorResponse,
@@ -8,12 +12,13 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import "./style.css";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import type { Route } from "./+types/root";
 import { Spinner } from "./components/ui/spinner";
+
+setDefaultOptions({ locale: fr });
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
