@@ -271,7 +271,7 @@ function AnnouncementsBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Annonces</CardTitle>
       </CardHeader>
-
+      <Separator />
       <CardContent>
         {fields.map((field, fieldIndex) => (
           <div key={field.id} className="flex flex-col gap-4">
@@ -321,6 +321,7 @@ function SectionBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Section</CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent>
         <Field>
@@ -358,6 +359,7 @@ function OpenDoorsBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Portes Ouvertes</CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent className="">
         <Field>
@@ -458,6 +460,7 @@ function ReadingBlockForm({ index }: BlockFormProps) {
           </span>
         </CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent>
         {fields.map((field, fieldIndex) => (
@@ -510,6 +513,7 @@ function ReadingBlockForm({ index }: BlockFormProps) {
                         <div className="self-start">
                           <Button
                             variant="ghost"
+                            size="xs"
                             disabled={!valid}
                             onClick={async () => {
                               const result = await getPassage(
@@ -560,6 +564,7 @@ function RecitationBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Récitation</CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent></CardContent>
     </Card>
@@ -581,6 +586,7 @@ function SermonBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Prédication</CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent>
         <Field>
@@ -645,6 +651,7 @@ function SongsBlockForm({ index }: BlockFormProps) {
       <CardHeader>
         <CardTitle>Chants</CardTitle>
       </CardHeader>
+      <Separator />
 
       <CardContent></CardContent>
     </Card>
