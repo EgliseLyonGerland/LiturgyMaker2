@@ -5,8 +5,8 @@ import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
 import {
   LiturgyCard,
-  LiturgyCardAction,
   LiturgyCardContent,
+  LiturgyCardFooter,
   LiturgyCardHeader,
   LiturgyCardSeparator,
   LiturgyCardTitle,
@@ -54,17 +54,6 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
     <LiturgyCard type="songs">
       <LiturgyCardHeader>
         <LiturgyCardTitle>Chants</LiturgyCardTitle>
-        <LiturgyCardAction>
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={() => {
-              append({ id: "", infos: "", lyrics: [], repeat: false });
-            }}
-          >
-            Ajouter un chant <PlusIcon />
-          </Button>
-        </LiturgyCardAction>
       </LiturgyCardHeader>
 
       {fields.map((field, fieldIndex) => {
@@ -157,6 +146,17 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
           </Fragment>
         );
       })}
+
+      <LiturgyCardFooter>
+        <Button
+          variant="outline"
+          onClick={() => {
+            append({ id: "", infos: "", lyrics: [], repeat: false });
+          }}
+        >
+          Ajouter un chant <PlusIcon />
+        </Button>
+      </LiturgyCardFooter>
     </LiturgyCard>
   );
 }

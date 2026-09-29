@@ -22,6 +22,8 @@
     "tailwindcss/enforce-sort-order": "error",
     "tailwindcss/consistent-variant-order": "error",
     "tailwindcss/enforce-consistent-important-position": "error",
-    "tailwindcss/no-unnecessary-whitespace": "error"
+    "tailwindcss/no-unnecessary-whitespace": "error",
+
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }]
   }
 }

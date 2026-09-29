@@ -4,8 +4,8 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 
 import {
   LiturgyCard,
-  LiturgyCardAction,
   LiturgyCardContent,
+  LiturgyCardFooter,
   LiturgyCardHeader,
   LiturgyCardSeparator,
   LiturgyCardTitle,
@@ -38,17 +38,6 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
     <LiturgyCard type="announcements">
       <LiturgyCardHeader>
         <LiturgyCardTitle>Annonces</LiturgyCardTitle>
-        <LiturgyCardAction>
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={() => {
-              append({ title: "", detail: "" });
-            }}
-          >
-            Ajouter une annonce <PlusIcon />
-          </Button>
-        </LiturgyCardAction>
       </LiturgyCardHeader>
 
       {fields.map((field, fieldIndex) => (
@@ -83,6 +72,17 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
           </LiturgyCardContent>
         </Fragment>
       ))}
+
+      <LiturgyCardFooter>
+        <Button
+          variant="outline"
+          onClick={() => {
+            append({ title: "", detail: "" });
+          }}
+        >
+          Ajouter une annonce <PlusIcon />
+        </Button>
+      </LiturgyCardFooter>
     </LiturgyCard>
   );
 }

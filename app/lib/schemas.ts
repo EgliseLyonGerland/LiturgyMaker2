@@ -2,7 +2,7 @@ import * as v from "valibot";
 
 import { liturgyDocumentVersion } from "@/config";
 
-import { validate } from "./bibleRef";
+import { validate } from "./bible";
 
 const bibleRefSchema = v.pipe(
   v.string(),

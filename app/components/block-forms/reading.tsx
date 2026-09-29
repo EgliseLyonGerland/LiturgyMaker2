@@ -1,20 +1,20 @@
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { Fragment } from "react";
 import { useFieldArray, useFormContext, Watch } from "react-hook-form";
 
 import {
   LiturgyCard,
-  LiturgyCardAction,
   LiturgyCardContent,
+  LiturgyCardFooter,
   LiturgyCardHeader,
   LiturgyCardSeparator,
   LiturgyCardTitle,
 } from "@/components/liturgy-card";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getPassage, validate } from "@/lib/bibleRef";
+import { getPassage, validate } from "@/lib/bible";
 import { type ReadingBlock, type Liturgy } from "@/lib/schemas";
 
 import { BibleRefField } from "./fields/bible-ref";
@@ -35,7 +35,10 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
     formState: { errors },
   } = useFormContext<FieldValues>();
 
-  const { fields, append } = useFieldArray({ control, name: `blocks.${index}.data.bibleRefs` });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `blocks.${index}.data.bibleRefs`,
+  });
 
   return (
     <LiturgyCard type="reading">
@@ -50,17 +53,6 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
             />
           </span>
         </LiturgyCardTitle>
-        <LiturgyCardAction>
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={() => {
-              append({ id: "", excerpt: "" });
-            }}
-          >
-            Ajouter une réf <PlusIcon />
-          </Button>
-        </LiturgyCardAction>
       </LiturgyCardHeader>
 
       {fields.map((field, fieldIndex) => (
@@ -69,6 +61,23 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
 
           <LiturgyCardContent>
             <FieldSet>
+              {fields.length > 1 && (
+                <div className="flex items-center justify-between">
+                  <FieldLegend className="m-0">Passage {fieldIndex + 1}</FieldLegend>
+
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={fields.length < 2}
+                    onClick={() => {
+                      remove(fieldIndex);
+                    }}
+                  >
+                    <TrashIcon />
+                  </Button>
+                </div>
+              )}
+
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}>
@@ -136,6 +145,17 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
           </LiturgyCardContent>
         </Fragment>
       ))}
+
+      <LiturgyCardFooter>
+        <Button
+          variant="outline"
+          onClick={() => {
+            append({ id: "", excerpt: "" });
+          }}
+        >
+          Ajouter une réf <PlusIcon />
+        </Button>
+      </LiturgyCardFooter>
     </LiturgyCard>
   );
 }

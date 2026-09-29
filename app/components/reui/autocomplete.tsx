@@ -8,7 +8,7 @@ import { XIcon, ChevronsUpDownIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const inputVariants = cva(
-  "flex w-full rounded-md border border-input bg-transparent text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [[readonly]]:cursor-not-allowed [[readonly]]:bg-muted/80",
+  "flex w-full rounded-lg border border-input bg-transparent text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [[readonly]]:cursor-not-allowed [[readonly]]:bg-muted/80",
   {
     variants: {
       size: {
@@ -139,8 +139,8 @@ function AutocompleteItem({
       data-slot="autocomplete-item"
       className={cn(
         "gap-1.5 text-foreground data-highlighted:text-foreground data-highlighted:before:bg-accent",
-        "rounded-sm",
-        "data-highlighted:before:rounded-sm",
+        "rounded-md",
+        "data-highlighted:before:rounded-md",
         // Icon sizing mirrors .cn-select-item. Rhea tracks nova, matching its
         // .cn-input metrics; the row radius above follows .cn-*-item at xl.
         "relative flex cursor-default items-center px-1.5 py-1 text-sm outline-hidden transition-colors select-none data-highlighted:relative data-highlighted:z-0 data-highlighted:before:absolute data-highlighted:before:inset-x-0 data-highlighted:before:inset-y-0 data-highlighted:before:z-[-1] data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60",
@@ -187,7 +187,7 @@ function AutocompleteContent({
           <AutocompletePrimitive.Popup
             data-slot="autocomplete-popup"
             className={cn(
-              "flex max-h-[min(var(--available-height),24rem)] w-(--anchor-width) max-w-(--available-width) origin-(--transform-origin) scroll-pt-2 scroll-pb-2 flex-col overscroll-contain rounded-md bg-popover py-0.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 transition-[scale,opacity] has-data-starting-style:scale-98 has-data-starting-style:opacity-0 has-data-[side=none]:scale-100 has-data-[side=none]:transition-none",
+              "flex max-h-[min(var(--available-height),24rem)] w-(--anchor-width) max-w-(--available-width) origin-(--transform-origin) scroll-pt-2 scroll-pb-2 flex-col overscroll-contain rounded-lg bg-popover py-0.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 transition-[scale,opacity] has-data-starting-style:scale-98 has-data-starting-style:opacity-0 has-data-[side=none]:scale-100 has-data-[side=none]:transition-none",
               className,
             )}
             {...props}

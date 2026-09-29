@@ -3,7 +3,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
-import { CalendarIcon, PlusCircleIcon } from "lucide-react";
+import { ChevronDown, PlusCircleIcon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
@@ -66,7 +66,13 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
-      return docs.map((doc) => ({ id: doc.id, ...doc.data() }) as SongDocument);
+      return docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as SongDocument,
+      );
     },
   });
 
@@ -109,13 +115,12 @@ function Content({ loaderData, params }: Route.ComponentProps) {
     <>
       <HeaderSlot>
         <div className="flex items-center">
-          <div className="mr-2">Présidence du {format(date, "do MMMM y")}</div>
-
           <Popover handle={datePickerHandle}>
             <PopoverTrigger
               render={
-                <Button variant="ghost" size="icon">
-                  <CalendarIcon />
+                <Button variant="ghost" className="group">
+                  Présidence du {format(date, "do MMMM y")}
+                  <ChevronDown className="group-data-popup-open:rotate-180" />
                 </Button>
               }
             />

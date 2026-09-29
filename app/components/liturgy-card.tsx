@@ -14,13 +14,13 @@ import type { LiturgyBlockType } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
 const colorByType: Record<LiturgyBlockType, string> = {
-  announcements: clsx("bg-taupe-600/20"),
-  openDoors: clsx("bg-purple-900/20"),
-  reading: clsx("bg-pink-900/20"),
-  recitation: clsx("bg-stone-900/20"),
-  section: clsx("bg-emerald-900/20"),
-  sermon: clsx("bg-amber-900/20"),
-  songs: clsx("bg-blue-900/20"),
+  announcements: clsx("bg-taupe-600/10"),
+  openDoors: clsx("bg-purple-900/10"),
+  reading: clsx("bg-pink-900/10"),
+  recitation: clsx("bg-stone-900/10"),
+  section: clsx("bg-emerald-900/10"),
+  sermon: clsx("bg-amber-900/10"),
+  songs: clsx("bg-blue-900/10"),
 };
 
 interface LiturgyCardProps extends ComponentProps<typeof Card> {
@@ -57,8 +57,8 @@ function LiturgyCardContent(props: LiturgyCardContentProps) {
 
 interface LiturgyCardFooterProps extends ComponentProps<typeof CardFooter> {}
 
-function LiturgyCardFooter(props: LiturgyCardFooterProps) {
-  return <CardFooter {...props} />;
+function LiturgyCardFooter({ className, ...props }: LiturgyCardFooterProps) {
+  return <CardFooter {...props} className={cn("bg-black/20", className)} />;
 }
 
 interface LiturgyCardSeparatorProps extends React.ComponentProps<"div"> {}

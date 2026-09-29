@@ -28,8 +28,8 @@ export function createDefaultReadingBlock({ title = "" } = {}): v.InferOutput<
 > {
   return {
     type: "reading",
+    title,
     data: {
-      title,
       bibleRefs: [
         {
           id: "",
