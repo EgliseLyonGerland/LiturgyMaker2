@@ -39,7 +39,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
   return (
     <LiturgyCard type="openDoors">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Portes Ouvertes</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
 
       <LiturgyCardSeparator />

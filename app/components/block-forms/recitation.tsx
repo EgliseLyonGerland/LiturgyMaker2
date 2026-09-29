@@ -23,7 +23,7 @@ export function RecitationBlockForm({ index }: RecitationBlockFormProps) {
   return (
     <LiturgyCard type="recitation">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Récitation</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
       <Separator />
 

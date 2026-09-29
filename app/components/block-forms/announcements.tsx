@@ -37,7 +37,7 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
   return (
     <LiturgyCard type="announcements">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Annonces</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
 
       {fields.map((field, fieldIndex) => (

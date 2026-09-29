@@ -33,7 +33,7 @@ export function SermonBlockForm({ index }: SermonBlockFormProps) {
   return (
     <LiturgyCard type="sermon">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Prédication</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
 
       <LiturgyCardSeparator />

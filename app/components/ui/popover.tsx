@@ -23,6 +23,11 @@ function PopoverContent({
   Pick<PopoverPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
   return (
     <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Backdrop
+        data-slot="popover-backdrop"
+        className="fixed inset-0 bg-black/30 transition-colors starting:bg-transparent"
+      />
+
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}

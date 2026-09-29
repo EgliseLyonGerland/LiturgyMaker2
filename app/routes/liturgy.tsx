@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
 import { ChevronDown, PlusCircleIcon } from "lucide-react";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -19,14 +19,8 @@ import { SermonBlockForm } from "@/components/block-forms/sermon";
 import { SongsBlockForm } from "@/components/block-forms/songs";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { liturgyBlockNames, liturgyBlockTypes } from "@/config";
+import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
 import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
 import { firebaseDb } from "@/lib/firebase";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
@@ -208,9 +202,16 @@ interface AddBlockButtonProps {
 }
 
 function AddBlockButton({ onSelect }: AddBlockButtonProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <Popover
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+      }}
+    >
+      <PopoverTrigger
         render={
           <button
             type="button"
@@ -226,18 +227,31 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
           </button>
         }
       />
-      <DropdownMenuContent className="w-40" align="center">
+      <PopoverContent
+        className="grid w-(--anchor-width) grid-cols-3 gap-2 shadow-2xl md:grid-cols-4"
+        align="center"
+        sideOffset={-2}
+      >
         {liturgyBlockTypes.map((type) => (
-          <DropdownMenuItem
+          <Button
             key={type}
+            variant="default"
+            className="flex h-auto flex-col items-center justify-center py-3"
             onClick={() => {
+              setOpen(false);
               onSelect(type);
             }}
           >
-            {liturgyBlockNames[type]}
-          </DropdownMenuItem>
+            {renderIcon(type)}
+            <span className="text-xs">{liturgyBlockNames[type]}</span>
+          </Button>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
+}
+
+function renderIcon(type: LiturgyBlockType) {
+  const Icon = liturgyBlockIcons[type];
+  return <Icon className="size-6" />;
 }

@@ -53,7 +53,7 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
   return (
     <LiturgyCard type="songs">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Chants</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
 
       {fields.map((field, fieldIndex) => {

@@ -30,7 +30,7 @@ export function SectionBlockForm({ index }: SectionBlockFormProps) {
   return (
     <LiturgyCard type="section">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>Section</LiturgyCardTitle>
+        <LiturgyCardTitle />
       </LiturgyCardHeader>
 
       <LiturgyCardSeparator />

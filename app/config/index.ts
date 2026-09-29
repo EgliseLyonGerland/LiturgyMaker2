@@ -1,3 +1,14 @@
+import {
+  BookOpenTextIcon,
+  CaptionsIcon,
+  FishIcon,
+  GraduationCapIcon,
+  MegaphoneIcon,
+  MusicIcon,
+  UserGroupIcon,
+  type LucideIcon,
+} from "lucide-react";
+
 import type { LiturgyBlockType } from "@/lib/schemas";
 
 export const liturgyDocumentVersion = 9;
@@ -20,4 +31,14 @@ export const liturgyBlockNames: Record<LiturgyBlockType, string> = {
   songs: "Chants",
   recitation: "Récitation",
   openDoors: "Portes ouvertes",
+};
+
+export const liturgyBlockIcons: Record<LiturgyBlockType, LucideIcon> = {
+  announcements: MegaphoneIcon,
+  openDoors: FishIcon,
+  reading: BookOpenTextIcon,
+  recitation: UserGroupIcon,
+  section: CaptionsIcon,
+  sermon: GraduationCapIcon,
+  songs: MusicIcon,
 };

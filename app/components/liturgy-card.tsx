@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { ComponentProps } from "react";
+import { createContext, useContext, type ComponentProps } from "react";
 
 import {
   Card,
@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
 import type { LiturgyBlockType } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
@@ -23,12 +24,32 @@ const colorByType: Record<LiturgyBlockType, string> = {
   songs: clsx("bg-blue-900/10"),
 };
 
+interface Context {
+  type: LiturgyBlockType;
+}
+
+const context = createContext<Context | null>(null);
+
+function useLiturgyCardContext() {
+  const contextValue = useContext(context);
+
+  if (!contextValue) {
+    throw new Error("useLiturgyCardContext must be used within a LiturgyCardProvider");
+  }
+
+  return contextValue;
+}
+
 interface LiturgyCardProps extends ComponentProps<typeof Card> {
   type: LiturgyBlockType;
 }
 
 function LiturgyCard({ type, className, ...props }: LiturgyCardProps) {
-  return <Card {...props} className={cn(colorByType[type], className)} />;
+  return (
+    <context.Provider value={{ type }}>
+      <Card {...props} className={cn(colorByType[type], className)} />
+    </context.Provider>
+  );
 }
 
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
@@ -39,8 +60,19 @@ function LiturgyCardHeader({ className, ...props }: LiturgyCardHeaderProps) {
 
 interface LiturgyCardTitleProps extends ComponentProps<typeof CardTitle> {}
 
-function LiturgyCardTitle(props: LiturgyCardTitleProps) {
-  return <CardTitle {...props} />;
+function LiturgyCardTitle({ className, children, ...props }: LiturgyCardTitleProps) {
+  const { type } = useLiturgyCardContext();
+
+  const Icon = liturgyBlockIcons[type];
+
+  return (
+    <CardTitle {...props} className={cn("flex items-center gap-2", className)}>
+      <Icon className="size-5" />
+      {liturgyBlockNames[type]}
+
+      {children}
+    </CardTitle>
+  );
 }
 
 interface LiturgyCardActionProps extends ComponentProps<typeof CardAction> {}

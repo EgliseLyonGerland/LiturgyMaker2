@@ -44,13 +44,8 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
     <LiturgyCard type="reading">
       <LiturgyCardHeader>
         <LiturgyCardTitle>
-          Lecture{" "}
-          <span className="ml-1 text-sm text-muted-foreground">
-            <Watch
-              control={control}
-              name={`blocks.${index}.title`}
-              render={(title) => title && `(${title})`}
-            />
+          <span className="text-xs text-muted-foreground">
+            <Watch control={control} name={`blocks.${index}.title`} render={(title) => title} />
           </span>
         </LiturgyCardTitle>
       </LiturgyCardHeader>
