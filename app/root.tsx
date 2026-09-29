@@ -1,7 +1,8 @@
+import { QueryClientProvider } from "@tanstack/react-query";
 import { setDefaultOptions } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import "./style.css";
+import { fr } from "date-fns/locale";
 import { LucideProvider } from "lucide-react";
 import {
   isRouteErrorResponse,
@@ -12,11 +13,12 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { queryClient } from "@/lib/query-client";
 
 import type { Route } from "./+types/root";
-import { Spinner } from "./components/ui/spinner";
 
 setDefaultOptions({ locale: fr });
 
@@ -53,12 +55,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <LucideProvider strokeWidth={1.5}>
-      <TooltipProvider>
-        <Outlet />
-        <Toaster />
-      </TooltipProvider>
-    </LucideProvider>
+    <QueryClientProvider client={queryClient}>
+      <LucideProvider strokeWidth={1.5}>
+        <TooltipProvider>
+          <Outlet />
+          <Toaster />
+        </TooltipProvider>
+      </LucideProvider>
+    </QueryClientProvider>
   );
 }
 

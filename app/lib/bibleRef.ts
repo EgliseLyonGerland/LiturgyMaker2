@@ -127,7 +127,7 @@ export async function getPassage(ref: string) {
 
   const result = (
     await Promise.all(
-      range(chapterStart, chapterEnd + 1, (chapter) =>
+      range(chapterStart, chapterEnd, (chapter) =>
         fetch(`https://api.getbible.net/v2/${version}/${bookId}/${chapter}.json`).then((res) =>
           res.ok ? (res.json() as Promise<GetBibleResponse>) : null,
         ),
