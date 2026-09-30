@@ -1,6 +1,9 @@
-import { PlusIcon, TrashIcon } from "lucide-react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { clsx } from "clsx";
+import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
-import { Fragment } from "react";
+import { useRef } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
 import {
@@ -42,110 +45,49 @@ interface SongsBlockFormProps {
 }
 
 export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
-  const {
-    control,
-    register,
-    formState: { errors },
-  } = useFormContext<FieldValues>();
+  const { control } = useFormContext<FieldValues>();
 
-  const { fields, append, remove } = useFieldArray({ control, name: `blocks.${index}.data.items` });
+  const { fields, append, remove, swap } = useFieldArray({
+    control,
+    name: `blocks.${index}.data.items`,
+  });
 
   return (
     <LiturgyCard type="songs">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
+      <LiturgyCardSeparator />
 
-      {fields.map((field, fieldIndex) => {
-        const idName = `blocks.${index}.data.items.${fieldIndex}.id` as const;
-        const infosName = `blocks.${index}.data.items.${fieldIndex}.infos` as const;
-        const repeatName = `blocks.${index}.data.items.${fieldIndex}.repeat` as const;
+      <DragDropProvider
+        onDragEnd={(event) => {
+          if (event.canceled) return;
 
-        return (
-          <Fragment key={field.id}>
-            <LiturgyCardSeparator />
+          const { source } = event.operation;
 
-            <LiturgyCardContent>
-              <FieldSet>
-                {fields.length > 1 && (
-                  <div className="flex items-center justify-between">
-                    <FieldLegend className="m-0">Chant {fieldIndex + 1}</FieldLegend>
+          if (isSortable(source)) {
+            const { initialIndex, index } = source;
 
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      disabled={fields.length < 2}
-                      onClick={() => {
-                        remove(fieldIndex);
-                      }}
-                    >
-                      <TrashIcon />
-                    </Button>
-                  </div>
-                )}
-
-                <FieldGroup>
-                  <Controller
-                    control={control}
-                    name={idName}
-                    render={({ field: { name, value, onChange, onBlur } }) => (
-                      <Field>
-                        <FieldLabel htmlFor={name}>Chant</FieldLabel>
-                        <Combobox
-                          items={songs}
-                          itemToStringLabel={(song) => song.title}
-                          value={songs.find((song) => song.id === value)}
-                          onValueChange={(song) => {
-                            if (song) {
-                              onChange(song.id);
-                            }
-                          }}
-                          autoHighlight
-                        >
-                          <ComboboxInput
-                            id={name}
-                            name={name}
-                            placeholder="Choisissez un chant"
-                            className="flex-1"
-                            onBlur={onBlur}
-                          />
-                          <ComboboxContent>
-                            <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
-                            <ComboboxList>
-                              {(song: Song) => (
-                                <ComboboxItem key={song.id} value={song}>
-                                  {song.title} {song.aka && `(${song.aka})`}
-                                </ComboboxItem>
-                              )}
-                            </ComboboxList>
-                          </ComboboxContent>
-                        </Combobox>
-                      </Field>
-                    )}
-                  />
-
-                  <Field>
-                    <FieldLabel htmlFor={infosName}>Infos</FieldLabel>
-                    <Textarea
-                      id={infosName}
-                      {...register(infosName)}
-                      className="min-h-lh"
-                      aria-invalid={!!get(errors, infosName)}
-                    />
-                  </Field>
-
-                  <Field orientation="horizontal">
-                    <Checkbox id={repeatName} {...register(repeatName)} />
-                    <FieldContent>
-                      <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
-                    </FieldContent>
-                  </Field>
-                </FieldGroup>
-              </FieldSet>
-            </LiturgyCardContent>
-          </Fragment>
-        );
-      })}
+            swap(initialIndex, index);
+          }
+        }}
+      >
+        <LiturgyCardContent className="flex flex-col gap-8">
+          {fields.map((field, fieldIndex) => (
+            <SongsBlockFormItem
+              key={field.id}
+              id={field.id}
+              index={fieldIndex}
+              name={`blocks.${index}.data.items.${fieldIndex}`}
+              songs={songs}
+              onRemove={() => {
+                remove(fieldIndex);
+              }}
+              sortable={fields.length > 1}
+            />
+          ))}
+        </LiturgyCardContent>
+      </DragDropProvider>
 
       <LiturgyCardFooter>
         <Button
@@ -158,5 +100,118 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
         </Button>
       </LiturgyCardFooter>
     </LiturgyCard>
+  );
+}
+
+interface SongsBlockFormItemProps {
+  id: string;
+  index: number;
+  name: `blocks.${number}.data.items.${number}`;
+  songs: Song[];
+  actionsDisabled?: boolean;
+  sortable?: boolean;
+  onRemove: () => void;
+}
+
+function SongsBlockFormItem({
+  id,
+  index,
+  name,
+  songs,
+  sortable,
+  onRemove,
+}: SongsBlockFormItemProps) {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<FieldValues>();
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const { ref } = useSortable({ id, index, handle: handleRef });
+
+  const idName = `${name}.id` as const;
+  const infosName = `${name}.infos` as const;
+  const repeatName = `${name}.repeat` as const;
+
+  return (
+    <div ref={ref}>
+      <FieldSet>
+        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
+          <button ref={handleRef} className="cursor-grab">
+            <MenuIcon className="size-4" />
+          </button>
+
+          <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
+            Chant {index + 1}
+          </FieldLegend>
+
+          <Button size="icon" variant="ghost" onClick={onRemove}>
+            <TrashIcon />
+          </Button>
+        </div>
+
+        <div className="flex">
+          {sortable && <div className="mr-4 ml-2 w-px bg-border" />}
+
+          <FieldGroup>
+            <Controller
+              control={control}
+              name={idName}
+              render={({ field: { name, value, onChange, onBlur } }) => (
+                <Field>
+                  <FieldLabel htmlFor={name}>Chant</FieldLabel>
+                  <Combobox
+                    items={songs}
+                    itemToStringLabel={(song) => song.title}
+                    value={songs.find((song) => song.id === value)}
+                    onValueChange={(song) => {
+                      if (song) {
+                        onChange(song.id);
+                      }
+                    }}
+                    autoHighlight
+                  >
+                    <ComboboxInput
+                      id={name}
+                      name={name}
+                      placeholder="Choisissez un chant"
+                      className="flex-1"
+                      onBlur={onBlur}
+                    />
+                    <ComboboxContent>
+                      <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
+                      <ComboboxList>
+                        {(song: Song) => (
+                          <ComboboxItem key={song.id} value={song}>
+                            {song.title} {song.aka && `(${song.aka})`}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                </Field>
+              )}
+            />
+
+            <Field>
+              <FieldLabel htmlFor={infosName}>Infos</FieldLabel>
+              <Textarea
+                id={infosName}
+                {...register(infosName)}
+                className="min-h-lh"
+                aria-invalid={!!get(errors, infosName)}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <Checkbox id={repeatName} {...register(repeatName)} />
+              <FieldContent>
+                <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
+              </FieldContent>
+            </Field>
+          </FieldGroup>
+        </div>
+      </FieldSet>
+    </div>
   );
 }

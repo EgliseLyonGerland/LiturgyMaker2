@@ -1,5 +1,9 @@
-import { PlusIcon } from "lucide-react";
-import { Fragment } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { clsx } from "clsx";
+import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { get } from "radashi";
+import { useRef } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
 import {
@@ -7,10 +11,9 @@ import {
   LiturgyCardContent,
   LiturgyCardFooter,
   LiturgyCardHeader,
-  LiturgyCardSeparator,
   LiturgyCardTitle,
 } from "@/components/liturgy-card";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { type AnnouncementsBlock, type Liturgy } from "@/lib/schemas";
@@ -26,13 +29,12 @@ interface AnnouncementsBlockFormProps {
 }
 
 export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
-  const {
-    control,
-    register,
-    formState: { errors },
-  } = useFormContext<FieldValues>();
+  const { control } = useFormContext<FieldValues>();
 
-  const { fields, append } = useFieldArray({ control, name: `blocks.${index}.data.items` });
+  const { fields, append, remove, swap } = useFieldArray({
+    control,
+    name: `blocks.${index}.data.items`,
+  });
 
   return (
     <LiturgyCard type="announcements">
@@ -40,38 +42,34 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
         <LiturgyCardTitle />
       </LiturgyCardHeader>
 
-      {fields.map((field, fieldIndex) => (
-        <Fragment key={field.id}>
-          <LiturgyCardSeparator />
+      <DragDropProvider
+        onDragEnd={(event) => {
+          if (event.canceled) return;
 
-          <LiturgyCardContent key={field.id}>
-            <FieldSet>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor={`blocks.${index}.data.items.${fieldIndex}.title`}>
-                    Titre
-                  </FieldLabel>
-                  <Input
-                    id={`blocks.${index}.data.items.${fieldIndex}.title`}
-                    {...register(`blocks.${index}.data.items.${fieldIndex}.title`)}
-                    aria-invalid={!!errors.blocks?.[index]?.data?.items?.[fieldIndex]?.title}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`blocks.${index}.data.items.${fieldIndex}.detail`}>
-                    Détails
-                  </FieldLabel>
-                  <Textarea
-                    id={`blocks.${index}.data.items.${fieldIndex}.detail`}
-                    {...register(`blocks.${index}.data.items.${fieldIndex}.detail`)}
-                    aria-invalid={!!errors.blocks?.[index]?.data?.items?.[fieldIndex]?.detail}
-                  />
-                </Field>
-              </FieldGroup>
-            </FieldSet>
-          </LiturgyCardContent>
-        </Fragment>
-      ))}
+          const { source } = event.operation;
+
+          if (isSortable(source)) {
+            const { initialIndex, index } = source;
+
+            swap(initialIndex, index);
+          }
+        }}
+      >
+        <LiturgyCardContent className="flex flex-col gap-8">
+          {fields.map((field, fieldIndex) => (
+            <AnnouncementsBlockFormItem
+              key={field.id}
+              id={field.id}
+              index={fieldIndex}
+              name={`blocks.${index}.data.items.${fieldIndex}`}
+              onRemove={() => {
+                remove(fieldIndex);
+              }}
+              sortable={fields.length > 1}
+            />
+          ))}
+        </LiturgyCardContent>
+      </DragDropProvider>
 
       <LiturgyCardFooter>
         <Button
@@ -84,5 +82,75 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
         </Button>
       </LiturgyCardFooter>
     </LiturgyCard>
+  );
+}
+
+interface AnnouncementsBlockFormItemProps {
+  id: string;
+  index: number;
+  name: `blocks.${number}.data.items.${number}`;
+  actionsDisabled?: boolean;
+  sortable?: boolean;
+  onRemove: () => void;
+}
+
+function AnnouncementsBlockFormItem({
+  id,
+  index,
+  name,
+  sortable,
+  onRemove,
+}: AnnouncementsBlockFormItemProps) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<FieldValues>();
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const { ref } = useSortable({ id, index, handle: handleRef });
+
+  const titleName = `${name}.title` as const;
+  const detailName = `${name}.detail` as const;
+
+  return (
+    <div ref={ref}>
+      <FieldSet>
+        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
+          <button ref={handleRef} className="cursor-grab">
+            <MenuIcon className="size-4" />
+          </button>
+
+          <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
+            Annonce {index + 1}
+          </FieldLegend>
+
+          <Button size="icon" variant="ghost" onClick={onRemove}>
+            <TrashIcon />
+          </Button>
+        </div>
+
+        <div className="flex">
+          {sortable && <div className="mr-4 ml-2 w-px bg-border" />}
+
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={titleName}>Titre</FieldLabel>
+              <Input
+                id={titleName}
+                {...register(titleName)}
+                aria-invalid={!!get(errors, titleName)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={detailName}>Détails</FieldLabel>
+              <Textarea
+                id={detailName}
+                {...register(detailName)}
+                aria-invalid={!!get(errors, detailName)}
+              />
+            </Field>
+          </FieldGroup>
+        </div>
+      </FieldSet>
+    </div>
   );
 }

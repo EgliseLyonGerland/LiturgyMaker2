@@ -1,5 +1,9 @@
-import { PlusIcon, TrashIcon } from "lucide-react";
-import { Fragment } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { clsx } from "clsx";
+import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { get } from "radashi";
+import { useRef } from "react";
 import { useFieldArray, useFormContext, Watch } from "react-hook-form";
 
 import {
@@ -28,14 +32,9 @@ interface ReadingBlockFormProps {
 }
 
 export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
-  const {
-    control,
-    register,
-    setValue,
-    formState: { errors },
-  } = useFormContext<FieldValues>();
+  const { control } = useFormContext<FieldValues>();
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, swap } = useFieldArray({
     control,
     name: `blocks.${index}.data.bibleRefs`,
   });
@@ -49,97 +48,36 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
           </span>
         </LiturgyCardTitle>
       </LiturgyCardHeader>
+      <LiturgyCardSeparator />
 
-      {fields.map((field, fieldIndex) => (
-        <Fragment key={field.id}>
-          <LiturgyCardSeparator />
+      <DragDropProvider
+        onDragEnd={(event) => {
+          if (event.canceled) return;
 
-          <LiturgyCardContent>
-            <FieldSet>
-              {fields.length > 1 && (
-                <div className="flex items-center justify-between">
-                  <FieldLegend className="m-0">Passage {fieldIndex + 1}</FieldLegend>
+          const { source } = event.operation;
 
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    disabled={fields.length < 2}
-                    onClick={() => {
-                      remove(fieldIndex);
-                    }}
-                  >
-                    <TrashIcon />
-                  </Button>
-                </div>
-              )}
+          if (isSortable(source)) {
+            const { initialIndex, index } = source;
 
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}>
-                    Référence
-                  </FieldLabel>
-
-                  <BibleRefField
-                    control={control}
-                    name={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`}>
-                    Extrait
-                  </FieldLabel>
-                  <Textarea
-                    id={`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`}
-                    {...register(`blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`)}
-                    aria-invalid={!!errors.blocks?.[index]?.data?.bibleRefs?.[fieldIndex]?.excerpt}
-                  />
-                  <Watch
-                    control={control}
-                    name={`blocks.${index}.data.bibleRefs.${fieldIndex}.id`}
-                    render={(id) => {
-                      const valid = validate(id);
-
-                      return (
-                        <Tooltip disabled={valid}>
-                          <TooltipTrigger
-                            render={
-                              <div className="self-start">
-                                <Button
-                                  variant="ghost"
-                                  size="xs"
-                                  disabled={!valid}
-                                  onClick={async () => {
-                                    const result = await getPassage(id);
-
-                                    if (result) {
-                                      setValue(
-                                        `blocks.${index}.data.bibleRefs.${fieldIndex}.excerpt`,
-                                        result,
-                                      );
-                                    }
-                                  }}
-                                >
-                                  Remplir automatiquement
-                                </Button>
-                              </div>
-                            }
-                          />
-                          <TooltipContent>
-                            <div>
-                              Pour utiliser le remplissage automatique, vous devez saisir une
-                              référence valide.
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    }}
-                  />
-                </Field>
-              </FieldGroup>
-            </FieldSet>
-          </LiturgyCardContent>
-        </Fragment>
-      ))}
+            swap(initialIndex, index);
+          }
+        }}
+      >
+        <LiturgyCardContent className="flex flex-col gap-8">
+          {fields.map((field, fieldIndex) => (
+            <ReadingBlockFormItem
+              key={field.id}
+              id={field.id}
+              index={fieldIndex}
+              name={`blocks.${index}.data.bibleRefs.${fieldIndex}`}
+              onRemove={() => {
+                remove(fieldIndex);
+              }}
+              sortable={fields.length > 1}
+            />
+          ))}
+        </LiturgyCardContent>
+      </DragDropProvider>
 
       <LiturgyCardFooter>
         <Button
@@ -152,5 +90,106 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
         </Button>
       </LiturgyCardFooter>
     </LiturgyCard>
+  );
+}
+
+interface ReadingBlockFormItemProps {
+  id: string;
+  index: number;
+  name: `blocks.${number}.data.bibleRefs.${number}`;
+  actionsDisabled?: boolean;
+  sortable?: boolean;
+  onRemove: () => void;
+}
+
+function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBlockFormItemProps) {
+  const {
+    control,
+    register,
+    setValue,
+    formState: { errors },
+  } = useFormContext<FieldValues>();
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const { ref } = useSortable({ id, index, handle: handleRef });
+
+  const idName = `${name}.id` as const;
+  const excerptName = `${name}.excerpt` as const;
+
+  return (
+    <div ref={ref}>
+      <FieldSet>
+        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
+          <button ref={handleRef} className="cursor-grab">
+            <MenuIcon className="size-4" />
+          </button>
+
+          <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
+            Référence {index + 1}
+          </FieldLegend>
+
+          <Button size="icon" variant="ghost" onClick={onRemove}>
+            <TrashIcon />
+          </Button>
+        </div>
+
+        <div className="flex">
+          {sortable && <div className="mr-4 ml-2 w-px bg-border" />}
+
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={idName}>Référence</FieldLabel>
+
+              <BibleRefField control={control} name={idName} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={excerptName}>Extrait</FieldLabel>
+              <Textarea
+                id={excerptName}
+                {...register(excerptName)}
+                aria-invalid={!!get(errors, excerptName)}
+              />
+              <Watch
+                control={control}
+                name={idName}
+                render={(id) => {
+                  const valid = validate(id);
+
+                  return (
+                    <Tooltip disabled={valid}>
+                      <TooltipTrigger
+                        render={
+                          <div className="w-auto self-start">
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              disabled={!valid}
+                              onClick={async () => {
+                                const result = await getPassage(id);
+
+                                if (result) {
+                                  setValue(excerptName, result);
+                                }
+                              }}
+                            >
+                              Remplir automatiquement
+                            </Button>
+                          </div>
+                        }
+                      />
+                      <TooltipContent>
+                        <div>
+                          Pour utiliser le remplissage automatique, vous devez saisir une référence
+                          valide.
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }}
+              />
+            </Field>
+          </FieldGroup>
+        </div>
+      </FieldSet>
+    </div>
   );
 }
