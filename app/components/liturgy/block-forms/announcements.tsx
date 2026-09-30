@@ -1,7 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { clsx } from "clsx";
-import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -12,13 +12,14 @@ import {
   LiturgyCardFooter,
   LiturgyCardHeader,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
+import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { type AnnouncementsBlock, type Liturgy } from "@/lib/schemas";
 
-import { Button } from "../ui/button";
+import { SortableButton } from "../sortable-button";
 
 interface FieldValues extends Liturgy {
   blocks: AnnouncementsBlock[];
@@ -114,10 +115,8 @@ function AnnouncementsBlockFormItem({
   return (
     <div ref={ref}>
       <FieldSet>
-        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
-          <button ref={handleRef} className="cursor-grab">
-            <MenuIcon className="size-4" />
-          </button>
+        <div className={clsx("items-center gap-2", sortable ? "flex" : "hidden")}>
+          <SortableButton ref={handleRef} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Annonce {index + 1}

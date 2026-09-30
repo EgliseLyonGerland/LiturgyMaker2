@@ -1,6 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
 import { useFieldArray, useFormContext, type FieldPath } from "react-hook-form";
@@ -11,12 +11,13 @@ import {
   LiturgyCardHeader,
   LiturgyCardSeparator,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { type SermonBlock, type Liturgy } from "@/lib/schemas";
 
+import { SortableButton } from "../sortable-button";
 import { BibleRefField } from "./fields/bible-ref";
 
 interface FieldValues extends Liturgy {
@@ -33,31 +34,32 @@ export function SermonBlockForm({ index }: SermonBlockFormProps) {
     formState: { errors },
   } = useFormContext<FieldValues>();
 
+  const titleName = `blocks.${index}.data.title` as const;
+  const authorName = `blocks.${index}.data.author` as const;
+
   return (
     <LiturgyCard type="sermon">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
 
-      <LiturgyCardSeparator />
-
       <LiturgyCardContent>
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`blocks.${index}.data.title`}>Titre</FieldLabel>
+              <FieldLabel htmlFor={titleName}>Titre</FieldLabel>
               <Input
-                id={`blocks.${index}.data.title`}
-                {...register(`blocks.${index}.data.title`)}
-                aria-invalid={!!errors.blocks?.[index]?.data?.title}
+                id={titleName}
+                {...register(titleName)}
+                aria-invalid={!!get(errors, titleName)}
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={`blocks.${index}.data.author`}>Auteur</FieldLabel>
+              <FieldLabel htmlFor={authorName}>Auteur</FieldLabel>
               <Input
-                id={`blocks.${index}.data.author`}
-                {...register(`blocks.${index}.data.author`)}
-                aria-invalid={!!errors.blocks?.[index]?.data?.title}
+                id={authorName}
+                {...register(authorName)}
+                aria-invalid={!!get(errors, authorName)}
               />
             </Field>
           </FieldGroup>
@@ -156,10 +158,8 @@ function BibleRefsFieldItem({
 
   return (
     <Field ref={ref}>
-      <div className="flex gap-1">
-        <Button ref={handleRef} variant="ghost" size="icon" disabled={actionsDisabled}>
-          <MenuIcon />
-        </Button>
+      <div className="flex gap-2">
+        <SortableButton ref={handleRef} disabled={actionsDisabled} />
         <BibleRefField control={control} name={name} />
         <Button size="icon" variant="ghost" disabled={actionsDisabled} onClick={onRemove}>
           <TrashIcon />
@@ -243,10 +243,8 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
 
   return (
     <Field ref={ref}>
-      <div className="flex gap-1">
-        <Button ref={handleRef} variant="ghost" size="icon" disabled={actionsDisabled}>
-          <MenuIcon />
-        </Button>
+      <div className="flex gap-2">
+        <SortableButton ref={handleRef} disabled={actionsDisabled} />
         <Input
           id={name}
           {...register(name)}

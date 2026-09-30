@@ -55,7 +55,7 @@ function LiturgyCard({ type, className, ...props }: LiturgyCardProps) {
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
 
 function LiturgyCardHeader({ className, ...props }: LiturgyCardHeaderProps) {
-  return <CardHeader {...props} className={cn("sticky", className)} />;
+  return <CardHeader {...props} className={cn("border-b border-border", className)} />;
 }
 
 interface LiturgyCardTitleProps extends ComponentProps<typeof CardTitle> {}

@@ -6,10 +6,7 @@ import {
   LiturgyCardContent,
   LiturgyCardHeader,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
-import { Separator } from "@/components/ui/separator";
-import { type RecitationBlock, type Liturgy, type Recitation } from "@/lib/schemas";
-
+} from "@/components/liturgy/liturgy-card";
 import {
   Combobox,
   ComboboxContent,
@@ -17,9 +14,10 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from "../ui/combobox";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { Textarea } from "../ui/textarea";
+} from "@/components/ui/combobox";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { type RecitationBlock, type Liturgy, type Recitation } from "@/lib/schemas";
 
 interface FieldValues extends Liturgy {
   blocks: RecitationBlock[];
@@ -45,7 +43,6 @@ export function RecitationBlockForm({ index, recitations }: RecitationBlockFormP
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
-      <Separator />
 
       <LiturgyCardContent>
         <FieldGroup>

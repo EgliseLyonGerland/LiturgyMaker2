@@ -1,12 +1,12 @@
+import { get } from "radashi";
 import { useFormContext } from "react-hook-form";
 
 import {
   LiturgyCard,
   LiturgyCardContent,
   LiturgyCardHeader,
-  LiturgyCardSeparator,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { type Liturgy, type SectionBlock } from "@/lib/schemas";
@@ -25,7 +25,7 @@ export function SectionBlockForm({ index }: SectionBlockFormProps) {
     formState: { errors },
   } = useFormContext<FieldValues>();
 
-  const path = `blocks.${index}.data.title` as const;
+  const name = `blocks.${index}.data.title` as const;
 
   return (
     <LiturgyCard type="section">
@@ -33,16 +33,10 @@ export function SectionBlockForm({ index }: SectionBlockFormProps) {
         <LiturgyCardTitle />
       </LiturgyCardHeader>
 
-      <LiturgyCardSeparator />
-
       <LiturgyCardContent>
         <Field>
-          <FieldLabel htmlFor={path}>Titre</FieldLabel>
-          <Input
-            id={path}
-            {...register(path)}
-            aria-invalid={!!errors.blocks?.[index]?.data?.title}
-          />
+          <FieldLabel htmlFor={name}>Titre</FieldLabel>
+          <Input id={name} {...register(name)} aria-invalid={!!get(errors, name)} />
         </Field>
       </LiturgyCardContent>
     </LiturgyCard>

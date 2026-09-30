@@ -1,6 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
 import { useFieldArray, useFormContext, type FieldPath } from "react-hook-form";
@@ -11,12 +11,14 @@ import {
   LiturgyCardHeader,
   LiturgyCardSeparator,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { type Liturgy, type OpenDoorsBlock } from "@/lib/schemas";
+
+import { SortableButton } from "../sortable-button";
 
 interface FieldValues extends Liturgy {
   blocks: OpenDoorsBlock[];
@@ -44,8 +46,6 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
-
-      <LiturgyCardSeparator />
 
       <LiturgyCardContent>
         <FieldSet>
@@ -147,10 +147,8 @@ function PrayerTopicsFieldItem({
 
   return (
     <Field ref={ref}>
-      <div className="flex gap-1">
-        <Button ref={handleRef} variant="ghost" size="icon" disabled={actionsDisabled}>
-          <MenuIcon />
-        </Button>
+      <div className="flex gap-2">
+        <SortableButton ref={handleRef} disabled={actionsDisabled} />
         <Textarea
           id={name}
           {...register(name)}

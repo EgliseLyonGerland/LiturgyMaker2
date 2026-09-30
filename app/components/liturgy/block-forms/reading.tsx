@@ -1,7 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { clsx } from "clsx";
-import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
 import { useFieldArray, useFormContext, Watch } from "react-hook-form";
@@ -11,9 +11,8 @@ import {
   LiturgyCardContent,
   LiturgyCardFooter,
   LiturgyCardHeader,
-  LiturgyCardSeparator,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getPassage, validate } from "@/lib/bible";
 import { type ReadingBlock, type Liturgy } from "@/lib/schemas";
 
+import { SortableButton } from "../sortable-button";
 import { BibleRefField } from "./fields/bible-ref";
 
 interface FieldValues extends Liturgy {
@@ -48,7 +48,6 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
           </span>
         </LiturgyCardTitle>
       </LiturgyCardHeader>
-      <LiturgyCardSeparator />
 
       <DragDropProvider
         onDragEnd={(event) => {
@@ -118,10 +117,8 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
   return (
     <div ref={ref}>
       <FieldSet>
-        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
-          <button ref={handleRef} className="cursor-grab">
-            <MenuIcon className="size-4" />
-          </button>
+        <div className={clsx("items-center gap-2", sortable ? "flex" : "hidden")}>
+          <SortableButton ref={handleRef} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Référence {index + 1}

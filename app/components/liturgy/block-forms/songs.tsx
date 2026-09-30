@@ -1,7 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { clsx } from "clsx";
-import { MenuIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
@@ -11,9 +11,8 @@ import {
   LiturgyCardContent,
   LiturgyCardFooter,
   LiturgyCardHeader,
-  LiturgyCardSeparator,
   LiturgyCardTitle,
-} from "@/components/liturgy-card";
+} from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,6 +33,8 @@ import {
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { type Liturgy, type Song, type SongsBlock } from "@/lib/schemas";
+
+import { SortableButton } from "../sortable-button";
 
 interface FieldValues extends Liturgy {
   blocks: SongsBlock[];
@@ -57,7 +58,6 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
-      <LiturgyCardSeparator />
 
       <DragDropProvider
         onDragEnd={(event) => {
@@ -136,10 +136,8 @@ function SongsBlockFormItem({
   return (
     <div ref={ref}>
       <FieldSet>
-        <div className={clsx("items-center gap-4", sortable ? "flex" : "hidden")}>
-          <button ref={handleRef} className="cursor-grab">
-            <MenuIcon className="size-4" />
-          </button>
+        <div className={clsx("items-center gap-2", sortable ? "flex" : "hidden")}>
+          <SortableButton ref={handleRef} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Chant {index + 1}
