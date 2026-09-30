@@ -78,7 +78,7 @@ export function createDefaultSongsBlock(): v.InferOutput<typeof songsBlockSchema
   return {
     type: "songs",
     data: {
-      items: [],
+      items: [{ id: "", infos: "", lyrics: [], repeat: false }],
     },
   };
 }
