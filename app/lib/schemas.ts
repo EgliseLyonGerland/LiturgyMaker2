@@ -130,6 +130,16 @@ const songSchema = v.object({
   lyrics: lyricsSchema,
 });
 
+const recitationSchema = v.object({
+  id: v.string(),
+  title: v.string(),
+  content: v.array(
+    v.object({
+      text: v.string(),
+    }),
+  ),
+});
+
 type Liturgy = v.InferOutput<typeof liturgySchema>;
 
 type Lyrics = v.InferOutput<typeof lyricsSchema>;
@@ -144,6 +154,7 @@ type OpenDoorsBlock = v.InferOutput<typeof openDoorsBlockSchema>;
 type LiturgyBlockType = Liturgy["blocks"][number]["type"];
 
 type Song = v.InferOutput<typeof songSchema>;
+type Recitation = v.InferOutput<typeof recitationSchema>;
 
 export {
   lyricsSchema,
@@ -156,6 +167,7 @@ export {
   openDoorsBlockSchema,
   liturgySchema,
   songSchema,
+  recitationSchema,
 };
 
 export type {
@@ -170,4 +182,5 @@ export type {
   Liturgy,
   LiturgyBlockType,
   Song,
+  Recitation,
 };

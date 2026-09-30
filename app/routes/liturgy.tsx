@@ -30,7 +30,8 @@ import {
   liturgySchema,
   type Liturgy as LiturgyDocument,
   type LiturgyBlockType,
-  type Song as SongDocument,
+  type Song,
+  type Recitation,
 } from "@/lib/schemas";
 
 import type { Route } from "./+types/liturgy";
@@ -65,12 +66,27 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
           ({
             id: doc.id,
             ...doc.data(),
-          }) as SongDocument,
+          }) as Song,
       );
     },
   });
 
-  return { liturgy, songs };
+  const recitations = await queryClient.query({
+    queryKey: ["recitations"],
+    queryFn: async () => {
+      const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
+
+      return docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Recitation,
+      );
+    },
+  });
+
+  return { liturgy, songs, recitations };
 }
 
 export default function Liturgy(props: Route.ComponentProps) {
@@ -85,7 +101,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const navigation = useNavigation();
 
   const { liturgyId } = params;
-  const { liturgy, songs } = loaderData;
+  const { liturgy, songs, recitations } = loaderData;
 
   const form = useForm({
     resolver: valibotResolver(liturgySchema),
@@ -167,7 +183,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                   ) : field.type === "reading" ? (
                     <ReadingBlockForm index={index} />
                   ) : field.type === "recitation" ? (
-                    <RecitationBlockForm index={index} />
+                    <RecitationBlockForm index={index} recitations={recitations} />
                   ) : field.type === "sermon" ? (
                     <SermonBlockForm index={index} />
                   ) : (

@@ -158,7 +158,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
                     <Tooltip disabled={valid}>
                       <TooltipTrigger
                         render={
-                          <div className="w-auto self-start">
+                          <div className="w-auto! self-start">
                             <Button
                               variant="ghost"
                               size="xs"
