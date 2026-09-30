@@ -3,7 +3,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
-import { ChevronDown, PlusCircleIcon } from "lucide-react";
+import { ChevronDown, PlusCircleIcon, SaveIcon } from "lucide-react";
 import { Fragment, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
@@ -118,8 +118,9 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                 </Button>
               }
             />
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="p-0" align="start">
               <Calendar
+                className="w-full min-w-(--anchror-width)"
                 mode="single"
                 locale={fr}
                 selected={date}
@@ -135,7 +136,8 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           </Popover>
 
           <Button className="ml-auto" type="submit" form="liturgy-form" disabled={!isDirty}>
-            Enregistrer
+            <span className="hidden md:block">Enregistrer</span>
+            <SaveIcon className="md:hidden" />
           </Button>
         </div>
       </HeaderSlot>
