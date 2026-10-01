@@ -1,7 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { useLens, type Lens } from "@hookform/lenses";
-import { clsx } from "clsx";
+import { cn } from "cn";
 import { AlertTriangleIcon, PlusIcon, SaveIcon, TrashIcon, XIcon } from "lucide-react";
 import { get } from "radashi";
 import { useEffect, useRef } from "react";
@@ -239,7 +239,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   return (
     <div ref={ref}>
       <FieldSet>
-        <div className={clsx("items-center gap-2", sortable ? "flex" : "hidden")}>
+        <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
           <SortableButton ref={handleRef} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
@@ -390,7 +390,7 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
               {lines.map((line, lineIndex) => (
                 <div
                   key={lineIndex}
-                  className={clsx("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
+                  className={cn("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
                 >
                   {line}
                 </div>

@@ -1,4 +1,4 @@
-import { clsx } from "clsx";
+import { cn } from "cn";
 import { createContext, useContext, type ComponentProps } from "react";
 
 import {
@@ -12,16 +12,15 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
 import type { LiturgyBlockType } from "@/lib/schemas";
-import { cn } from "@/lib/utils";
 
 const colorByType: Record<LiturgyBlockType, string> = {
-  announcements: clsx("bg-taupe-600/10"),
-  openDoors: clsx("bg-purple-900/10"),
-  reading: clsx("bg-pink-900/10"),
-  recitation: clsx("bg-stone-900/10"),
-  section: clsx("bg-emerald-900/10"),
-  sermon: clsx("bg-amber-900/10"),
-  songs: clsx("bg-blue-900/10"),
+  announcements: cn("bg-taupe-600/10"),
+  openDoors: cn("bg-purple-900/10"),
+  reading: cn("bg-pink-900/10"),
+  recitation: cn("bg-stone-900/10"),
+  section: cn("bg-emerald-900/10"),
+  sermon: cn("bg-amber-900/10"),
+  songs: cn("bg-blue-900/10"),
 };
 
 interface Context {

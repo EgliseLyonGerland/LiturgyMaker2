@@ -1,7 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import type { Lens } from "@hookform/lenses";
-import { clsx } from "clsx";
+import { cn } from "cn";
 import { EllipsisVerticalIcon, GripHorizontalIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useRef } from "react";
 import { Controller, useFieldArray } from "react-hook-form";
@@ -100,7 +100,7 @@ function LyricsItem({ lens, id, index, onInsertBefore, onInsertAfter, onRemove }
 
           <InputGroupAddon
             align="block-start"
-            className={clsx(
+            className={cn(
               "group grid cursor-default grid-cols-[1fr_auto_1fr] items-center gap-4 dark:bg-transparent",
             )}
             data-dragging={isDragging || undefined}

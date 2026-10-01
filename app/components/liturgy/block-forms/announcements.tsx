@@ -1,6 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { clsx } from "clsx";
+import { cn } from "cn";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
@@ -116,7 +116,7 @@ function AnnouncementsBlockFormItem({
   return (
     <div ref={ref}>
       <FieldSet>
-        <div className={clsx("items-center gap-2", sortable ? "flex" : "hidden")}>
+        <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
           <SortableButton ref={handleRef} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
