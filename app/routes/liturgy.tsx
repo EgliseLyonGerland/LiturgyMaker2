@@ -2,13 +2,14 @@ import { Popover as PopoverPrimitive } from "@base-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
-import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore";
 import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
 import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useBlocker, useNavigate, useNavigation, type Blocker } from "react-router";
+import { useBlocker, useFetcher, useNavigate, useNavigation, type Blocker } from "react-router";
+import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
@@ -31,9 +32,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
 import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
-import { firebaseDb } from "@/lib/firebase";
+import { firebaseAuth, firebaseDb } from "@/lib/firebase";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import migrate from "@/lib/migrate";
 import { queryClient } from "@/lib/query-client";
@@ -63,8 +66,12 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
 
       const data = migrate(snapshot.data()) as LiturgyDocument;
 
-      return { id: liturgyId, ...data };
+      return {
+        ...data,
+        id: liturgyId,
+      };
     },
+    staleTime: Infinity,
   });
 
   const songs = await queryClient.query({
@@ -73,15 +80,10 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
       return docs
-        .map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            }) as Song,
-        )
+        .map((doc) => ({ id: doc.id, ...doc.data() }) as Song)
         .toSorted((a, b) => a.title.localeCompare(b.title));
     },
+    staleTime: Infinity,
   });
 
   const recitations = await queryClient.query({
@@ -90,18 +92,42 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
       const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
 
       return docs
-        .map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            }) as Recitation,
-        )
+        .map((doc) => ({ id: doc.id, ...doc.data() }) as Recitation)
         .toSorted((a, b) => a.title.localeCompare(b.title));
     },
+    staleTime: Infinity,
   });
 
   return { liturgy, songs, recitations };
+}
+
+export async function clientAction({ params, request }: Route.ClientActionArgs) {
+  const { liturgyId } = params;
+  const data = await request.json();
+
+  const result = v.safeParse(liturgySchema, data);
+
+  if (!result.success) {
+    toast.add({
+      title: "Echec de l'enregistrement",
+      type: "error",
+    });
+
+    return;
+  }
+
+  const liturgy = {
+    ...result.output,
+    uid: firebaseAuth.currentUser?.uid || "",
+  };
+
+  await setDoc(doc(firebaseDb, "liturgies", liturgyId), liturgy);
+  await queryClient.invalidateQueries({ queryKey: ["liturgies", liturgyId] });
+
+  toast.add({
+    title: "Enregistrement réussi",
+    type: "success",
+  });
 }
 
 export default function Liturgy(props: Route.ComponentProps) {
@@ -114,23 +140,31 @@ export default function Liturgy(props: Route.ComponentProps) {
 function Content({ loaderData, params }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
+  const fetcher = useFetcher();
 
   const { liturgyId } = params;
   const { liturgy, songs, recitations } = loaderData;
 
+  const disabled = navigation.state !== "idle" || fetcher.state !== "idle";
+
   const form = useForm({
     resolver: valibotResolver(liturgySchema),
     defaultValues: liturgy,
-    disabled: navigation.state !== "idle",
+    disabled,
   });
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isDirty },
   } = form;
 
   const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
+
+  useEffect(() => {
+    reset(liturgy);
+  }, [liturgy, reset]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -159,7 +193,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           <Popover handle={datePickerHandle}>
             <PopoverTrigger
               render={
-                <Button type="button" variant="ghost" className="group">
+                <Button type="button" variant="ghost" className="group" disabled={disabled}>
                   Présidence du {format(date, "do MMMM y")}
                   <ChevronDown className="group-data-popup-open:rotate-180" />
                 </Button>
@@ -182,7 +216,13 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             </PopoverContent>
           </Popover>
 
-          <Button className="ml-auto" type="submit" form="liturgy-form" disabled={!isDirty}>
+          <Button
+            className="ml-auto"
+            type="submit"
+            form="liturgy-form"
+            disabled={disabled || !isDirty}
+          >
+            {fetcher.state !== "idle" && <Spinner />}
             <span className="hidden md:block">Enregistrer</span>
             <SaveIcon className="md:hidden" />
           </Button>
@@ -191,9 +231,12 @@ function Content({ loaderData, params }: Route.ComponentProps) {
       <FormProvider {...form}>
         <form
           id="liturgy-form"
-          onSubmit={handleSubmit((data, event) => {
-            console.log(event);
-            console.log("liturgy submitted", data);
+          method="post"
+          onSubmit={handleSubmit((data) => {
+            fetcher.submit(data, {
+              method: "post",
+              encType: "application/json",
+            });
           })}
         >
           <div ref={listElement} className="max-w-xl p-4 px-4 md:px-8">
