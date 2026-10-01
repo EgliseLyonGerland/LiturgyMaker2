@@ -34,7 +34,7 @@ interface ReadingBlockFormProps {
 export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: `blocks.${index}.data.bibleRefs`,
   });
@@ -58,7 +58,7 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            swap(initialIndex, index);
+            move(initialIndex, index);
           }
         }}
       >
@@ -80,6 +80,7 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
 
       <LiturgyCardFooter>
         <Button
+          type="button"
           variant="outline"
           onClick={() => {
             append({ id: "", excerpt: "" });
@@ -124,7 +125,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
             Référence {index + 1}
           </FieldLegend>
 
-          <Button size="icon" variant="ghost" onClick={onRemove}>
+          <Button type="button" size="icon" variant="ghost" onClick={onRemove}>
             <TrashIcon />
           </Button>
         </div>
@@ -135,7 +136,6 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor={idName}>Référence</FieldLabel>
-
               <BibleRefField control={control} name={idName} />
             </Field>
             <Field>
@@ -157,6 +157,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
                         render={
                           <div className="w-auto! self-start">
                             <Button
+                              type="button"
                               variant="ghost"
                               size="xs"
                               disabled={!valid}

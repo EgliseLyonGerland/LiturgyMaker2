@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect, it } from "vitest";
 
 import version7 from "../version7";
 

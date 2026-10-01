@@ -1,10 +1,19 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { useLens, type Lens } from "@hookform/lenses";
 import { clsx } from "clsx";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import { AlertTriangleIcon, PlusIcon, SaveIcon, TrashIcon, XIcon } from "lucide-react";
 import { get } from "radashi";
-import { useRef } from "react";
-import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { useRef, useState } from "react";
+import {
+  FormProvider,
+  useController,
+  useFieldArray,
+  useForm,
+  useFormContext,
+  Watch,
+} from "react-hook-form";
+import Player from "react-player";
 
 import {
   LiturgyCard,
@@ -13,6 +22,8 @@ import {
   LiturgyCardHeader,
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
+import { LyricsFieldArray } from "@/components/lyrics-field-array";
+import { Alert, AlertAction, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -24,6 +35,16 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Field,
   FieldContent,
   FieldGroup,
@@ -31,8 +52,11 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { type Liturgy, type Song, type SongsBlock } from "@/lib/schemas";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isEqualLyrics, prepareLyrics } from "@/lib/lyrics-utils";
+import { type Liturgy, type Lyrics, type Song, type SongsBlock } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 
@@ -48,7 +72,7 @@ interface SongsBlockFormProps {
 export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: `blocks.${index}.data.items`,
   });
@@ -68,13 +92,13 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            swap(initialIndex, index);
+            move(initialIndex, index);
           }
         }}
       >
         <LiturgyCardContent className="flex flex-col gap-8">
           {fields.map((field, fieldIndex) => (
-            <SongsBlockFormItem
+            <Item
               key={field.id}
               id={field.id}
               index={fieldIndex}
@@ -91,9 +115,10 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
 
       <LiturgyCardFooter>
         <Button
+          type="button"
           variant="outline"
           onClick={() => {
-            append({ id: "", infos: "", lyrics: [], repeat: false });
+            append({ id: "", infos: "", lyrics: null, repeat: false });
           }}
         >
           Ajouter un chant <PlusIcon />
@@ -103,7 +128,7 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
   );
 }
 
-interface SongsBlockFormItemProps {
+interface ItemProps {
   id: string;
   index: number;
   name: `blocks.${number}.data.items.${number}`;
@@ -113,25 +138,27 @@ interface SongsBlockFormItemProps {
   onRemove: () => void;
 }
 
-function SongsBlockFormItem({
-  id,
-  index,
-  name,
-  songs,
-  sortable,
-  onRemove,
-}: SongsBlockFormItemProps) {
+function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const {
     control,
     register,
+    setValue,
     formState: { errors },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
+  const isMobile = useIsMobile();
 
   const idName = `${name}.id` as const;
   const infosName = `${name}.infos` as const;
   const repeatName = `${name}.repeat` as const;
+  const lyricsName = `${name}.lyrics` as const;
+
+  const idField = useController({ control, name: idName });
+
+  const lens = useLens({ control });
+
+  const song = songs.find((song) => song.id === idField.field.value);
 
   return (
     <div ref={ref}>
@@ -143,7 +170,7 @@ function SongsBlockFormItem({
             Chant {index + 1}
           </FieldLegend>
 
-          <Button size="icon" variant="ghost" onClick={onRemove}>
+          <Button type="button" size="icon" variant="ghost" onClick={onRemove}>
             <TrashIcon />
           </Button>
         </div>
@@ -152,43 +179,61 @@ function SongsBlockFormItem({
           {sortable && <div className="mr-4 ml-2 w-px bg-border" />}
 
           <FieldGroup>
-            <Controller
+            <Field>
+              <FieldLabel htmlFor={name}>Chant</FieldLabel>
+              <Combobox
+                items={songs}
+                itemToStringLabel={(song) => song.title}
+                value={song}
+                onValueChange={(song) => {
+                  if (song) {
+                    idField.field.onChange(song.id);
+                  }
+                }}
+                autoHighlight
+              >
+                <ComboboxInput
+                  id={name}
+                  name={name}
+                  placeholder="Choisissez un chant"
+                  className="flex-1"
+                  onBlur={idField.field.onBlur}
+                />
+                <ComboboxContent>
+                  <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
+                  <ComboboxList>
+                    {(song: Song) => (
+                      <ComboboxItem key={song.id} value={song}>
+                        {song.title} {song.aka && `(${song.aka})`}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </Field>
+
+            <Watch
               control={control}
-              name={idName}
-              render={({ field: { name, value, onChange, onBlur } }) => (
-                <Field>
-                  <FieldLabel htmlFor={name}>Chant</FieldLabel>
-                  <Combobox
-                    items={songs}
-                    itemToStringLabel={(song) => song.title}
-                    value={songs.find((song) => song.id === value)}
-                    onValueChange={(song) => {
-                      if (song) {
-                        onChange(song.id);
-                      }
-                    }}
-                    autoHighlight
-                  >
-                    <ComboboxInput
-                      id={name}
-                      name={name}
-                      placeholder="Choisissez un chant"
-                      className="flex-1"
-                      onBlur={onBlur}
-                    />
-                    <ComboboxContent>
-                      <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
-                      <ComboboxList>
-                        {(song: Song) => (
-                          <ComboboxItem key={song.id} value={song}>
-                            {song.title} {song.aka && `(${song.aka})`}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                </Field>
-              )}
+              name={lyricsName}
+              render={(value) =>
+                value !== null && (
+                  <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+                    <AlertTriangleIcon />
+                    <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
+                    <AlertAction>
+                      <Button
+                        size="xs"
+                        variant="default"
+                        onClick={() => {
+                          setValue(lyricsName, null);
+                        }}
+                      >
+                        Rétablir
+                      </Button>
+                    </AlertAction>
+                  </Alert>
+                )
+              }
             />
 
             <Field>
@@ -201,15 +246,211 @@ function SongsBlockFormItem({
               />
             </Field>
 
-            <Field orientation="horizontal">
-              <Checkbox id={repeatName} {...register(repeatName)} />
-              <FieldContent>
-                <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
-              </FieldContent>
-            </Field>
+            <div className="grid grid-cols-[1fr_auto] items-center">
+              <Field orientation="horizontal">
+                <Checkbox id={repeatName} {...register(repeatName)} />
+                <FieldContent>
+                  <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
+                </FieldContent>
+              </Field>
+
+              {song && (
+                <Drawer showSwipeHandle={isMobile} swipeDirection={isMobile ? "down" : "right"}>
+                  <DrawerTrigger
+                    render={
+                      <Button type="button" size="sm" variant="outline">
+                        Informations
+                      </Button>
+                    }
+                  />
+                  <DrawerContent className="w-[90%] max-w-xl">
+                    <ItemInformationDrawerContent lens={lens.focus(lyricsName)} song={song} />
+                  </DrawerContent>
+                </Drawer>
+              )}
+            </div>
           </FieldGroup>
         </div>
       </FieldSet>
     </div>
+  );
+}
+
+interface ItemInformationDrawerContentProps {
+  lens: Lens<Lyrics | null>;
+  song: Song;
+}
+
+function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerContentProps) {
+  const [editing, setEditing] = useState(false);
+  const isMobile = useIsMobile();
+
+  const lyricsField = useController(lens.interop());
+
+  return (
+    <>
+      <DrawerHeader>
+        <DrawerTitle className="text-lg">
+          {song.title} {song.aka && <span>({song.aka})</span>}
+        </DrawerTitle>
+        <DrawerDescription>{song.authors || <i>Aucun auteur</i>}</DrawerDescription>
+      </DrawerHeader>
+
+      <Separator className="my-4" />
+
+      <div className="flex-1 scroll-fade overflow-y-auto px-4">
+        {song.previewUrl && (
+          <>
+            <Preview title={song.title} url={song.previewUrl} />
+            <Separator className="my-4" />
+          </>
+        )}
+
+        <div className="mb-10 flex flex-col gap-4">
+          {prepareLyrics(song.lyrics).map(({ type, lines }, lyricIndex) => (
+            <div key={lyricIndex}>
+              {lines.map((line, lineIndex) => (
+                <div
+                  key={lineIndex}
+                  className={clsx("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <DrawerFooter>
+        <Watch
+          {...lens.interop()}
+          render={(value) =>
+            value !== null && (
+              <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+                <AlertTriangleIcon />
+                <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
+                <AlertAction>
+                  <Button
+                    size="xs"
+                    variant="default"
+                    onClick={() => {
+                      lyricsField.field.onChange(null);
+                    }}
+                  >
+                    Rétablir
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )
+          }
+        />
+
+        <Drawer
+          showSwipeHandle={isMobile}
+          swipeDirection={isMobile ? "down" : "right"}
+          open={editing}
+          onOpenChange={setEditing}
+        >
+          <DrawerTrigger
+            render={
+              <Button type="button" size="lg">
+                Modifier les paroles pour ce culte
+              </Button>
+            }
+          />
+          <DrawerContent className="w-[90%] max-w-xl">
+            <EditLyricsDrawerContent lens={lens} song={song} onClose={() => setEditing(false)} />
+          </DrawerContent>
+        </Drawer>
+      </DrawerFooter>
+    </>
+  );
+}
+
+interface PreviewProps {
+  title: string;
+  url: string;
+}
+
+function Preview({ title, url }: PreviewProps) {
+  if (url.includes("drive.google.com")) {
+    return (
+      <iframe
+        height="140"
+        src={url.replace("/view", "/preview")}
+        title={`${title} preview`}
+        width="100%"
+        loading="lazy"
+      />
+    );
+  }
+
+  return <Player src={url} width="100%" height={260} controls />;
+}
+
+interface EditLyricsDrawerContentProps {
+  lens: Lens<Lyrics | null>;
+  song: Song;
+  onClose: () => void;
+}
+
+function EditLyricsDrawerContent({ lens, song, onClose }: EditLyricsDrawerContentProps) {
+  const {
+    field: { value, onChange },
+  } = useController(lens.interop());
+
+  const form = useForm<{ lyrics: Lyrics }>({
+    defaultValues: {
+      lyrics: value ?? song.lyrics,
+    },
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = form;
+
+  const lyricsLens = useLens({ control });
+
+  return (
+    <FormProvider {...form}>
+      <DrawerHeader>
+        <div className="flex justify-between gap-2">
+          <DrawerClose
+            render={
+              <Button type="button" variant="ghost" size="icon">
+                <XIcon />
+              </Button>
+            }
+          />
+
+          <Button form="edit-lyrics-form" type="submit" variant="default" disabled={!isDirty}>
+            Enregistrer <SaveIcon />
+          </Button>
+        </div>
+      </DrawerHeader>
+      <div className="scroll-fade overflow-y-auto p-4 pb-10">
+        <form
+          id="edit-lyrics-form"
+          onSubmit={(event) => {
+            event?.stopPropagation();
+
+            handleSubmit((data) => {
+              if (isEqualLyrics(data.lyrics, song.lyrics)) {
+                onChange(null);
+              } else {
+                onChange(data.lyrics);
+              }
+
+              onClose();
+            })(event);
+          }}
+        >
+          <LyricsFieldArray lens={lyricsLens.focus("lyrics")} />
+        </form>
+      </div>
+    </FormProvider>
   );
 }

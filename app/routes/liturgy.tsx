@@ -3,13 +3,14 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
-import { ChevronDown, PlusCircleIcon, SaveIcon } from "lucide-react";
+import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
 import { Fragment, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useNavigate, useNavigation } from "react-router";
 
+import { AddButton } from "@/components/add-button";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
 import { OpenDoorsBlockForm } from "@/components/liturgy/block-forms/open-doors";
 import { ReadingBlockForm } from "@/components/liturgy/block-forms/reading";
@@ -61,13 +62,15 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
-      return docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          }) as Song,
-      );
+      return docs
+        .map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            }) as Song,
+        )
+        .toSorted((a, b) => a.title.localeCompare(b.title));
     },
   });
 
@@ -76,13 +79,15 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
 
-      return docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          }) as Recitation,
-      );
+      return docs
+        .map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            }) as Recitation,
+        )
+        .toSorted((a, b) => a.title.localeCompare(b.title));
     },
   });
 
@@ -115,7 +120,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
     formState: { isDirty },
   } = form;
 
-  const fieldArray = useFieldArray({ control, name: "blocks" });
+  const { fields, prepend, insert } = useFieldArray({ control, name: "blocks" });
 
   const [listElement] = useAutoAnimate();
 
@@ -128,7 +133,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           <Popover handle={datePickerHandle}>
             <PopoverTrigger
               render={
-                <Button variant="ghost" className="group">
+                <Button type="button" variant="ghost" className="group">
                   Présidence du {format(date, "do MMMM y")}
                   <ChevronDown className="group-data-popup-open:rotate-180" />
                 </Button>
@@ -160,19 +165,20 @@ function Content({ loaderData, params }: Route.ComponentProps) {
       <FormProvider {...form}>
         <form
           id="liturgy-form"
-          onSubmit={handleSubmit((data) => {
-            console.log(data);
+          onSubmit={handleSubmit((data, event) => {
+            console.log(event);
+            console.log("liturgy submitted", data);
           })}
         >
           <div ref={listElement} className="max-w-xl p-4 px-4 md:px-8">
             <AddBlockButton
               onSelect={(type) => {
-                fieldArray.prepend(createDefaultBlock(type));
+                prepend(createDefaultBlock(type));
               }}
             />
 
             <div ref={listElement} className="flex flex-col gap-1">
-              {fieldArray.fields.map((field, index) => (
+              {fields.map((field, index) => (
                 <Fragment key={field.id}>
                   {field.type === "section" ? (
                     <SectionBlockForm index={index} />
@@ -192,7 +198,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
                   <AddBlockButton
                     onSelect={(type) => {
-                      fieldArray.insert(index + 1, createDefaultBlock(type));
+                      insert(index + 1, createDefaultBlock(type));
                     }}
                   />
                 </Fragment>
@@ -231,18 +237,9 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
     >
       <PopoverTrigger
         render={
-          <button
-            type="button"
-            className="group flex h-6 w-full cursor-pointer items-center text-sm text-background transition-[height] outline-none hover:h-15 hover:delay-300 focus-visible:h-15 aria-expanded:h-15"
-          >
-            <div className="w-full cursor-pointer rounded-md bg-border transition-colors group-hover:bg-foreground group-hover:delay-50 group-focus-visible:border-ring group-focus-visible:bg-foreground group-focus-visible:ring-3 group-focus-visible:ring-ring group-aria-expanded:bg-foreground/80">
-              <div className="flex h-px items-center justify-center overflow-hidden transition-[height] group-hover:h-8 group-hover:delay-300 group-focus-visible:h-8 group-aria-expanded:h-8">
-                <span className="inline-flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 group-aria-expanded:opacity-100">
-                  <PlusCircleIcon className="size-4" /> Ajouter un block
-                </span>
-              </div>
-            </div>
-          </button>
+          <AddButton>
+            Ajouter un block <PlusIcon />
+          </AddButton>
         }
       />
       <PopoverContent
@@ -253,6 +250,7 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
         {liturgyBlockTypes.map((type) => (
           <Button
             key={type}
+            type="button"
             variant="default"
             className="flex h-auto flex-col items-center justify-center py-3"
             onClick={() => {

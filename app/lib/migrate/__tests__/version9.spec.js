@@ -1,5 +1,5 @@
 import { uid } from "uid";
-import { expect } from "vitest";
+import { vi, expect, it } from "vitest";
 
 import version9 from "../version9";
 

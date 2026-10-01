@@ -86,7 +86,7 @@ function BibleRefsField({ index }: SermonBlockFormProps) {
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.bibleRefs`;
 
-  const { fields, append, remove, swap } = useFieldArray({ control, name });
+  const { fields, append, remove, move } = useFieldArray({ control, name });
 
   return (
     <FieldSet>
@@ -95,6 +95,7 @@ function BibleRefsField({ index }: SermonBlockFormProps) {
           Références bibliques
         </FieldLegend>
         <Button
+          type="button"
           variant="outline"
           size="xs"
           onClick={() => {
@@ -114,7 +115,7 @@ function BibleRefsField({ index }: SermonBlockFormProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            swap(initialIndex, index);
+            move(initialIndex, index);
           }
         }}
       >
@@ -161,7 +162,13 @@ function BibleRefsFieldItem({
       <div className="flex gap-2">
         <SortableButton ref={handleRef} disabled={actionsDisabled} />
         <BibleRefField control={control} name={name} />
-        <Button size="icon" variant="ghost" disabled={actionsDisabled} onClick={onRemove}>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          disabled={actionsDisabled}
+          onClick={onRemove}
+        >
           <TrashIcon />
         </Button>
       </div>
@@ -174,7 +181,7 @@ function PointsField({ index }: SermonBlockFormProps) {
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.plan`;
 
-  const { fields, append, remove, swap } = useFieldArray({ control, name });
+  const { fields, append, remove, move } = useFieldArray({ control, name });
 
   return (
     <FieldSet>
@@ -183,6 +190,7 @@ function PointsField({ index }: SermonBlockFormProps) {
           Points
         </FieldLegend>
         <Button
+          type="button"
           variant="outline"
           size="xs"
           onClick={() => {
@@ -202,7 +210,7 @@ function PointsField({ index }: SermonBlockFormProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            swap(initialIndex, index);
+            move(initialIndex, index);
           }
         }}
       >
@@ -251,7 +259,13 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
           className="min-h-lh"
           aria-invalid={!!get(errors, name)}
         />
-        <Button size="icon" variant="ghost" disabled={actionsDisabled} onClick={onRemove}>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          disabled={actionsDisabled}
+          onClick={onRemove}
+        >
           <TrashIcon />
         </Button>
       </div>

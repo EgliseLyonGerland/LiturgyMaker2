@@ -32,7 +32,7 @@ interface AnnouncementsBlockFormProps {
 export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
-  const { fields, append, remove, swap } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: `blocks.${index}.data.items`,
   });
@@ -52,7 +52,7 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            swap(initialIndex, index);
+            move(initialIndex, index);
           }
         }}
       >
@@ -74,6 +74,7 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
 
       <LiturgyCardFooter>
         <Button
+          type="button"
           variant="outline"
           onClick={() => {
             append({ title: "", detail: "" });
@@ -122,7 +123,7 @@ function AnnouncementsBlockFormItem({
             Annonce {index + 1}
           </FieldLegend>
 
-          <Button size="icon" variant="ghost" onClick={onRemove}>
+          <Button type="button" size="icon" variant="ghost" onClick={onRemove}>
             <TrashIcon />
           </Button>
         </div>

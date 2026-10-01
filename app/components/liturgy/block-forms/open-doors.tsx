@@ -39,7 +39,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
   const detailName = `blocks.${index}.data.detail` as const;
   const prayerTopicsName = `blocks.${index}.data.prayerTopics` as const;
 
-  const { fields, append, remove, swap } = useFieldArray({ control, name: prayerTopicsName });
+  const { fields, append, remove, move } = useFieldArray({ control, name: prayerTopicsName });
 
   return (
     <LiturgyCard type="openDoors">
@@ -79,6 +79,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
               Sujets de prière
             </FieldLegend>
             <Button
+              type="button"
               variant="outline"
               size="xs"
               onClick={() => {
@@ -98,7 +99,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
               if (isSortable(source)) {
                 const { initialIndex, index } = source;
 
-                swap(initialIndex, index);
+                move(initialIndex, index);
               }
             }}
           >
@@ -155,7 +156,13 @@ function PrayerTopicsFieldItem({
           className="min-h-lh"
           aria-invalid={!!get(errors, name)}
         />
-        <Button size="icon" variant="ghost" disabled={actionsDisabled} onClick={onRemove}>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          disabled={actionsDisabled}
+          onClick={onRemove}
+        >
           <TrashIcon />
         </Button>
       </div>
