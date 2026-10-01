@@ -4,7 +4,7 @@ import { useLens, type Lens } from "@hookform/lenses";
 import { clsx } from "clsx";
 import { AlertTriangleIcon, PlusIcon, SaveIcon, TrashIcon, XIcon } from "lucide-react";
 import { get } from "radashi";
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   FormProvider,
   useController,
@@ -14,6 +14,7 @@ import {
   Watch,
 } from "react-hook-form";
 import Player from "react-player";
+import { create } from "zustand";
 
 import {
   LiturgyCard,
@@ -24,6 +25,16 @@ import {
 } from "@/components/liturgy/liturgy-card";
 import { LyricsFieldArray } from "@/components/lyrics-field-array";
 import { Alert, AlertAction, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -64,6 +75,29 @@ interface FieldValues extends Liturgy {
   blocks: SongsBlock[];
 }
 
+interface LyricsEditState {
+  open: boolean;
+  dirty: boolean;
+  pendingDiscard: boolean;
+  setOpen: (open: boolean) => void;
+  setDirty: (dirty: boolean) => void;
+  requestDiscard: () => void;
+  cancelDiscard: () => void;
+}
+
+const useLyricsEdit = create<LyricsEditState>((set) => ({
+  open: false,
+  dirty: false,
+  pendingDiscard: false,
+  setOpen: (open) => set(() => ({ open })),
+  setDirty: (dirty) => set(() => ({ dirty })),
+  requestDiscard: () =>
+    set(({ dirty }) =>
+      dirty ? { pendingDiscard: dirty } : { open: false, pendingDiscard: false, dirty: false },
+    ),
+  cancelDiscard: () => set(() => ({ pendingDiscard: false })),
+}));
+
 interface SongsBlockFormProps {
   index: number;
   songs: Song[];
@@ -78,53 +112,95 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
   });
 
   return (
-    <LiturgyCard type="songs">
-      <LiturgyCardHeader>
-        <LiturgyCardTitle />
-      </LiturgyCardHeader>
+    <>
+      <LiturgyCard type="songs">
+        <LiturgyCardHeader>
+          <LiturgyCardTitle />
+        </LiturgyCardHeader>
 
-      <DragDropProvider
-        onDragEnd={(event) => {
-          if (event.canceled) return;
+        <DragDropProvider
+          onDragEnd={(event) => {
+            if (event.canceled) return;
 
-          const { source } = event.operation;
+            const { source } = event.operation;
 
-          if (isSortable(source)) {
-            const { initialIndex, index } = source;
+            if (isSortable(source)) {
+              const { initialIndex, index } = source;
 
-            move(initialIndex, index);
-          }
-        }}
-      >
-        <LiturgyCardContent className="flex flex-col gap-8">
-          {fields.map((field, fieldIndex) => (
-            <Item
-              key={field.id}
-              id={field.id}
-              index={fieldIndex}
-              name={`blocks.${index}.data.items.${fieldIndex}`}
-              songs={songs}
-              onRemove={() => {
-                remove(fieldIndex);
-              }}
-              sortable={fields.length > 1}
-            />
-          ))}
-        </LiturgyCardContent>
-      </DragDropProvider>
-
-      <LiturgyCardFooter>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            append({ id: "", infos: "", lyrics: null, repeat: false });
+              move(initialIndex, index);
+            }
           }}
         >
-          Ajouter un chant <PlusIcon />
-        </Button>
-      </LiturgyCardFooter>
-    </LiturgyCard>
+          <LiturgyCardContent className="flex flex-col gap-8">
+            {fields.map((field, fieldIndex) => (
+              <Item
+                key={field.id}
+                id={field.id}
+                index={fieldIndex}
+                name={`blocks.${index}.data.items.${fieldIndex}`}
+                songs={songs}
+                onRemove={() => {
+                  remove(fieldIndex);
+                }}
+                sortable={fields.length > 1}
+              />
+            ))}
+          </LiturgyCardContent>
+        </DragDropProvider>
+
+        <LiturgyCardFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              append({ id: "", infos: "", lyrics: null, repeat: false });
+            }}
+          >
+            Ajouter un chant <PlusIcon />
+          </Button>
+        </LiturgyCardFooter>
+      </LiturgyCard>
+
+      <DiscardLyricsChangesDialog />
+    </>
+  );
+}
+
+function DiscardLyricsChangesDialog() {
+  const setOpen = useLyricsEdit((state) => state.setOpen);
+  const pendingDiscard = useLyricsEdit((state) => state.pendingDiscard);
+  const cancelDiscard = useLyricsEdit((state) => state.cancelDiscard);
+
+  return (
+    <AlertDialog
+      open={pendingDiscard}
+      onOpenChange={(open) => {
+        if (!open) {
+          cancelDiscard();
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Abandonner les modifications ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Les modifications apportées aux paroles n'ont pas été enregistrées et seront perdues.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuer l'édition</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              setOpen(false);
+              cancelDiscard();
+            }}
+          >
+            Abandonner
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -282,7 +358,9 @@ interface ItemInformationDrawerContentProps {
 }
 
 function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerContentProps) {
-  const [editing, setEditing] = useState(false);
+  const drawerOpen = useLyricsEdit((state) => state.open);
+  const setDrawerOpen = useLyricsEdit((state) => state.setOpen);
+  const requestDiscard = useLyricsEdit((state) => state.requestDiscard);
   const isMobile = useIsMobile();
 
   const lyricsField = useController(lens.interop());
@@ -349,8 +427,14 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
         <Drawer
           showSwipeHandle={isMobile}
           swipeDirection={isMobile ? "down" : "right"}
-          open={editing}
-          onOpenChange={setEditing}
+          open={drawerOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              setDrawerOpen(true);
+            } else {
+              requestDiscard();
+            }
+          }}
         >
           <DrawerTrigger
             render={
@@ -360,7 +444,7 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
             }
           />
           <DrawerContent className="w-[90%] max-w-xl">
-            <EditLyricsDrawerContent lens={lens} song={song} onClose={() => setEditing(false)} />
+            <EditLyricsDrawerContent lens={lens} song={song} />
           </DrawerContent>
         </Drawer>
       </DrawerFooter>
@@ -392,10 +476,12 @@ function Preview({ title, url }: PreviewProps) {
 interface EditLyricsDrawerContentProps {
   lens: Lens<Lyrics | null>;
   song: Song;
-  onClose: () => void;
 }
 
-function EditLyricsDrawerContent({ lens, song, onClose }: EditLyricsDrawerContentProps) {
+function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
+  const setOpen = useLyricsEdit((state) => state.setOpen);
+  const setDirty = useLyricsEdit((state) => state.setDirty);
+
   const {
     field: { value, onChange },
   } = useController(lens.interop());
@@ -413,6 +499,23 @@ function EditLyricsDrawerContent({ lens, song, onClose }: EditLyricsDrawerConten
   } = form;
 
   const lyricsLens = useLens({ control });
+
+  useEffect(() => {
+    setDirty(isDirty);
+
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      setDirty(false);
+    };
+  }, [isDirty, setDirty]);
 
   return (
     <FormProvider {...form}>
@@ -444,7 +547,8 @@ function EditLyricsDrawerContent({ lens, song, onClose }: EditLyricsDrawerConten
                 onChange(data.lyrics);
               }
 
-              onClose();
+              setDirty(false);
+              setOpen(false);
             })(event);
           }}
         >

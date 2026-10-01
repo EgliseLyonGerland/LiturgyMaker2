@@ -1,6 +1,5 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { Lens } from "@hookform/lenses";
 import { clsx } from "clsx";
 import { EllipsisVerticalIcon, GripHorizontalIcon, PlusIcon, TrashIcon } from "lucide-react";
@@ -32,8 +31,6 @@ export function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
 
   const { fields, append, move, insert, remove } = fieldArray;
 
-  const [listElement] = useAutoAnimate();
-
   return (
     <div className="space-y-4">
       <DragDropProvider
@@ -49,7 +46,7 @@ export function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
           }
         }}
       >
-        <div ref={listElement} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           {lens.map(fields, (field, fieldLens, index) => (
             <LyricsItem
               key={field.id}
