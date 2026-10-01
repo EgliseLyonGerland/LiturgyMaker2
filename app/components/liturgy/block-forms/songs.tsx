@@ -237,7 +237,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const song = songs.find((song) => song.id === idField.field.value);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
           <SortableButton ref={handleRef} />
@@ -246,7 +246,13 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
             Chant {index + 1}
           </FieldLegend>
 
-          <Button type="button" size="icon" variant="ghost" onClick={onRemove}>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
+            onClick={onRemove}
+          >
             <TrashIcon />
           </Button>
         </div>
