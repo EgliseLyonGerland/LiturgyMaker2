@@ -4,11 +4,11 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
 import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useNavigate, useNavigation } from "react-router";
+import { useBlocker, useNavigate, useNavigation, type Blocker } from "react-router";
 
 import { AddButton } from "@/components/add-button";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
@@ -18,6 +18,16 @@ import { RecitationBlockForm } from "@/components/liturgy/block-forms/recitation
 import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -120,6 +130,22 @@ function Content({ loaderData, params }: Route.ComponentProps) {
     formState: { isDirty },
   } = form;
 
+  const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
+
   const { fields, prepend, insert } = useFieldArray({ control, name: "blocks" });
 
   const [listElement] = useAutoAnimate();
@@ -207,6 +233,8 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           </div>
         </form>
       </FormProvider>
+
+      {blocker.state === "blocked" && <DiscardAlertDialog blocker={blocker} />}
     </>
   );
 }
@@ -270,4 +298,45 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
 function renderIcon(type: LiturgyBlockType) {
   const Icon = liturgyBlockIcons[type];
   return <Icon className="size-6" />;
+}
+
+interface DiscardAlertDialogProps {
+  blocker: Extract<Blocker, { state: "blocked" }>;
+}
+
+function DiscardAlertDialog({ blocker }: DiscardAlertDialogProps) {
+  // const setOpen = useLyricsEdit((state) => state.setOpen);
+  // const pendingDiscard = useLyricsEdit((state) => state.pendingDiscard);
+  // const cancelDiscard = useLyricsEdit((state) => state.cancelDiscard);
+
+  return (
+    <AlertDialog
+      open={true}
+      onOpenChange={(open) => {
+        if (!open) {
+          blocker.reset();
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Abandonner les modifications ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Les modifications apportées n'ont pas été enregistrées et seront perdues.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuer l'édition</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              blocker.proceed();
+            }}
+          >
+            Abandonner
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
