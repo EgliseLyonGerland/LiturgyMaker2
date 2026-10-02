@@ -2,6 +2,7 @@ import { cn } from "cn";
 import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { createContext, useContext, type ComponentProps } from "react";
 
+import { ConfirmDropdown } from "@/components/confirm-dropdown";
 import {
   Card,
   CardAction,
@@ -81,10 +82,26 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
         />
         <DropdownMenuContent className="min-w-40" align="end">
           <DropdownMenuGroup>
-            <DropdownMenuItem variant="destructive" onClick={remove}>
-              <TrashIcon />
-              Supprimer
-            </DropdownMenuItem>
+            <ConfirmDropdown.Root>
+              <ConfirmDropdown.Trigger
+                nativeButton={false}
+                render={
+                  <DropdownMenuItem tabIndex={-1} closeOnClick={false} variant="destructive">
+                    <TrashIcon />
+                    Supprimer
+                  </DropdownMenuItem>
+                }
+              />
+              <ConfirmDropdown.Content>
+                <ConfirmDropdown.Title>
+                  Êtes-vous sûr de vouloir supprimer ce bloc ?
+                </ConfirmDropdown.Title>
+                <ConfirmDropdown.Actions>
+                  <ConfirmDropdown.Cancel>Non</ConfirmDropdown.Cancel>
+                  <ConfirmDropdown.Confirm onClick={remove}>Oui</ConfirmDropdown.Confirm>
+                </ConfirmDropdown.Actions>
+              </ConfirmDropdown.Content>
+            </ConfirmDropdown.Root>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
