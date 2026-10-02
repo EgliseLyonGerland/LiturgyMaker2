@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore";
 import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
-import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { fr } from "react-day-picker/locale";
 import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -37,6 +37,7 @@ import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
 import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
 import { firebaseAuth, firebaseDb } from "@/lib/firebase";
+import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import migrate from "@/lib/migrate";
 import { queryClient } from "@/lib/query-client";
@@ -80,7 +81,13 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
       return docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }) as Song)
+        .map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            }) as Song,
+        )
         .toSorted((a, b) => a.title.localeCompare(b.title));
     },
     staleTime: Infinity,
@@ -92,7 +99,13 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
       const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
 
       return docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }) as Recitation)
+        .map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            }) as Recitation,
+        )
         .toSorted((a, b) => a.title.localeCompare(b.title));
     },
     staleTime: Infinity,
@@ -180,7 +193,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
     };
   }, [isDirty]);
 
-  const { fields, prepend, insert } = useFieldArray({ control, name: "blocks" });
+  const { fields, prepend, insert, remove } = useFieldArray({ control, name: "blocks" });
 
   const [listElement] = useAutoAnimate();
 
@@ -248,7 +261,12 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
             <div ref={listElement} className="flex flex-col gap-1">
               {fields.map((field, index) => (
-                <Fragment key={field.id}>
+                <liturgyBlockContext.Provider
+                  key={field.id}
+                  value={{
+                    remove: () => remove(index),
+                  }}
+                >
                   {field.type === "section" ? (
                     <SectionBlockForm index={index} />
                   ) : field.type === "announcements" ? (
@@ -270,7 +288,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                       insert(index + 1, createDefaultBlock(type));
                     }}
                   />
-                </Fragment>
+                </liturgyBlockContext.Provider>
               ))}
             </div>
           </div>

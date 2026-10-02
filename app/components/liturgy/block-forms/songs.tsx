@@ -307,7 +307,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                         size="xs"
                         variant="default"
                         onClick={() => {
-                          setValue(lyricsName, null);
+                          setValue(lyricsName, null, { shouldDirty: true });
                         }}
                       >
                         Rétablir

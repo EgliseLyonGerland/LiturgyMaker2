@@ -1,4 +1,5 @@
 import { cn } from "cn";
+import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { createContext, useContext, type ComponentProps } from "react";
 
 import {
@@ -11,7 +12,17 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
+import { useLiturgyBlockContext } from "@/lib/liturgy-context";
 import type { LiturgyBlockType } from "@/lib/schemas";
+
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 const colorByType: Record<LiturgyBlockType, string> = {
   announcements: cn("bg-taupe-600/10"),
@@ -53,8 +64,32 @@ function LiturgyCard({ type, className, ...props }: LiturgyCardProps) {
 
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
 
-function LiturgyCardHeader({ className, ...props }: LiturgyCardHeaderProps) {
-  return <CardHeader {...props} className={cn("border-b border-border", className)} />;
+function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderProps) {
+  const { remove } = useLiturgyBlockContext();
+
+  return (
+    <CardHeader {...props} className={cn("flex items-center border-b border-border", className)}>
+      {children}
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button type="button" variant="ghost" size="icon" className="ml-auto">
+              <EllipsisVerticalIcon />
+            </Button>
+          }
+        />
+        <DropdownMenuContent className="min-w-40" align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem variant="destructive" onClick={remove}>
+              <TrashIcon />
+              Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </CardHeader>
+  );
 }
 
 interface LiturgyCardTitleProps extends ComponentProps<typeof CardTitle> {}
