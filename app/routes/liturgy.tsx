@@ -4,14 +4,14 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
 import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore";
 import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fr } from "react-day-picker/locale";
-import { createPortal } from "react-dom";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useBlocker, useFetcher, useNavigate, useNavigation, type Blocker } from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
+import { HeaderSlot } from "@/components/header-slot";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
 import { OpenDoorsBlockForm } from "@/components/liturgy/block-forms/open-doors";
 import { ReadingBlockForm } from "@/components/liturgy/block-forms/reading";
@@ -76,7 +76,7 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   });
 
   const songs = await queryClient.query({
-    queryKey: ["songs"],
+    queryKey: ["songs", "catalog"],
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
@@ -300,16 +300,6 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   );
 }
 
-interface HeaderSlotProps {
-  children: ReactNode;
-}
-
-function HeaderSlot({ children }: HeaderSlotProps) {
-  const element = document.getElementById("header");
-
-  return element ? createPortal(children, element) : null;
-}
-
 interface AddBlockButtonProps {
   onSelect: (type: LiturgyBlockType) => void;
 }
@@ -366,10 +356,6 @@ interface DiscardAlertDialogProps {
 }
 
 function DiscardAlertDialog({ blocker }: DiscardAlertDialogProps) {
-  // const setOpen = useLyricsEdit((state) => state.setOpen);
-  // const pendingDiscard = useLyricsEdit((state) => state.pendingDiscard);
-  // const cancelDiscard = useLyricsEdit((state) => state.cancelDiscard);
-
   return (
     <AlertDialog
       open={true}

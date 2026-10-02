@@ -3,6 +3,7 @@ import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { createContext, useContext, type ComponentProps } from "react";
 
 import { ConfirmDropdown } from "@/components/confirm-dropdown";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -11,19 +12,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
-import { useLiturgyBlockContext } from "@/lib/liturgy-context";
-import type { LiturgyBlockType } from "@/lib/schemas";
-
-import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
+import { useLiturgyBlockContext } from "@/lib/liturgy-context";
+import type { LiturgyBlockType } from "@/lib/schemas";
 
 const colorByType: Record<LiturgyBlockType, string> = {
   announcements: cn("bg-taupe-600/10"),

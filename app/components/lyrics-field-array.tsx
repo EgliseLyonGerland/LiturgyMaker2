@@ -6,9 +6,7 @@ import { EllipsisVerticalIcon, GripHorizontalIcon, PlusIcon, TrashIcon } from "l
 import { useRef } from "react";
 import { Controller, useFieldArray } from "react-hook-form";
 
-import type { Lyrics } from "@/lib/schemas";
-
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,11 +14,12 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "./ui/dropdown-menu";
-import { Field } from "./ui/field";
-import { InputGroup, InputGroupAddon, InputGroupTextarea } from "./ui/input-group";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
+} from "@/components/ui/dropdown-menu";
+import { Field } from "@/components/ui/field";
+import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import type { Lyrics } from "@/lib/schemas";
 
 export interface LyricsFieldArrayProps {
   lens: Lens<Lyrics>;

@@ -1,4 +1,4 @@
-import { mergeProps, Popover, useRender } from "@base-ui/react";
+import { Popover } from "@base-ui/react";
 import { cn } from "cn";
 import React, { type ComponentProps } from "react";
 
