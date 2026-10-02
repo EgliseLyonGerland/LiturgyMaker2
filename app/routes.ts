@@ -9,5 +9,6 @@ export default [
       route(":liturgyId", "routes/liturgy.tsx"),
     ]),
     route("songs", "routes/songs.tsx"),
+    route("recitations", "routes/recitations.tsx"),
   ]),
 ] satisfies RouteConfig;

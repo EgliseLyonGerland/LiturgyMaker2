@@ -76,7 +76,7 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   });
 
   const songs = await queryClient.query({
-    queryKey: ["songs", "catalog"],
+    queryKey: ["songs"],
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 

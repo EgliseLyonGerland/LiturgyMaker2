@@ -17,7 +17,7 @@ import type { Route } from "./+types/songs";
 
 export async function clientLoader() {
   const songs = await queryClient.query({
-    queryKey: ["songs", "catalog"],
+    queryKey: ["songs"],
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
@@ -53,10 +53,11 @@ export default function Songs(props: Route.ComponentProps) {
         lyrics: (song.lyrics || []).map((line) => line.text).join("\n"),
       })),
       {
-        keys: ["title", "author", "aka", "lyrics"],
+        keys: ["title", "authors", "aka", "lyrics"],
         ignoreDiacritics: true,
         includeMatches: true,
-        threshold: 0.3,
+        threshold: 0.2,
+        distance: Infinity,
       },
     );
   }, [songs]);
@@ -70,13 +71,13 @@ export default function Songs(props: Route.ComponentProps) {
       <HeaderSlot>
         <h1 className="ml-2">Chants</h1>
       </HeaderSlot>
-      <main>
+      <main className="mb-[30vh]">
         <div className="sticky top-16 z-10 backdrop-blur-2xl">
           <div className="flex w-full max-w-5xl items-center px-4 py-6 md:px-8">
-            <label className="relative block">
-              <InputGroup className="max-w-xs">
+            <label className="relative block w-full max-w-sm">
+              <InputGroup>
                 <InputGroupInput
-                  placeholder="Recherche..."
+                  placeholder="Rechercher un titre, un auteur ou des paroles"
                   type="search"
                   onChange={(event) => setSearch(event.target.value)}
                 />
