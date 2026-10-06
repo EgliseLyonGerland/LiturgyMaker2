@@ -40,12 +40,16 @@ function useControllableState<T>({
   return [value, setValue] as const;
 }
 
-interface RootProps extends Omit<Popover.Root.Props, "open" | "onOpenChange"> {
+interface ConfirmDropdownRootProps extends Omit<Popover.Root.Props, "open" | "onOpenChange"> {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-function Root({ open: controlledOpen, onOpenChange, ...props }: RootProps) {
+function ConfirmDropdown({
+  open: controlledOpen,
+  onOpenChange,
+  ...props
+}: ConfirmDropdownRootProps) {
   const [open, setOpen] = useControllableState({
     value: controlledOpen,
     onChange: onOpenChange,
@@ -61,15 +65,15 @@ function Root({ open: controlledOpen, onOpenChange, ...props }: RootProps) {
   );
 }
 
-interface TriggerProps extends Popover.Trigger.Props {}
+interface ConfirmDropdownTriggerProps extends Popover.Trigger.Props {}
 
-const Trigger = Popover.Trigger;
+const ConfirmDropdownTrigger = Popover.Trigger;
 
-interface ContentProps extends Popover.Popup.Props {
+interface ConfirmDropdownContentProps extends Popover.Popup.Props {
   children: React.ReactNode;
 }
 
-function Content({ children, className, ...props }: ContentProps) {
+function ConfirmDropdownContent({ children, className, ...props }: ConfirmDropdownContentProps) {
   return (
     <Popover.Portal>
       <Popover.Positioner
@@ -94,22 +98,22 @@ function Content({ children, className, ...props }: ContentProps) {
   );
 }
 
-interface TitleProps extends React.HTMLProps<HTMLDivElement> {}
+interface ConfirmDropdownTitleProps extends React.HTMLProps<HTMLDivElement> {}
 
-function Title({ className, ...props }: TitleProps) {
+function ConfirmDropdownTitle({ className, ...props }: ConfirmDropdownTitleProps) {
   return <div {...props} className={cn("text-base", className)} />;
 }
 
-interface ActionsProps extends React.HTMLProps<HTMLDivElement> {}
+interface ConfirmDropdownActionsProps extends React.HTMLProps<HTMLDivElement> {}
 
-function Actions({ className, ...props }: ActionsProps) {
+function ConfirmDropdownActions({ className, ...props }: ConfirmDropdownActionsProps) {
   return <div {...props} className={cn("flex gap-2", className)} />;
 }
 
-interface CancelProps extends Partial<ComponentProps<typeof Button>> {}
+interface ConfirmDropdownCancelProps extends Partial<ComponentProps<typeof Button>> {}
 
-function Cancel({ onClick, ...props }: CancelProps) {
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+function ConfirmDropdownCancel({ onClick, ...props }: ConfirmDropdownCancelProps) {
+  const handleClick: ComponentProps<typeof Button>["onClick"] = (event) => {
     onClick?.(event);
   };
 
@@ -128,10 +132,10 @@ function Cancel({ onClick, ...props }: CancelProps) {
   );
 }
 
-interface ConfirmProps extends Partial<ComponentProps<typeof Button>> {}
+interface ConfirmDropdownConfirmProps extends Partial<ComponentProps<typeof Button>> {}
 
-function Confirm({ onClick, ...props }: ConfirmProps) {
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+function ConfirmDropdownConfirm({ onClick, ...props }: ConfirmDropdownConfirmProps) {
+  const handleClick: ComponentProps<typeof Button>["onClick"] = (event) => {
     onClick?.(event);
   };
 
@@ -149,14 +153,22 @@ function Confirm({ onClick, ...props }: ConfirmProps) {
   );
 }
 
-export const ConfirmDropdown = { Root, Trigger, Content, Title, Actions, Cancel, Confirm };
+export {
+  ConfirmDropdown,
+  ConfirmDropdownTrigger,
+  ConfirmDropdownContent,
+  ConfirmDropdownTitle,
+  ConfirmDropdownActions,
+  ConfirmDropdownCancel,
+  ConfirmDropdownConfirm,
+};
 
 export type {
-  RootProps,
-  TriggerProps,
-  ContentProps,
-  TitleProps,
-  ActionsProps,
-  CancelProps,
-  ConfirmProps,
+  ConfirmDropdownRootProps,
+  ConfirmDropdownTriggerProps,
+  ConfirmDropdownContentProps,
+  ConfirmDropdownTitleProps,
+  ConfirmDropdownActionsProps,
+  ConfirmDropdownCancelProps,
+  ConfirmDropdownConfirmProps,
 };

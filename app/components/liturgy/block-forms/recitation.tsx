@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/combobox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { type RecitationBlock, type Liturgy, type Recitation } from "@/lib/schemas";
+import { type RecitationBlock, type Liturgy, type RecitationWithId } from "@/lib/schemas";
 
 interface FieldValues extends Liturgy {
   blocks: RecitationBlock[];
@@ -25,7 +25,7 @@ interface FieldValues extends Liturgy {
 
 interface RecitationBlockFormProps {
   index: number;
-  recitations: Recitation[];
+  recitations: RecitationWithId[];
 }
 
 export function RecitationBlockForm({ index, recitations }: RecitationBlockFormProps) {
@@ -73,7 +73,7 @@ export function RecitationBlockForm({ index, recitations }: RecitationBlockFormP
                   <ComboboxContent>
                     <ComboboxEmpty>Auncun texte trouvé</ComboboxEmpty>
                     <ComboboxList>
-                      {(recitation: Recitation) => (
+                      {(recitation: RecitationWithId) => (
                         <ComboboxItem key={recitation.id} value={recitation}>
                           {recitation.title}
                         </ComboboxItem>

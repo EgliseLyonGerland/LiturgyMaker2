@@ -2,7 +2,15 @@ import { cn } from "cn";
 import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { createContext, useContext, type ComponentProps } from "react";
 
-import { ConfirmDropdown } from "@/components/confirm-dropdown";
+import {
+  ConfirmDropdown,
+  ConfirmDropdownActions,
+  ConfirmDropdownCancel,
+  ConfirmDropdownConfirm,
+  ConfirmDropdownContent,
+  ConfirmDropdownTitle,
+  ConfirmDropdownTrigger,
+} from "@/components/confirm-dropdown";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -81,8 +89,8 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
         />
         <DropdownMenuContent className="min-w-40" align="end">
           <DropdownMenuGroup>
-            <ConfirmDropdown.Root>
-              <ConfirmDropdown.Trigger
+            <ConfirmDropdown>
+              <ConfirmDropdownTrigger
                 nativeButton={false}
                 render={
                   <DropdownMenuItem tabIndex={-1} closeOnClick={false} variant="destructive">
@@ -91,16 +99,16 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
                   </DropdownMenuItem>
                 }
               />
-              <ConfirmDropdown.Content>
-                <ConfirmDropdown.Title>
+              <ConfirmDropdownContent>
+                <ConfirmDropdownTitle>
                   Êtes-vous sûr de vouloir supprimer ce bloc ?
-                </ConfirmDropdown.Title>
-                <ConfirmDropdown.Actions>
-                  <ConfirmDropdown.Cancel>Non</ConfirmDropdown.Cancel>
-                  <ConfirmDropdown.Confirm onClick={remove}>Oui</ConfirmDropdown.Confirm>
-                </ConfirmDropdown.Actions>
-              </ConfirmDropdown.Content>
-            </ConfirmDropdown.Root>
+                </ConfirmDropdownTitle>
+                <ConfirmDropdownActions>
+                  <ConfirmDropdownCancel>Non</ConfirmDropdownCancel>
+                  <ConfirmDropdownConfirm onClick={remove}>Oui</ConfirmDropdownConfirm>
+                </ConfirmDropdownActions>
+              </ConfirmDropdownContent>
+            </ConfirmDropdown>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

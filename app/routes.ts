@@ -8,7 +8,13 @@ export default [
       index("routes/liturgies.tsx"),
       route(":liturgyId", "routes/liturgy.tsx"),
     ]),
-    route("songs", "routes/songs.tsx"),
-    route("recitations", "routes/recitations.tsx"),
+    route("songs", "routes/songs.tsx", [
+      route("create", "routes/songs.create.tsx"),
+      route(":songId", "routes/songs.$songId.tsx"),
+    ]),
+    route("recitations", "routes/recitations.tsx", [
+      route("create", "routes/recitations.create.tsx"),
+      route(":recitationId", "routes/recitations.$recitationId.tsx"),
+    ]),
   ]),
 ] satisfies RouteConfig;

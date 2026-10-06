@@ -12,7 +12,15 @@ const bibleRefSchema = v.pipe(
 const lyricsSchema = v.array(
   v.object({
     type: v.picklist(["verse", "chorus"]),
-    text: v.string(),
+    text: v.pipe(
+      v.string(),
+      v.trim(),
+      v.nonEmpty("Ce passage ne peut pas être vide"),
+      v.check(
+        (text) => text.split(/\r\n|\r|\n/).length <= 8,
+        "Ce passage ne peut pas dépasser 8 lignes",
+      ),
+    ),
   }),
 );
 
@@ -118,26 +126,37 @@ const liturgySchema = v.object({
 });
 
 const songSchema = v.object({
-  id: v.string(),
-  title: v.string(),
-  aka: v.string(),
-  authors: v.string(),
-  number: v.string(),
-  copyright: v.string(),
-  translation: v.string(),
-  collection: v.string(),
-  previewUrl: v.pipe(v.string(), v.url()),
-  lyrics: lyricsSchema,
+  title: v.pipe(v.string(), v.trim(), v.nonEmpty("Le titre est requis")),
+  aka: v.fallback(v.string(), ""),
+  authors: v.fallback(v.string(), ""),
+  number: v.fallback(v.number(), 0),
+  copyright: v.fallback(v.string(), ""),
+  translation: v.fallback(v.string(), ""),
+  collection: v.fallback(v.string(), ""),
+  previewUrl: v.fallback(
+    v.union([v.literal(""), v.pipe(v.string(), v.url("L’URL de l’aperçu est invalide"))]),
+    "",
+  ),
+  lyrics: v.fallback(lyricsSchema, []),
 });
 
+const recitationContentSchema = v.array(
+  v.object({
+    text: v.pipe(
+      v.string(),
+      v.trim(),
+      v.nonEmpty("Ce passage ne peut pas être vide"),
+      v.check(
+        (text) => text.split(/\r\n|\r|\n/).length <= 8,
+        "Ce passage ne peut pas dépasser 8 lignes",
+      ),
+    ),
+  }),
+);
+
 const recitationSchema = v.object({
-  id: v.string(),
   title: v.string(),
-  content: v.array(
-    v.object({
-      text: v.string(),
-    }),
-  ),
+  content: v.fallback(recitationContentSchema, []),
 });
 
 type Liturgy = v.InferOutput<typeof liturgySchema>;
@@ -154,7 +173,10 @@ type OpenDoorsBlock = v.InferOutput<typeof openDoorsBlockSchema>;
 type LiturgyBlockType = Liturgy["blocks"][number]["type"];
 
 type Song = v.InferOutput<typeof songSchema>;
+type SongWithId = v.InferOutput<typeof songSchema> & { id: string };
 type Recitation = v.InferOutput<typeof recitationSchema>;
+type RecitationWithId = v.InferOutput<typeof recitationSchema> & { id: string };
+type RecitationContent = v.InferOutput<typeof recitationContentSchema>;
 
 export {
   lyricsSchema,
@@ -168,6 +190,7 @@ export {
   liturgySchema,
   songSchema,
   recitationSchema,
+  recitationContentSchema,
 };
 
 export type {
@@ -182,5 +205,8 @@ export type {
   Liturgy,
   LiturgyBlockType,
   Song,
+  SongWithId,
   Recitation,
+  RecitationWithId,
+  RecitationContent,
 };

@@ -1,10 +1,9 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import type { Lens } from "@hookform/lenses";
-import { cn } from "cn";
 import { EllipsisVerticalIcon, GripHorizontalIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { useRef } from "react";
-import { Controller, useFieldArray } from "react-hook-form";
+import { useRef, type ReactNode } from "react";
+import { Controller, useController, useFieldArray } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,21 +14,76 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Field } from "@/components/ui/field";
+import { Field, FieldError } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import type { Lyrics } from "@/lib/schemas";
+import type { Lyrics, RecitationContent } from "@/lib/schemas";
 
-export interface LyricsFieldArrayProps {
+export type PassageFieldArrayProps =
+  | { kind: "song"; lens: Lens<Lyrics> }
+  | { kind: "recitation"; lens: Lens<RecitationContent> };
+
+export function PassageFieldArray(props: PassageFieldArrayProps) {
+  return props.kind === "song" ? (
+    <LyricsFieldArray lens={props.lens} />
+  ) : (
+    <ContentFieldArray lens={props.lens} />
+  );
+}
+
+interface LyricsFieldArrayProps {
   lens: Lens<Lyrics>;
 }
 
-export function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
-  const fieldArray = useFieldArray(lens.interop());
+function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
+  const { fields, append, move, insert, remove } = useFieldArray(lens.interop());
 
-  const { fields, append, move, insert, remove } = fieldArray;
+  return (
+    <PassageList onMove={move} onAppend={() => append({ type: "verse", text: "" })}>
+      {lens.map(fields, (field, fieldLens, index) => (
+        <PassageItem
+          key={field.id}
+          id={field.id}
+          index={index}
+          textLens={fieldLens.focus("text")}
+          typeLens={fieldLens.focus("type")}
+          onInsertBefore={() => insert(index, { type: "verse", text: "" })}
+          onInsertAfter={() => insert(index + 1, { type: "verse", text: "" })}
+          onRemove={() => remove(index)}
+        />
+      ))}
+    </PassageList>
+  );
+}
 
+function ContentFieldArray({ lens }: { lens: Lens<RecitationContent> }) {
+  const { fields, append, move, insert, remove } = useFieldArray(lens.interop());
+
+  return (
+    <PassageList onMove={move} onAppend={() => append({ text: "" })}>
+      {lens.map(fields, (field, fieldLens, index) => (
+        <PassageItem
+          key={field.id}
+          id={field.id}
+          index={index}
+          textLens={fieldLens.focus("text")}
+          onInsertBefore={() => insert(index, { text: "" })}
+          onInsertAfter={() => insert(index + 1, { text: "" })}
+          onRemove={() => remove(index)}
+        />
+      ))}
+    </PassageList>
+  );
+}
+
+interface PassageListProps {
+  children: ReactNode;
+  onMove: (from: number, to: number) => void;
+  onAppend: () => void;
+}
+
+function PassageList({ children, onMove, onAppend }: PassageListProps) {
   return (
     <div className="space-y-4">
       <DragDropProvider
@@ -41,41 +95,23 @@ export function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
           if (isSortable(source)) {
             const { initialIndex, index } = source;
 
-            move(initialIndex, index);
+            onMove(initialIndex, index);
           }
         }}
       >
-        <div className="flex flex-col gap-4">
-          {lens.map(fields, (field, fieldLens, index) => (
-            <LyricsItem
-              key={field.id}
-              lens={fieldLens}
-              id={field.id}
-              index={index}
-              onInsertBefore={() => insert(index, { type: "verse", text: "" })}
-              onInsertAfter={() => insert(index + 1, { type: "verse", text: "" })}
-              onRemove={() => remove(index)}
-            />
-          ))}
-        </div>
+        <div className="flex flex-col gap-4">{children}</div>
       </DragDropProvider>
 
-      <Button
-        type="button"
-        className="w-full"
-        variant="outline"
-        onClick={() => {
-          append({ type: "verse", text: "" });
-        }}
-      >
+      <Button type="button" className="w-full" variant="outline" onClick={onAppend}>
         Ajouter un passage <PlusIcon />
       </Button>
     </div>
   );
 }
 
-interface LyricsItemProps {
-  lens: Lens<Lyrics[number]>;
+interface PassageItemProps {
+  textLens: Lens<string>;
+  typeLens?: Lens<Lyrics[number]["type"]>;
   id: string;
   index: number;
   onInsertBefore: () => void;
@@ -83,49 +119,61 @@ interface LyricsItemProps {
   onRemove: () => void;
 }
 
-function LyricsItem({ lens, id, index, onInsertBefore, onInsertAfter, onRemove }: LyricsItemProps) {
+function PassageItem({
+  textLens,
+  typeLens,
+  id,
+  index,
+  onInsertBefore,
+  onInsertAfter,
+  onRemove,
+}: PassageItemProps) {
   const handleRef = useRef<HTMLDivElement>(null);
   const { ref, isDragging } = useSortable({ id, index, handle: handleRef });
+
+  const {
+    field,
+    fieldState: { error },
+  } = useController(textLens.interop());
 
   return (
     <div ref={ref}>
       <Field>
-        <InputGroup className="dark:has-data-[type=chorus]:bg-blue-950/20">
+        <InputGroup className="p-1 dark:has-data-[type=chorus]:bg-blue-950/20">
           <InputGroupTextarea
-            {...lens.focus("text").interop((control, name) => control.register(name))}
+            {...field}
             className="dark:bg-transparent"
             placeholder="Saisir le texte du passage"
+            aria-invalid={!!error}
           />
 
           <InputGroupAddon
             align="block-start"
-            className={cn(
-              "group grid cursor-default grid-cols-[1fr_auto_1fr] items-center gap-4 dark:bg-transparent",
-            )}
+            className="grid cursor-default grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-md p-1 dark:bg-black/30"
             data-dragging={isDragging || undefined}
           >
-            <Controller
-              {...lens.focus("type").interop()}
+            {typeLens ? (
+              <Controller
+                {...typeLens.interop()}
+                render={({ field }) => (
+                  <div className="ml-2 flex items-center gap-3" data-type={field.value}>
+                    <Switch
+                      id={`passage.${id}.type`}
+                      size="sm"
+                      checked={field.value === "chorus"}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked ? "chorus" : "verse");
+                      }}
+                    />
+                    <Label htmlFor={`passage.${id}.type`}>Refrain</Label>
+                  </div>
+                )}
+              />
+            ) : (
+              <div />
+            )}
 
-              render={({ field }) => (
-                <div className="ml-2 flex items-center gap-3" data-type={field.value}>
-                  <Switch
-                    id={`lyrics.${index}.type`}
-                    size="sm"
-                    checked={field.value === "chorus"}
-                    onCheckedChange={(checked) => {
-                      field.onChange(checked ? "chorus" : "verse");
-                    }}
-                  />
-                  <Label htmlFor={`lyrics.${index}.type`}>Refrain</Label>
-                </div>
-              )}
-            />
-
-            <div
-              ref={handleRef}
-              className="mt-1 flex cursor-grab self-start px-4 opacity-0 transition-opacity group-hover:opacity-100 group-data-dragging:opacity-100"
-            >
+            <div ref={handleRef} className="flex cursor-grab px-4">
               <GripHorizontalIcon className="size-4" />
             </div>
 
@@ -158,6 +206,7 @@ function LyricsItem({ lens, id, index, onInsertBefore, onInsertAfter, onRemove }
             </div>
           </InputGroupAddon>
         </InputGroup>
+        <FieldError errors={[error]} />
       </Field>
     </div>
   );

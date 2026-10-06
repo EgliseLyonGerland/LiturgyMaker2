@@ -2,15 +2,21 @@ import { Popover as PopoverPrimitive } from "@base-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format } from "date-fns";
-import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore";
-import { ChevronDown, PlusIcon, SaveIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { ChevronDownIcon, PlusIcon, SaveIcon } from "lucide-react";
+import { useCallback, useState } from "react";
 import { fr } from "react-day-picker/locale";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useBlocker, useFetcher, useNavigate, useNavigation, type Blocker } from "react-router";
+import {
+  useBlocker,
+  useFetcher,
+  useNavigate,
+  useNavigation,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
+import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
 import { HeaderSlot } from "@/components/header-slot";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
 import { OpenDoorsBlockForm } from "@/components/liturgy/block-forms/open-doors";
@@ -19,35 +25,19 @@ import { RecitationBlockForm } from "@/components/liturgy/block-forms/recitation
 import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
-import { createDefaultBlock, createDefaultLiturgy } from "@/lib/default-liturgy";
-import { firebaseAuth, firebaseDb } from "@/lib/firebase";
+import { useBeforeUnload } from "@/hooks/use-before-unload";
+import { getLiturgy, getRecitations, getSongs, updateLiturgy } from "@/lib/api";
+import { createDefaultBlock } from "@/lib/default-liturgy";
+import { firebaseAuth } from "@/lib/firebase";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
-import migrate from "@/lib/migrate";
-import { queryClient } from "@/lib/query-client";
-import {
-  liturgySchema,
-  type Liturgy as LiturgyDocument,
-  type LiturgyBlockType,
-  type Song,
-  type Recitation,
-} from "@/lib/schemas";
+import { liturgySchema, type LiturgyBlockType } from "@/lib/schemas";
 
 import type { Route } from "./+types/liturgy";
 
@@ -56,60 +46,9 @@ const datePickerHandle = PopoverPrimitive.createHandle();
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { liturgyId } = params;
 
-  const liturgy = await queryClient.query({
-    queryKey: ["liturgies", liturgyId],
-    queryFn: async () => {
-      const snapshot = await getDoc(doc(firebaseDb, "liturgies", liturgyId));
-
-      if (!snapshot.exists()) {
-        return { id: liturgyId, ...createDefaultLiturgy() };
-      }
-
-      const data = migrate(snapshot.data()) as LiturgyDocument;
-
-      return {
-        ...data,
-        id: liturgyId,
-      };
-    },
-    staleTime: Infinity,
-  });
-
-  const songs = await queryClient.query({
-    queryKey: ["songs"],
-    queryFn: async () => {
-      const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
-
-      return docs
-        .map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            }) as Song,
-        )
-        .toSorted((a, b) => a.title.localeCompare(b.title));
-    },
-    staleTime: Infinity,
-  });
-
-  const recitations = await queryClient.query({
-    queryKey: ["recitations"],
-    queryFn: async () => {
-      const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
-
-      return docs
-        .map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            }) as Recitation,
-        )
-        .toSorted((a, b) => a.title.localeCompare(b.title));
-    },
-    staleTime: Infinity,
-  });
+  const liturgy = await getLiturgy(liturgyId);
+  const songs = await getSongs();
+  const recitations = await getRecitations();
 
   return { liturgy, songs, recitations };
 }
@@ -118,32 +57,42 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
   const { liturgyId } = params;
   const data = await request.json();
 
-  const result = v.safeParse(liturgySchema, data);
+  try {
+    const output = v.parse(liturgySchema, data);
 
-  if (!result.success) {
+    const liturgy = {
+      ...output,
+      uid: firebaseAuth.currentUser?.uid || "",
+    };
+
+    await updateLiturgy(liturgyId, liturgy);
+
+    toast.add({
+      title: "Enregistrement réussi",
+      type: "success",
+    });
+
+    return { shouldRefresh: true };
+  } catch {
     toast.add({
       title: "Echec de l'enregistrement",
       type: "error",
     });
-
-    return;
   }
-
-  const liturgy = {
-    ...result.output,
-    uid: firebaseAuth.currentUser?.uid || "",
-  };
-
-  await setDoc(doc(firebaseDb, "liturgies", liturgyId), liturgy);
-  await queryClient.invalidateQueries({ queryKey: ["liturgies", liturgyId] });
-
-  toast.add({
-    title: "Enregistrement réussi",
-    type: "success",
-  });
 }
 
-export default function Liturgy(props: Route.ComponentProps) {
+export function shouldRevalidate({
+  actionResult,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (actionResult?.shouldRefresh) {
+    return true;
+  }
+
+  return defaultShouldRevalidate;
+}
+
+export default function EditLiturgy(props: Route.ComponentProps) {
   const { loaderData } = props;
   const { liturgy } = loaderData;
 
@@ -169,29 +118,20 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const {
     control,
     handleSubmit,
-    reset,
+    // reset,
     formState: { isDirty },
   } = form;
 
   const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
 
-  useEffect(() => {
-    reset(liturgy);
-  }, [liturgy, reset]);
+  useBeforeUnload(isDirty);
 
-  useEffect(() => {
-    if (!isDirty) return;
-
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [isDirty]);
+  // useEffect(() => {
+  //   console.log("Resetting form with liturgy");
+  //   if (isDirty) {
+  //     reset(liturgy);
+  //   }
+  // }, [liturgy, reset, isDirty]);
 
   const { fields, prepend, insert, remove } = useFieldArray({ control, name: "blocks" });
 
@@ -208,7 +148,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
               render={
                 <Button type="button" variant="ghost" className="group" disabled={disabled}>
                   Présidence du {format(date, "do MMMM y")}
-                  <ChevronDown className="group-data-popup-open:rotate-180" />
+                  <ChevronDownIcon className="group-data-popup-open:rotate-180" />
                 </Button>
               }
             />
@@ -244,15 +184,14 @@ function Content({ loaderData, params }: Route.ComponentProps) {
       <FormProvider {...form}>
         <form
           id="liturgy-form"
-          method="post"
           onSubmit={handleSubmit((data) => {
-            fetcher.submit(data, {
+            return fetcher.submit(data, {
               method: "post",
               encType: "application/json",
             });
           })}
         >
-          <div ref={listElement} className="max-w-xl p-4 px-4 md:px-8">
+          <div className="max-w-xl p-4 px-4 md:px-8">
             <AddBlockButton
               onSelect={(type) => {
                 prepend(createDefaultBlock(type));
@@ -330,7 +269,7 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
           <Button
             key={type}
             type="button"
-            variant="default"
+
             className="flex h-auto flex-col items-center justify-center py-3"
             onClick={() => {
               setOpen(false);
@@ -349,41 +288,4 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
 function renderIcon(type: LiturgyBlockType) {
   const Icon = liturgyBlockIcons[type];
   return <Icon className="size-6" />;
-}
-
-interface DiscardAlertDialogProps {
-  blocker: Extract<Blocker, { state: "blocked" }>;
-}
-
-function DiscardAlertDialog({ blocker }: DiscardAlertDialogProps) {
-  return (
-    <AlertDialog
-      open={true}
-      onOpenChange={(open) => {
-        if (!open) {
-          blocker.reset();
-        }
-      }}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Abandonner les modifications ?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Les modifications apportées n'ont pas été enregistrées et seront perdues.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Continuer l'édition</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => {
-              blocker.proceed();
-            }}
-          >
-            Abandonner
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 }

@@ -13,7 +13,6 @@ import {
   useFormContext,
   Watch,
 } from "react-hook-form";
-import Player from "react-player";
 import { create } from "zustand";
 
 import {
@@ -23,7 +22,8 @@ import {
   LiturgyCardHeader,
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
-import { LyricsFieldArray } from "@/components/lyrics-field-array";
+import { PassageFieldArray } from "@/components/lyrics-field-array";
+import Preview from "@/components/preview";
 import { Alert, AlertAction, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -65,9 +65,16 @@ import {
 } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isEqualLyrics, prepareLyrics } from "@/lib/lyrics-utils";
-import { type Liturgy, type Lyrics, type Song, type SongsBlock } from "@/lib/schemas";
+import {
+  type Liturgy,
+  type Lyrics,
+  type Song,
+  type SongsBlock,
+  type SongWithId,
+} from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 
@@ -100,7 +107,7 @@ const useLyricsEdit = create<LyricsEditState>((set) => ({
 
 interface SongsBlockFormProps {
   index: number;
-  songs: Song[];
+  songs: SongWithId[];
 }
 
 export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
@@ -208,7 +215,7 @@ interface ItemProps {
   id: string;
   index: number;
   name: `blocks.${number}.data.items.${number}`;
-  songs: Song[];
+  songs: SongWithId[];
   actionsDisabled?: boolean;
   sortable?: boolean;
   onRemove: () => void;
@@ -284,7 +291,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 <ComboboxContent>
                   <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
                   <ComboboxList>
-                    {(song: Song) => (
+                    {(song: SongWithId) => (
                       <ComboboxItem key={song.id} value={song}>
                         {song.title} {song.aka && `(${song.aka})`}
                       </ComboboxItem>
@@ -305,7 +312,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                     <AlertAction>
                       <Button
                         size="xs"
-                        variant="default"
+
                         onClick={() => {
                           setValue(lyricsName, null, { shouldDirty: true });
                         }}
@@ -345,7 +352,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                       </Button>
                     }
                   />
-                  <DrawerContent className="w-[90%] max-w-xl">
+                  <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
                     <ItemInformationDrawerContent lens={lens.focus(lyricsName)} song={song} />
                   </DrawerContent>
                 </Drawer>
@@ -417,7 +424,7 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
                 <AlertAction>
                   <Button
                     size="xs"
-                    variant="default"
+
                     onClick={() => {
                       lyricsField.field.onChange(null);
                     }}
@@ -449,34 +456,13 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
               </Button>
             }
           />
-          <DrawerContent className="w-[90%] max-w-xl">
+          <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
             <EditLyricsDrawerContent lens={lens} song={song} />
           </DrawerContent>
         </Drawer>
       </DrawerFooter>
     </>
   );
-}
-
-interface PreviewProps {
-  title: string;
-  url: string;
-}
-
-function Preview({ title, url }: PreviewProps) {
-  if (url.includes("drive.google.com")) {
-    return (
-      <iframe
-        height="140"
-        src={url.replace("/view", "/preview")}
-        title={`${title} preview`}
-        width="100%"
-        loading="lazy"
-      />
-    );
-  }
-
-  return <Player src={url} width="100%" height={260} controls />;
 }
 
 interface EditLyricsDrawerContentProps {
@@ -506,19 +492,12 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
 
   const lyricsLens = useLens({ control });
 
+  useBeforeUnload(isDirty);
+
   useEffect(() => {
     setDirty(isDirty);
 
-    if (!isDirty) return;
-
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
       setDirty(false);
     };
   }, [isDirty, setDirty]);
@@ -535,7 +514,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
             }
           />
 
-          <Button form="edit-lyrics-form" type="submit" variant="default" disabled={!isDirty}>
+          <Button form="edit-lyrics-form" type="submit" disabled={!isDirty}>
             Enregistrer <SaveIcon />
           </Button>
         </div>
@@ -558,7 +537,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
             })(event);
           }}
         >
-          <LyricsFieldArray lens={lyricsLens.focus("lyrics")} />
+          <PassageFieldArray kind="song" lens={lyricsLens.focus("lyrics")} />
         </form>
       </div>
     </FormProvider>
