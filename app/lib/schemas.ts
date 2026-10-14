@@ -6,7 +6,14 @@ import { validate } from "./bible";
 
 const bibleRefSchema = v.pipe(
   v.string(),
-  v.check((ref) => validate(ref), "Format de référence invalide"),
+  v.trim(),
+  v.union([
+    v.literal(""),
+    v.pipe(
+      v.string(),
+      v.check((ref) => validate(ref), "Format de référence invalide"),
+    ),
+  ]),
 );
 
 const lyricsSchema = v.array(
