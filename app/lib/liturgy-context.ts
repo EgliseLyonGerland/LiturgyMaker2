@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 
 interface LiturgyBlockContext {
   remove: () => void;
+  fillFromPreviousWeek: () => Promise<void>;
 }
 
 const liturgyBlockContext = createContext<LiturgyBlockContext | null>(null);

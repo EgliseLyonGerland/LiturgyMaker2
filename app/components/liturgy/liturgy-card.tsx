@@ -25,6 +25,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
@@ -73,7 +74,7 @@ function LiturgyCard({ type, className, ...props }: LiturgyCardProps) {
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
 
 function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderProps) {
-  const { remove } = useLiturgyBlockContext();
+  const { remove, fillFromPreviousWeek } = useLiturgyBlockContext();
 
   return (
     <CardHeader {...props} className={cn("flex items-center border-b border-border", className)}>
@@ -87,8 +88,12 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
             </Button>
           }
         />
-        <DropdownMenuContent className="min-w-40" align="end">
+        <DropdownMenuContent className="w-auto min-w-40" align="end">
           <DropdownMenuGroup>
+            <DropdownMenuItem onClick={fillFromPreviousWeek}>
+              Remplir à partir de la semaine précédente
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <ConfirmDropdown>
               <ConfirmDropdownTrigger
                 nativeButton={false}

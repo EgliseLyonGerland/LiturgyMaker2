@@ -32,11 +32,40 @@ import { firebaseAuth } from "@/lib/firebase";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
-import { liturgySchema, type LiturgyBlockType } from "@/lib/schemas";
+import { liturgySchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
 
 import type { Route } from "./+types/liturgy";
 
 const datePickerHandle = PopoverPrimitive.createHandle();
+
+async function getPreviousWeekBlock<T extends LiturgyBlockType>(
+  blocks: Liturgy["blocks"],
+  date: Date,
+  type: T,
+  index: number,
+) {
+  const previousDate = subDays(date, 7);
+  const previousId = convertToId(previousDate);
+  const previousLiturgy = await getLiturgy(previousId);
+
+  if (!previousLiturgy) {
+    return null;
+  }
+
+  const currentBlock = blocks[index];
+
+  const currentBlockPosition = blocks
+    .filter((block) => block.type === type)
+    .findIndex((block) => block === currentBlock);
+
+  const sameTypeBlocks = previousLiturgy.blocks.filter((block) => block.type === currentBlock.type);
+
+  if (sameTypeBlocks.length === 0) {
+    return null;
+  }
+
+  return sameTypeBlocks[currentBlockPosition] || sameTypeBlocks.pop();
+}
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { liturgyId } = params;
@@ -108,7 +137,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
   useBeforeUnload(isDirty);
 
-  const { fields, prepend, insert, remove } = useFieldArray({ control, name: "blocks" });
+  const { fields, prepend, insert, remove, update } = useFieldArray({ control, name: "blocks" });
 
   const [listElement] = useAutoAnimate();
 
@@ -209,6 +238,18 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                   key={field.id}
                   value={{
                     remove: () => remove(index),
+                    fillFromPreviousWeek: async () => {
+                      const previousBlock = await getPreviousWeekBlock(
+                        liturgy.blocks,
+                        date,
+                        field.type,
+                        index,
+                      );
+
+                      if (previousBlock) {
+                        update(index, previousBlock);
+                      }
+                    },
                   }}
                 >
                   {field.type === "section" ? (
