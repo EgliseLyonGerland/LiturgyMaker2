@@ -82,7 +82,7 @@ const songsBlockSchema = v.object({
         id: v.string(),
         infos: v.string(),
         repeat: v.boolean(),
-        lyrics: v.nullable(lyricsSchema),
+        lyrics: v.fallback(lyricsSchema, []),
       }),
     ),
   }),

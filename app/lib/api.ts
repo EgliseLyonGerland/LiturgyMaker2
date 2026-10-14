@@ -15,6 +15,7 @@ import { firebaseDb } from "./firebase";
 import migrate from "./migrate";
 import { queryClient } from "./query-client";
 import {
+  liturgySchema,
   recitationSchema,
   songSchema,
   type Liturgy,
@@ -129,15 +130,12 @@ export async function getLiturgy(id: string) {
       const snapshot = await getDoc(doc(firebaseDb, "liturgies", id));
 
       if (!snapshot.exists()) {
-        return { id: id, ...createDefaultLiturgy() };
+        return createDefaultLiturgy();
       }
 
-      const data = migrate(snapshot.data()) as Liturgy;
+      const { success, output } = v.safeParse(liturgySchema, migrate(snapshot.data()));
 
-      return {
-        ...data,
-        id: id,
-      };
+      return success ? output : createDefaultLiturgy();
     },
     staleTime: Infinity,
   });

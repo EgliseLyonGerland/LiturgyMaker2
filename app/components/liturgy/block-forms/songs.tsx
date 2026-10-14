@@ -310,7 +310,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               control={control}
               name={lyricsName}
               render={(value) =>
-                value !== null && (
+                value.length > 0 && (
                   <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
                     <AlertTriangleIcon />
                     <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
@@ -319,7 +319,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                         size="xs"
 
                         onClick={() => {
-                          setValue(lyricsName, null, { shouldDirty: true });
+                          setValue(lyricsName, [], { shouldDirty: true });
                         }}
                       >
                         Rétablir
