@@ -6,13 +6,7 @@ import { ChevronDownIcon, PlusIcon, SaveIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { fr } from "react-day-picker/locale";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import {
-  useBlocker,
-  useFetcher,
-  useNavigate,
-  useNavigation,
-  type ShouldRevalidateFunctionArgs,
-} from "react-router";
+import { useBlocker, useFetcher, useNavigate, useNavigation } from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
@@ -72,8 +66,6 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
       title: "Enregistrement réussi",
       type: "success",
     });
-
-    return { shouldRefresh: true };
   } catch {
     toast.add({
       title: "Echec de l'enregistrement",
@@ -82,22 +74,12 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
   }
 }
 
-export function shouldRevalidate({
-  actionResult,
-  defaultShouldRevalidate,
-}: ShouldRevalidateFunctionArgs) {
-  if (actionResult?.shouldRefresh) {
-    return true;
-  }
-
-  return defaultShouldRevalidate;
-}
-
 export default function EditLiturgy(props: Route.ComponentProps) {
-  const { loaderData } = props;
-  const { liturgy } = loaderData;
+  const {
+    params: { liturgyId },
+  } = props;
 
-  return <Content key={liturgy.id} {...props} />;
+  return <Content key={liturgyId} {...props} />;
 }
 
 function Content({ loaderData, params }: Route.ComponentProps) {
@@ -112,27 +94,19 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
   const form = useForm({
     resolver: valibotResolver(liturgySchema),
-    defaultValues: liturgy,
+    values: liturgy,
     disabled,
   });
 
   const {
     control,
     handleSubmit,
-    // reset,
-    formState: { isDirty },
+    formState: { isDirty, isReady },
   } = form;
 
   const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
 
   useBeforeUnload(isDirty);
-
-  // useEffect(() => {
-  //   console.log("Resetting form with liturgy");
-  //   if (isDirty) {
-  //     reset(liturgy);
-  //   }
-  // }, [liturgy, reset, isDirty]);
 
   const { fields, prepend, insert, remove } = useFieldArray({ control, name: "blocks" });
 
@@ -185,12 +159,12 @@ function Content({ loaderData, params }: Route.ComponentProps) {
       <FormProvider {...form}>
         <form
           id="liturgy-form"
-          onSubmit={handleSubmit((data) => {
-            return fetcher.submit(data, {
+          onSubmit={handleSubmit((data) =>
+            fetcher.submit(data, {
               method: "post",
               encType: "application/json",
-            });
-          })}
+            }),
+          )}
         >
           <div className="max-w-xl p-4 px-4 md:px-8">
             <AddBlockButton
@@ -199,7 +173,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
               }}
             />
 
-            <div ref={listElement} className="flex flex-col gap-1">
+            <div ref={isReady ? listElement : null} className="flex flex-col gap-1">
               {fields.map((field, index) => (
                 <liturgyBlockContext.Provider
                   key={field.id}
