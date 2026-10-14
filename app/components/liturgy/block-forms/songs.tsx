@@ -241,13 +241,13 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const repeatName = `${name}.repeat` as const;
   const lyricsName = `${name}.lyrics` as const;
 
-  const { field } = useController({ control, name: idName });
-
-  const { value: songId } = field;
+  const {
+    field: { value, onChange, ...field },
+  } = useController({ control, name: idName });
 
   const lens = useLens({ control });
 
-  const song = songs.find((song) => song.id === songId);
+  const song = songs.find((song) => song.id === value);
 
   return (
     <div ref={sortableRef} className="group">
@@ -282,7 +282,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 value={song}
                 onValueChange={(song) => {
                   if (song) {
-                    field.onChange(song.id);
+                    onChange(song.id);
                   }
                 }}
                 autoHighlight
