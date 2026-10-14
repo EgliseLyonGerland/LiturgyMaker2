@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { maxPrayerTopics } from "@/config";
 import { type Liturgy, type OpenDoorsBlock } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
@@ -85,6 +86,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
               onClick={() => {
                 append({ text: "" });
               }}
+              // disabled={fields.length >= maxPrayerTopics}
             >
               Ajouter un sujet <PlusIcon />
             </Button>

@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { liturgyDocumentVersion } from "@/config";
+import { liturgyDocumentVersion, maxPrayerTopics } from "@/config";
 
 import { validate } from "./bible";
 
@@ -101,10 +101,14 @@ const openDoorsBlockSchema = v.object({
   data: v.object({
     title: v.string(),
     detail: v.string(),
-    prayerTopics: v.array(
-      v.object({
-        text: v.string(),
-      }),
+    prayerTopics: v.pipe(
+      v.array(
+        v.object({
+          text: v.string(),
+        }),
+      ),
+      v.maxLength(maxPrayerTopics),
+      v.minLength(1),
     ),
   }),
 });

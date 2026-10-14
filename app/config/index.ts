@@ -13,6 +13,8 @@ import type { LiturgyBlockType } from "@/lib/schemas";
 
 export const liturgyDocumentVersion = 9;
 
+export const maxPrayerTopics = 3;
+
 export const liturgyBlockTypes: LiturgyBlockType[] = [
   "announcements",
   "reading",
