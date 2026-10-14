@@ -1,8 +1,8 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { format } from "date-fns";
-import { ChevronDownIcon, PlusIcon, SaveIcon } from "lucide-react";
+import { addDays, format, subDays } from "date-fns";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, SaveIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { fr } from "react-day-picker/locale";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -113,17 +113,37 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const [listElement] = useAutoAnimate();
 
   const date = converToDate(liturgyId);
+  const previousDate = subDays(date, 7);
+  const nextDate = addDays(date, 7);
 
   return (
     <>
       <HeaderSlot>
         <div className="flex items-center">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            title={`Aller à la la liturgie du ${format(previousDate, "do MMMM y")}`}
+            onClick={() => {
+              navigate(`/liturgies/${convertToId(previousDate)}`);
+            }}
+          >
+            <ChevronLeftIcon />
+          </Button>
           <Popover handle={datePickerHandle}>
             <PopoverTrigger
               render={
-                <Button type="button" variant="ghost" className="group" disabled={disabled}>
-                  Présidence du {format(date, "do MMMM y")}
-                  <ChevronDownIcon className="group-data-popup-open:rotate-180" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="group"
+                  disabled={disabled}
+                  title="Sélectionner une date"
+                >
+                  <span>
+                    <span className="hidden md:inline">Présidence du</span>{" "}
+                    {format(date, "do MMMM y")}
+                  </span>
                 </Button>
               }
             />
@@ -143,6 +163,16 @@ function Content({ loaderData, params }: Route.ComponentProps) {
               />
             </PopoverContent>
           </Popover>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            title={`Aller à la la liturgie du ${format(nextDate, "do MMMM y")}`}
+            onClick={() => {
+              navigate(`/liturgies/${convertToId(nextDate)}`);
+            }}
+          >
+            <ChevronRightIcon />
+          </Button>
 
           <Button
             className="ml-auto"
