@@ -67,6 +67,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { isEqualLyrics, prepareLyrics } from "@/lib/lyrics-utils";
 import {
   type Liturgy,
@@ -160,7 +161,10 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
             type="button"
             variant="outline"
             onClick={() => {
-              append({ id: "", infos: "", lyrics: null, repeat: false });
+              append(
+                { id: "", infos: "", lyrics: [], repeat: false },
+                { focusName: getBlockFocusName("songs", index, fields.length) },
+              );
             }}
           >
             Ajouter un chant <PlusIcon />
@@ -229,7 +233,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
     formState: { errors },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
-  const { ref } = useSortable({ id, index, handle: handleRef });
+  const { ref: sortableRef } = useSortable({ id, index, handle: handleRef });
   const isMobile = useIsMobile();
 
   const idName = `${name}.id` as const;
@@ -237,14 +241,16 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const repeatName = `${name}.repeat` as const;
   const lyricsName = `${name}.lyrics` as const;
 
-  const idField = useController({ control, name: idName });
+  const { field } = useController({ control, name: idName });
+
+  const { value: songId } = field;
 
   const lens = useLens({ control });
 
-  const song = songs.find((song) => song.id === idField.field.value);
+  const song = songs.find((song) => song.id === songId);
 
   return (
-    <div ref={ref} className="group">
+    <div ref={sortableRef} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
           <SortableButton ref={handleRef} />
@@ -276,17 +282,16 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 value={song}
                 onValueChange={(song) => {
                   if (song) {
-                    idField.field.onChange(song.id);
+                    field.onChange(song.id);
                   }
                 }}
                 autoHighlight
               >
                 <ComboboxInput
                   id={name}
-                  name={name}
                   placeholder="Choisissez un chant"
                   className="flex-1"
-                  onBlur={idField.field.onBlur}
+                  {...field}
                 />
                 <ComboboxContent>
                   <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>

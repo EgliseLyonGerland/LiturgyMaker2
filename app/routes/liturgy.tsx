@@ -36,6 +36,7 @@ import { getLiturgy, getRecitations, getSongs, updateLiturgy } from "@/lib/api";
 import { createDefaultBlock } from "@/lib/default-liturgy";
 import { firebaseAuth } from "@/lib/firebase";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
+import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import { liturgySchema, type LiturgyBlockType } from "@/lib/schemas";
 
@@ -194,7 +195,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           <div className="max-w-xl p-4 px-4 md:px-8">
             <AddBlockButton
               onSelect={(type) => {
-                prepend(createDefaultBlock(type));
+                prepend(createDefaultBlock(type), { focusName: getBlockFocusName(type, 0) });
               }}
             />
 
@@ -224,7 +225,9 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
                   <AddBlockButton
                     onSelect={(type) => {
-                      insert(index + 1, createDefaultBlock(type));
+                      insert(index + 1, createDefaultBlock(type), {
+                        focusName: getBlockFocusName(type, index + 1),
+                      });
                     }}
                   />
                 </liturgyBlockContext.Provider>

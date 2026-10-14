@@ -18,6 +18,7 @@ import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/componen
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getPassage, validate } from "@/lib/bible";
+import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { type ReadingBlock, type Liturgy } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
@@ -83,7 +84,10 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
           type="button"
           variant="outline"
           onClick={() => {
-            append({ id: "", excerpt: "" });
+            append(
+              { id: "", excerpt: "" },
+              { focusName: getBlockFocusName("reading", index, fields.length) },
+            );
           }}
         >
           Ajouter une réf <PlusIcon />
