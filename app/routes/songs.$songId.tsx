@@ -10,6 +10,7 @@ import * as v from "valibot";
 import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
 import { PassageFieldArray } from "@/components/lyrics-field-array";
 import Preview from "@/components/preview";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { DrawerClose, DrawerHeader } from "@/components/ui/drawer";
 import {
@@ -84,6 +85,8 @@ export default function SongEdit({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
+      <Title>{song.title}</Title>
+
       <DrawerHeader>
         <div className="flex justify-between gap-2">
           <DrawerClose

@@ -19,6 +19,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
 import type { Route } from "./+types/root";
+import { Title } from "./components/title";
 
 setDefaultOptions({ locale: fr });
 
@@ -47,6 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="dark">
         {children}
+        <Title />
         <ScrollRestoration />
         <Scripts />
       </body>

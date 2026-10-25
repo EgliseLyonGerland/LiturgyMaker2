@@ -7,6 +7,7 @@ import { redirect, useBlocker, useFetcher } from "react-router";
 import * as v from "valibot";
 
 import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { DrawerClose, DrawerHeader } from "@/components/ui/drawer";
 import { Spinner } from "@/components/ui/spinner";
@@ -58,6 +59,7 @@ export default function RecitationsCreate() {
 
   return (
     <>
+      <Title>Nouvelle récitation</Title>
       <DrawerHeader>
         <div className="flex justify-between gap-2">
           <DrawerClose

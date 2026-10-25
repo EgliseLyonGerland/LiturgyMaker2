@@ -16,6 +16,7 @@ import {
   ConfirmDropdownTrigger,
 } from "@/components/confirm-dropdown";
 import { HeaderSlot } from "@/components/header-slot";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
@@ -109,6 +110,7 @@ export default function Songs(props: Route.ComponentProps) {
 
   return (
     <>
+      <Title>Chants</Title>
       <HeaderSlot>
         <div className="flex items-center">
           <h1 className="ml-2">Chants</h1>

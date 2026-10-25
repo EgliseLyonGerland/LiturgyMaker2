@@ -20,6 +20,7 @@ import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
 import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -152,6 +153,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
   return (
     <>
+      <Title>{`Présidence du ${format(date, "do MMMM y")}`}</Title>
       <HeaderSlot>
         <div className="flex items-center">
           <Button
