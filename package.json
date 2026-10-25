@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "react-router dev",
     "dev-server": "firebase emulators:start --import=.firebase/export",
-    "build": "tsc -b && vite build",
+    "build": "react-router build",
     "lint": "oxlint",
     "fmt": "oxfmt",
     "preview": "vite preview",
