@@ -23,7 +23,6 @@ import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
