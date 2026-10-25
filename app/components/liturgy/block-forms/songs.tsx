@@ -372,7 +372,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
 }
 
 interface ItemInformationDrawerContentProps {
-  lens: Lens<Lyrics | null>;
+  lens: Lens<Lyrics>;
   song: Song;
 }
 
@@ -472,7 +472,7 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
 }
 
 interface EditLyricsDrawerContentProps {
-  lens: Lens<Lyrics | null>;
+  lens: Lens<Lyrics>;
   song: Song;
 }
 

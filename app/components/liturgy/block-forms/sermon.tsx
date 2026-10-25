@@ -82,7 +82,11 @@ export function SermonBlockForm({ id, index }: SermonBlockFormProps) {
   );
 }
 
-function BibleRefsField({ index }: SermonBlockFormProps) {
+interface BibleRefsFieldProps {
+  index: number;
+}
+
+function BibleRefsField({ index }: BibleRefsFieldProps) {
   const { control } = useFormContext<FieldValues>();
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.bibleRefs`;
@@ -177,7 +181,11 @@ function BibleRefsFieldItem({
   );
 }
 
-function PointsField({ index }: SermonBlockFormProps) {
+interface PointsFieldProps {
+  index: number;
+}
+
+function PointsField({ index }: PointsFieldProps) {
   const { control } = useFormContext<FieldValues>();
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.plan`;
