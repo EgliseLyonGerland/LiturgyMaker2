@@ -107,11 +107,12 @@ const useLyricsEdit = create<LyricsEditState>((set) => ({
 }));
 
 interface SongsBlockFormProps {
+  id: string;
   index: number;
   songs: SongWithId[];
 }
 
-export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
+export function SongsBlockForm({ id, index, songs }: SongsBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
@@ -121,7 +122,7 @@ export function SongsBlockForm({ index, songs }: SongsBlockFormProps) {
 
   return (
     <>
-      <LiturgyCard type="songs">
+      <LiturgyCard id={id} type="songs">
         <LiturgyCardHeader>
           <LiturgyCardTitle />
         </LiturgyCardHeader>

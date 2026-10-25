@@ -14,7 +14,14 @@ import {
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getPassage, validate } from "@/lib/bible";
@@ -29,10 +36,11 @@ interface FieldValues extends Liturgy {
 }
 
 interface ReadingBlockFormProps {
+  id: string;
   index: number;
 }
 
-export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
+export function ReadingBlockForm({ id, index }: ReadingBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
@@ -41,7 +49,7 @@ export function ReadingBlockForm({ index }: ReadingBlockFormProps) {
   });
 
   return (
-    <LiturgyCard type="reading">
+    <LiturgyCard id={id} type="reading">
       <LiturgyCardHeader>
         <LiturgyCardTitle>
           <span className="text-xs text-muted-foreground">
@@ -148,6 +156,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
             <Field>
               <FieldLabel htmlFor={idName}>Référence</FieldLabel>
               <BibleRefField control={control} name={idName} />
+              <FieldError errors={[get(errors, idName)]} />
             </Field>
             <Field>
               <FieldLabel htmlFor={excerptName}>Extrait</FieldLabel>

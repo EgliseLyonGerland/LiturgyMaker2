@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { maxPrayerTopics } from "@/config";
 import { type Liturgy, type OpenDoorsBlock } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
@@ -26,10 +25,11 @@ interface FieldValues extends Liturgy {
 }
 
 interface OpenDoorsBlockFormProps {
+  id: string;
   index: number;
 }
 
-export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
+export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
   const {
     control,
     register,
@@ -43,7 +43,7 @@ export function OpenDoorsBlockForm({ index }: OpenDoorsBlockFormProps) {
   const { fields, append, remove, move } = useFieldArray({ control, name: prayerTopicsName });
 
   return (
-    <LiturgyCard type="openDoors">
+    <LiturgyCard id={id} type="openDoors">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>

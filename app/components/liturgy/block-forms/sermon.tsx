@@ -25,10 +25,11 @@ interface FieldValues extends Liturgy {
 }
 
 interface SermonBlockFormProps {
+  id: string;
   index: number;
 }
 
-export function SermonBlockForm({ index }: SermonBlockFormProps) {
+export function SermonBlockForm({ id, index }: SermonBlockFormProps) {
   const {
     register,
     formState: { errors },
@@ -38,7 +39,7 @@ export function SermonBlockForm({ index }: SermonBlockFormProps) {
   const authorName = `blocks.${index}.data.author` as const;
 
   return (
-    <LiturgyCard type="sermon">
+    <LiturgyCard id={id} type="sermon">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>

@@ -14,7 +14,14 @@ import {
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { type AnnouncementsBlock, type Liturgy } from "@/lib/schemas";
@@ -26,10 +33,11 @@ interface FieldValues extends Liturgy {
 }
 
 interface AnnouncementsBlockFormProps {
+  id: string;
   index: number;
 }
 
-export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
+export function AnnouncementsBlockForm({ id, index }: AnnouncementsBlockFormProps) {
   const { control } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
@@ -38,7 +46,7 @@ export function AnnouncementsBlockForm({ index }: AnnouncementsBlockFormProps) {
   });
 
   return (
-    <LiturgyCard type="announcements">
+    <LiturgyCard id={id} type="announcements">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
@@ -145,6 +153,7 @@ function AnnouncementsBlockFormItem({
                 {...register(titleName)}
                 aria-invalid={!!get(errors, titleName)}
               />
+              <FieldError errors={get(errors, titleName)} />
             </Field>
             <Field>
               <FieldLabel htmlFor={detailName}>Détails</FieldLabel>
@@ -153,6 +162,7 @@ function AnnouncementsBlockFormItem({
                 {...register(detailName)}
                 aria-invalid={!!get(errors, detailName)}
               />
+              <FieldError errors={get(errors, detailName)} />
             </Field>
           </FieldGroup>
         </div>

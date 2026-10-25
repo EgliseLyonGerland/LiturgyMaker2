@@ -153,10 +153,15 @@
     @apply bg-background text-foreground;
   }
 
-  .firebase-emulator-warning {
-    display: none;
-  }
   html {
     @apply font-sans;
   }
+
+  .firebase-emulator-warning {
+    display: none;
+  }
+}
+
+:root {
+  --header-height: --spacing(16);
 }

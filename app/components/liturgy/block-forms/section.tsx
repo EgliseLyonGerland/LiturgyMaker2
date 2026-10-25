@@ -16,10 +16,11 @@ interface FieldValues extends Liturgy {
 }
 
 interface SectionBlockFormProps {
+  id: string;
   index: number;
 }
 
-export function SectionBlockForm({ index }: SectionBlockFormProps) {
+export function SectionBlockForm({ id, index }: SectionBlockFormProps) {
   const {
     register,
     formState: { errors },
@@ -28,7 +29,7 @@ export function SectionBlockForm({ index }: SectionBlockFormProps) {
   const name = `blocks.${index}.data.title` as const;
 
   return (
-    <LiturgyCard type="section">
+    <LiturgyCard id={id} type="section">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>

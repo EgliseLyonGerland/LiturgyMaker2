@@ -19,9 +19,11 @@ import { RecitationBlockForm } from "@/components/liturgy/block-forms/recitation
 import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
+import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
@@ -95,7 +97,8 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
       title: "Enregistrement réussi",
       type: "success",
     });
-  } catch {
+  } catch (error) {
+    console.log(error);
     toast.add({
       title: "Echec de l'enregistrement",
       type: "error",
@@ -137,9 +140,12 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
   useBeforeUnload(isDirty);
 
-  const { fields, prepend, insert, remove, update } = useFieldArray({ control, name: "blocks" });
+  const { fields, prepend, insert, remove, update, move } = useFieldArray({
+    control,
+    name: "blocks",
+  });
 
-  const [listElement] = useAutoAnimate();
+  const [listElementRef] = useAutoAnimate();
 
   const date = converToDate(liturgyId);
   const previousDate = subDays(date, 7);
@@ -216,23 +222,42 @@ function Content({ loaderData, params }: Route.ComponentProps) {
         </div>
       </HeaderSlot>
       <FormProvider {...form}>
-        <form
-          id="liturgy-form"
-          onSubmit={handleSubmit((data) =>
-            fetcher.submit(data, {
-              method: "post",
-              encType: "application/json",
-            }),
-          )}
-        >
-          <div className="max-w-xl p-4 px-4 md:px-8">
+        <div className="flex w-full flex-1 gap-4 px-4">
+          <LiturgyMenu
+            fields={fields}
+            songs={songs}
+            recitations={recitations}
+            onClick={(field) => {
+              const blockElement = document.getElementById(field.id);
+
+              if (blockElement) {
+                window.scrollTo({
+                  top: blockElement.offsetTop,
+                  behavior: "smooth",
+                });
+              }
+            }}
+            onMove={(fromIndex, toIndex) => {
+              move(fromIndex, toIndex);
+            }}
+          />
+          <form
+            id="liturgy-form"
+            className="max-w-xl min-w-sm flex-1 py-4"
+            onSubmit={handleSubmit((data) =>
+              fetcher.submit(data, {
+                method: "post",
+                encType: "application/json",
+              }),
+            )}
+          >
             <AddBlockButton
               onSelect={(type) => {
                 prepend(createDefaultBlock(type), { focusName: getBlockFocusName(type, 0) });
               }}
             />
 
-            <div ref={isReady ? listElement : null} className="flex flex-col gap-1">
+            <div ref={isReady ? listElementRef : null} className="flex flex-col gap-1">
               {fields.map((field, index) => (
                 <liturgyBlockContext.Provider
                   key={field.id}
@@ -253,19 +278,19 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                   }}
                 >
                   {field.type === "section" ? (
-                    <SectionBlockForm index={index} />
+                    <SectionBlockForm id={field.id} index={index} />
                   ) : field.type === "announcements" ? (
-                    <AnnouncementsBlockForm index={index} />
+                    <AnnouncementsBlockForm id={field.id} index={index} />
                   ) : field.type === "openDoors" ? (
-                    <OpenDoorsBlockForm index={index} />
+                    <OpenDoorsBlockForm id={field.id} index={index} />
                   ) : field.type === "reading" ? (
-                    <ReadingBlockForm index={index} />
+                    <ReadingBlockForm id={field.id} index={index} />
                   ) : field.type === "recitation" ? (
-                    <RecitationBlockForm index={index} recitations={recitations} />
+                    <RecitationBlockForm id={field.id} index={index} recitations={recitations} />
                   ) : field.type === "sermon" ? (
-                    <SermonBlockForm index={index} />
+                    <SermonBlockForm id={field.id} index={index} />
                   ) : (
-                    <SongsBlockForm index={index} songs={songs} />
+                    <SongsBlockForm id={field.id} index={index} songs={songs} />
                   )}
 
                   <AddBlockButton
@@ -278,8 +303,8 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                 </liturgyBlockContext.Provider>
               ))}
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </FormProvider>
 
       {blocker.state === "blocked" && <DiscardAlertDialog blocker={blocker} />}
@@ -309,16 +334,14 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
         }
       />
       <PopoverContent
-        className="grid w-(--anchor-width) grid-cols-3 gap-2 shadow-2xl md:grid-cols-4"
+        className="grid w-full grid-cols-3 gap-2 shadow-2xl md:grid-cols-4"
         align="center"
-        sideOffset={-2}
       >
         {liturgyBlockTypes.map((type) => (
           <Button
             key={type}
             type="button"
-
-            className="flex h-auto flex-col items-center justify-center py-3"
+            className="flex h-auto flex-col items-center justify-center p-3"
             onClick={() => {
               setOpen(false);
               onSelect(type);

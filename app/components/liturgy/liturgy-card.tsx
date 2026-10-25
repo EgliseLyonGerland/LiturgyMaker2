@@ -60,13 +60,14 @@ function useLiturgyCardContext() {
 }
 
 interface LiturgyCardProps extends ComponentProps<typeof Card> {
+  id: string;
   type: LiturgyBlockType;
 }
 
-function LiturgyCard({ type, className, ...props }: LiturgyCardProps) {
+function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
   return (
     <context.Provider value={{ type }}>
-      <Card {...props} className={cn(colorByType[type], className)} />
+      <Card id={id} {...props} className={cn(colorByType[type], className)} />
     </context.Provider>
   );
 }

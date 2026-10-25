@@ -24,11 +24,12 @@ interface FieldValues extends Liturgy {
 }
 
 interface RecitationBlockFormProps {
+  id: string;
   index: number;
   recitations: RecitationWithId[];
 }
 
-export function RecitationBlockForm({ index, recitations }: RecitationBlockFormProps) {
+export function RecitationBlockForm({ id, index, recitations }: RecitationBlockFormProps) {
   const {
     control,
     register,
@@ -39,7 +40,7 @@ export function RecitationBlockForm({ index, recitations }: RecitationBlockFormP
   const infosName = `blocks.${index}.data.infos` as const;
 
   return (
-    <LiturgyCard type="recitation">
+    <LiturgyCard id={id} type="recitation">
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
