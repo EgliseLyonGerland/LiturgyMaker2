@@ -67,7 +67,7 @@ interface LiturgyCardProps extends ComponentProps<typeof Card> {
 function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
   return (
     <context.Provider value={{ type }}>
-      <Card id={id} {...props} className={cn(colorByType[type], className)} />
+      <Card id={id} {...props} className={cn("pt-0", colorByType[type], className)} />
     </context.Provider>
   );
 }
@@ -78,7 +78,10 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
   const { remove, fillFromPreviousWeek } = useLiturgyBlockContext();
 
   return (
-    <CardHeader {...props} className={cn("flex items-center border-b border-border", className)}>
+    <CardHeader
+      {...props}
+      className={cn("mb-0 flex h-16 items-center border-b border-border pb-0!", className)}
+    >
       {children}
 
       <DropdownMenu>
@@ -122,19 +125,25 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
   );
 }
 
-interface LiturgyCardTitleProps extends ComponentProps<typeof CardTitle> {}
+interface LiturgyCardTitleProps extends Omit<ComponentProps<typeof CardTitle>, "children"> {
+  extraLabel?: string;
+}
 
-function LiturgyCardTitle({ className, children, ...props }: LiturgyCardTitleProps) {
+function LiturgyCardTitle({ className, extraLabel, ...props }: LiturgyCardTitleProps) {
   const { type } = useLiturgyCardContext();
 
   const Icon = liturgyBlockIcons[type];
 
   return (
-    <CardTitle {...props} className={cn("flex items-center gap-2", className)}>
-      <Icon className="size-5" />
+    <CardTitle
+      {...props}
+      className={cn("grid grid-cols-[auto_1fr] items-center gap-0.5 gap-x-3", className)}
+    >
+      <Icon className="size-4.5" />
       {liturgyBlockNames[type]}
-
-      {children}
+      {extraLabel && (
+        <span className="col-start-2 text-xs text-muted-foreground">{extraLabel}</span>
+      )}
     </CardTitle>
   );
 }

@@ -51,11 +51,11 @@ export function ReadingBlockForm({ id, index }: ReadingBlockFormProps) {
   return (
     <LiturgyCard id={id} type="reading">
       <LiturgyCardHeader>
-        <LiturgyCardTitle>
-          <span className="text-xs text-muted-foreground">
-            <Watch control={control} name={`blocks.${index}.title`} render={(title) => title} />
-          </span>
-        </LiturgyCardTitle>
+        <Watch
+          control={control}
+          name={`blocks.${index}.title`}
+          render={(title) => <LiturgyCardTitle extraLabel={title} />}
+        />
       </LiturgyCardHeader>
 
       <DragDropProvider
