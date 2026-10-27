@@ -8,6 +8,7 @@ import {
   query,
   setDoc,
 } from "firebase/firestore";
+import { sort } from "radashi";
 import * as v from "valibot";
 
 import { createDefaultLiturgy } from "./default-liturgy";
@@ -25,22 +26,33 @@ import {
   type SongWithId,
 } from "./schemas";
 
+function sortSongs(songs: SongWithId[]) {
+  return songs.toSorted((left, right) =>
+    String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
+  );
+}
+
+function sortRecitations(recitations: RecitationWithId[]) {
+  return recitations.toSorted((left, right) =>
+    String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
+  );
+}
+
 export async function getSongs() {
   return await queryClient.query({
     queryKey: ["songs"],
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
-      return docs
-        .map((doc) => {
-          const { success, output } = v.safeParse(songSchema, doc.data());
+      return sortSongs(
+        docs
+          .map((doc) => {
+            const { success, output } = v.safeParse(songSchema, doc.data());
 
-          return success ? { id: doc.id, ...output } : null;
-        })
-        .filter((item) => item !== null)
-        .toSorted((left, right) =>
-          String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
-        );
+            return success ? { id: doc.id, ...output } : null;
+          })
+          .filter((item) => item !== null),
+      );
     },
     staleTime: Infinity,
     gcTime: Infinity,
@@ -51,11 +63,7 @@ export async function addSong(data: Song) {
   const ref = await addDoc(collection(firebaseDb, "songs"), data);
 
   return queryClient.setQueryData(["songs"], (oldSongs: SongWithId[]) =>
-    oldSongs
-      .concat({ id: ref.id, ...data })
-      .toSorted((left, right) =>
-        String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
-      ),
+    sortSongs(oldSongs.concat({ id: ref.id, ...data })),
   );
 }
 
@@ -63,7 +71,7 @@ export async function updateSong(id: string, data: Song) {
   await setDoc(doc(firebaseDb, "songs", id), data);
 
   return queryClient.setQueryData(["songs"], (oldSongs: SongWithId[]) =>
-    oldSongs.map((s) => (s.id === id ? { id, ...data } : s)),
+    sortSongs(oldSongs.map((s) => (s.id === id ? { id, ...data } : s))),
   );
 }
 
@@ -71,7 +79,7 @@ export async function deleteSong(id: string) {
   await deleteDoc(doc(firebaseDb, "songs", id));
 
   return queryClient.setQueryData(["songs"], (oldSongs: SongWithId[]) =>
-    oldSongs.filter((song) => song.id !== id),
+    sortSongs(oldSongs.filter((song) => song.id !== id)),
   );
 }
 
@@ -81,16 +89,15 @@ export async function getRecitations() {
     queryFn: async () => {
       const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
 
-      return docs
-        .map((doc) => {
-          const { success, output } = v.safeParse(recitationSchema, doc.data());
+      return sortRecitations(
+        docs
+          .map((doc) => {
+            const { success, output } = v.safeParse(recitationSchema, doc.data());
 
-          return success ? { id: doc.id, ...output } : null;
-        })
-        .filter((item) => item !== null)
-        .toSorted((left, right) =>
-          String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
-        );
+            return success ? { id: doc.id, ...output } : null;
+          })
+          .filter((item) => item !== null),
+      );
     },
     staleTime: Infinity,
     gcTime: Infinity,
@@ -101,11 +108,7 @@ export async function addRecitation(data: Recitation) {
   const ref = await addDoc(collection(firebaseDb, "recitations"), data);
 
   return queryClient.setQueryData(["recitations"], (oldRecitations: RecitationWithId[]) =>
-    oldRecitations
-      .concat({ id: ref.id, ...data })
-      .toSorted((left, right) =>
-        String(left.title ?? "").localeCompare(String(right.title ?? ""), "fr"),
-      ),
+    sortRecitations(oldRecitations.concat({ id: ref.id, ...data })),
   );
 }
 
@@ -113,7 +116,7 @@ export async function updateRecitation(id: string, data: Recitation) {
   await setDoc(doc(firebaseDb, "recitations", id), data);
 
   return queryClient.setQueryData(["recitations"], (oldRecitations: RecitationWithId[]) =>
-    oldRecitations.map((s) => (s.id === id ? { id, ...data } : s)),
+    sortRecitations(oldRecitations.map((s) => (s.id === id ? { id, ...data } : s))),
   );
 }
 
@@ -121,7 +124,7 @@ export async function deleteRecitation(id: string) {
   await deleteDoc(doc(firebaseDb, "recitations", id));
 
   return queryClient.setQueryData(["recitations"], (oldRecitations: RecitationWithId[]) =>
-    oldRecitations.filter((recitation) => recitation.id !== id),
+    sortRecitations(oldRecitations.filter((recitation) => recitation.id !== id)),
   );
 }
 
