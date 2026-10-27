@@ -119,7 +119,7 @@ export default function Songs(props: Route.ComponentProps) {
             className="ml-auto"
             onClick={() => navigate("create", { preventScrollReset: true })}
           >
-            <span className="hidden md:block">Ajouter un chant</span>
+            <span className="hidden sm:block">Ajouter un chant</span>
             <PlusIcon className="md:hidden" />
           </Button>
         </div>

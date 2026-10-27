@@ -110,7 +110,7 @@ export default function Recitations(props: Route.ComponentProps) {
             className="ml-auto"
             onClick={() => navigate("create", { preventScrollReset: true })}
           >
-            <span className="hidden md:block">Ajouter une récitation</span>
+            <span className="hidden sm:block">Ajouter une récitation</span>
             <PlusIcon className="md:hidden" />
           </Button>
         </div>

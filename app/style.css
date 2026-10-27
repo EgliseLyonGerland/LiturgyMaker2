@@ -144,6 +144,10 @@
   --invert-foreground: var(--color-zinc-50);
 }
 
+@theme {
+  --breakpoint-xs: 30rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -1,5 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { cn } from "cn";
 import { type LucideProps } from "lucide-react";
 import { useRef } from "react";
 import { type UseFieldArrayReturn, useFormContext, useWatch } from "react-hook-form";
@@ -64,11 +65,19 @@ export interface LiturgyMenuProps {
   fields: Fields;
   songs: SongWithId[];
   recitations: RecitationWithId[];
+  className?: string;
   onClick: (field: Fields[number]) => void;
   onMove: (from: number, to: number) => void;
 }
 
-export function LiturgyMenu({ fields, songs, recitations, onClick, onMove }: LiturgyMenuProps) {
+export function LiturgyMenu({
+  fields,
+  songs,
+  recitations,
+  className,
+  onClick,
+  onMove,
+}: LiturgyMenuProps) {
   return (
     <DragDropProvider
       onDragEnd={(event) => {
@@ -84,7 +93,10 @@ export function LiturgyMenu({ fields, songs, recitations, onClick, onMove }: Lit
       }}
     >
       <div
-        className="sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full max-w-xs scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-none py-4 pr-4"
+        className={cn(
+          "sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-none py-4 pr-4",
+          className,
+        )}
         aria-hidden
       >
         {fields.map((field, index) => (

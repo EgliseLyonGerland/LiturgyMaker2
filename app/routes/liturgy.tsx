@@ -179,7 +179,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                   title="Sélectionner une date"
                 >
                   <span>
-                    <span className="hidden md:inline">Présidence du</span>{" "}
+                    <span className="hidden xs:inline">Présidence du</span>{" "}
                     {format(date, "do MMMM y")}
                   </span>
                 </Button>
@@ -219,17 +219,18 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             disabled={disabled || !isDirty}
           >
             {fetcher.state !== "idle" && <Spinner />}
-            <span className="hidden md:block">Enregistrer</span>
+            <span className="hidden sm:block">Enregistrer</span>
             <SaveIcon className="md:hidden" />
           </Button>
         </div>
       </HeaderSlot>
       <FormProvider {...form}>
-        <div className="flex w-full flex-1 gap-4 px-4">
+        <div className="@container flex w-full flex-1 gap-4 px-4">
           <LiturgyMenu
             fields={fields}
             songs={songs}
             recitations={recitations}
+            className="hidden max-w-50 sm:block @min-3xl:max-w-xs"
             onClick={(field) => {
               const blockElement = document.getElementById(field.id);
 
@@ -246,7 +247,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           />
           <form
             id="liturgy-form"
-            className="max-w-xl min-w-sm flex-1 py-4"
+            className="w-full flex-1 py-4 sm:max-w-xl"
             onSubmit={handleSubmit((data) =>
               fetcher.submit(data, {
                 method: "post",
