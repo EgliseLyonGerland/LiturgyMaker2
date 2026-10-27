@@ -43,6 +43,7 @@ export async function getSongs() {
         );
     },
     staleTime: Infinity,
+    gcTime: Infinity,
   });
 }
 
@@ -92,6 +93,7 @@ export async function getRecitations() {
         );
     },
     staleTime: Infinity,
+    gcTime: Infinity,
   });
 }
 
@@ -138,6 +140,7 @@ export async function getLiturgy(id: string) {
       return success ? output : createDefaultLiturgy();
     },
     staleTime: Infinity,
+    gcTime: Infinity,
   });
 }
 

@@ -1,4 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { setDefaultOptions } from "date-fns";
 
 import "./style.css";
@@ -63,6 +64,7 @@ export default function App() {
         <TooltipProvider>
           <Outlet />
           <Toaster />
+          <ReactQueryDevtools initialIsOpen={false} />
         </TooltipProvider>
       </LucideProvider>
     </QueryClientProvider>

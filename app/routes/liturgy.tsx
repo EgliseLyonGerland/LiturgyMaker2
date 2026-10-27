@@ -72,9 +72,11 @@ async function getPreviousWeekBlock<T extends LiturgyBlockType>(
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { liturgyId } = params;
 
-  const liturgy = await getLiturgy(liturgyId);
-  const songs = await getSongs();
-  const recitations = await getRecitations();
+  const [liturgy, songs, recitations] = await Promise.all([
+    getLiturgy(liturgyId),
+    getSongs(),
+    getRecitations(),
+  ]);
 
   return { liturgy, songs, recitations };
 }
