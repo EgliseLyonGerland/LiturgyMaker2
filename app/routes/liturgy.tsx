@@ -226,25 +226,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
       </HeaderSlot>
       <FormProvider {...form}>
         <div className="@container flex w-full flex-1 gap-4 px-4">
-          <LiturgyMenu
-            fields={fields}
-            songs={songs}
-            recitations={recitations}
-            className="hidden max-w-50 sm:block @min-3xl:max-w-xs"
-            onClick={(field) => {
-              const blockElement = document.getElementById(field.id);
-
-              if (blockElement) {
-                window.scrollTo({
-                  top: blockElement.offsetTop,
-                  behavior: "smooth",
-                });
-              }
-            }}
-            onMove={(fromIndex, toIndex) => {
-              move(fromIndex, toIndex);
-            }}
-          />
+          {/* Le formulaire est placé avant le menu dans le DOM pour recevoir le focus en premier. */}
           <form
             id="liturgy-form"
             className="w-full flex-1 py-4 sm:max-w-xl"
@@ -308,6 +290,29 @@ function Content({ loaderData, params }: Route.ComponentProps) {
               ))}
             </div>
           </form>
+          <LiturgyMenu
+            fields={fields}
+            songs={songs}
+            recitations={recitations}
+            className="order-first hidden max-w-50 sm:block @min-3xl:max-w-xs"
+            onClick={(field) => {
+              const blockElement = document.getElementById(field.id);
+
+              if (blockElement) {
+                window.scrollTo({
+                  top: blockElement.offsetTop,
+                  behavior: "smooth",
+                });
+
+                blockElement
+                  .querySelector<HTMLElement>("input, textarea, select, button")
+                  ?.focus({ preventScroll: true });
+              }
+            }}
+            onMove={(fromIndex, toIndex) => {
+              move(fromIndex, toIndex);
+            }}
+          />
         </div>
       </FormProvider>
 
