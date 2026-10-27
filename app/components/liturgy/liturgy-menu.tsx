@@ -97,7 +97,6 @@ export function LiturgyMenu({
           "sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-none py-4 pr-4",
           className,
         )}
-        aria-hidden
       >
         {fields.map((field, index) => (
           <MenuItem
@@ -150,7 +149,7 @@ function MenuItem({ field, index, songs, recitations, onClick }: MenuItemProps) 
             <ItemTitle>{liturgyBlockNames[field.type]}</ItemTitle>
             {description && (
               <ItemDescription className="line-clamp-none flex flex-col text-xs">
-                {description.map((line) => (
+                {description.filter(Boolean).map((line) => (
                   <span key={line} className="mt-0.5">
                     {line}
                   </span>
