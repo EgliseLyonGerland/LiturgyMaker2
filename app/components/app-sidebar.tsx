@@ -1,10 +1,14 @@
-import { ChurchIcon, ListMusicIcon, MessageSquareTextIcon } from "lucide-react";
+import { type UserInfo } from "firebase/auth";
+import { ChurchIcon, ListMusicIcon, LogOutIcon, MessageSquareTextIcon } from "lucide-react";
+import { ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
-import { NavLink, useLocation } from "react-router";
+import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
+import { NavLink, useLocation, useNavigate } from "react-router";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -13,8 +17,19 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { firebaseAuth } from "@/lib/firebase";
 
-// This is sample data.
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+
 const navItems = [
   {
     title: "Présidences",
@@ -34,6 +49,10 @@ const navItems = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [user] = useAuthState(firebaseAuth);
+
+  console.log(user);
+
   const location = useLocation();
 
   return (
@@ -71,7 +90,73 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {user && <Footer user={user} />}
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+interface FooterProps {
+  user: UserInfo;
+}
+
+function Footer({ user }: FooterProps) {
+  const isMobile = useIsMobile();
+  const [signOut] = useSignOut(firebaseAuth);
+  const navigate = useNavigate();
+
+  return (
+    <SidebarFooter>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                />
+              }
+            >
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                {/* <span className="truncate font-medium">{user.displayName}</span> */}
+                <span className="truncate text-xs">{user.email}</span>
+              </div>
+              <ChevronsUpDownIcon className="ml-auto size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              side={isMobile ? "bottom" : "right"}
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      {/* <span className="truncate font-medium">Nicolas</span> */}
+                      <span className="truncate text-xs">{user.email}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onClick={() => {
+                    signOut();
+                    navigate("/auth");
+                  }}
+                >
+                  <LogOutIcon />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
   );
 }
