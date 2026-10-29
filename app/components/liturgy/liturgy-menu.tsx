@@ -94,7 +94,7 @@ export function LiturgyMenu({
     >
       <div
         className={cn(
-          "sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-none py-4 pr-4",
+          "sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-contain py-4 pr-4",
           className,
         )}
       >
@@ -137,6 +137,7 @@ function MenuItem({ field, index, songs, recitations, onClick }: MenuItemProps) 
       render={
         <a
           href="#"
+          className="flex-nowrap!"
           onClick={(event) => {
             event.preventDefault();
             onClick();
@@ -148,9 +149,9 @@ function MenuItem({ field, index, songs, recitations, onClick }: MenuItemProps) 
           <ItemContent>
             <ItemTitle>{liturgyBlockNames[field.type]}</ItemTitle>
             {description && (
-              <ItemDescription className="line-clamp-none flex flex-col text-xs">
-                {description.filter(Boolean).map((line) => (
-                  <span key={line} className="mt-0.5">
+              <ItemDescription className="flex max-w-full min-w-0 flex-1 shrink flex-col text-xs">
+                {description.filter(Boolean).map((line, index) => (
+                  <span key={`${line}-${index}`} className="mt-0.5 block truncate">
                     {line}
                   </span>
                 ))}
