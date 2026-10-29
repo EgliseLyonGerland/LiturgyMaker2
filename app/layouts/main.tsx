@@ -1,26 +1,32 @@
-import { onAuthStateChanged } from "firebase/auth";
 import { Outlet, redirect } from "react-router";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { firebaseAuth } from "@/lib/firebase";
+import { getCurrentUser, type CurrentUser } from "@/lib/current-user";
+import { userContext } from "@/lib/user-context";
 
 import type { Route } from "./+types/main";
 
-const authMiddleware: Route.MiddlewareFunction = async ({ url }) => {
-  const user = await new Promise((resolve) => {
-    onAuthStateChanged(firebaseAuth, (user) => {
-      resolve(user);
-    });
-  });
+const authMiddleware = (async ({ url, context }) => {
+  const user = await getCurrentUser();
 
   if (!user) {
-    throw redirect(`/auth?redirect=${encodeURI(url.pathname + url.searchParams)}`);
+    throw redirect(`/auth?redirect=${encodeURIComponent(url.pathname + url.search)}`);
   }
-};
 
-export const clientMiddleware: Route.MiddlewareFunction[] = [authMiddleware];
+  context.set(userContext, user);
+}) satisfies Route.ClientMiddlewareFunction;
+
+export const clientMiddleware = [authMiddleware];
+
+export function clientLoader({ context }: Route.ClientLoaderArgs): CurrentUser {
+  return context.get(userContext);
+}
+
+export function shouldRevalidate() {
+  return true;
+}
 
 export default function MainLayout() {
   return (

@@ -1,8 +1,7 @@
-import { type UserInfo } from "firebase/auth";
 import { ChurchIcon, ListMusicIcon, LogOutIcon, MessageSquareTextIcon } from "lucide-react";
 import { ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
-import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
+import { useSignOut } from "react-firebase-hooks/auth";
 import { NavLink, useLocation, useNavigate } from "react-router";
 
 import {
@@ -18,7 +17,9 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { CurrentUser } from "@/lib/current-user";
 import { firebaseAuth } from "@/lib/firebase";
+import { useCurrentUser } from "@/lib/user-context";
 
 import { ThemeSwitcherDropdownMenuGroup } from "./theme";
 import {
@@ -30,6 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { toast } from "./ui/toast";
 
 const navItems = [
   {
@@ -50,9 +52,7 @@ const navItems = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [user] = useAuthState(firebaseAuth);
-
-  console.log(user);
+  const user = useCurrentUser();
 
   const location = useLocation();
 
@@ -92,14 +92,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      {user && <Footer user={user} />}
+      <Footer user={user} />
       <SidebarRail />
     </Sidebar>
   );
 }
 
 interface FooterProps {
-  user: UserInfo;
+  user: CurrentUser;
 }
 
 function Footer({ user }: FooterProps) {
@@ -120,9 +120,11 @@ function Footer({ user }: FooterProps) {
                 />
               }
             >
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                {/* <span className="truncate font-medium">{user.displayName}</span> */}
-                <span className="truncate text-xs">{user.email}</span>
+              <div className="grid flex-1 gap-0.5 text-left text-sm leading-tight">
+                {user.profile && (
+                  <span className="truncate font-medium">Hey, {user.profile.firstName} !</span>
+                )}
+                <span className="truncate text-xs text-muted-foreground">{user.auth.email}</span>
               </div>
               <ChevronsUpDownIcon className="ml-auto size-4" />
             </DropdownMenuTrigger>
@@ -136,8 +138,12 @@ function Footer({ user }: FooterProps) {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      {/* <span className="truncate font-medium">Nicolas</span> */}
-                      <span className="truncate text-xs">{user.email}</span>
+                      {user.profile && (
+                        <span className="truncate font-medium">
+                          {user.profile.firstName} {user.profile.lastName}
+                        </span>
+                      )}
+                      <span className="truncate text-xs">{user.auth.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -147,9 +153,15 @@ function Footer({ user }: FooterProps) {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onClick={() => {
-                    signOut();
-                    navigate("/auth");
+                  onClick={async () => {
+                    if (await signOut()) {
+                      navigate("/auth");
+                    } else {
+                      toast.add({
+                        title: "Déconnexion impossible",
+                        type: "error",
+                      });
+                    }
                   }}
                 >
                   <LogOutIcon />

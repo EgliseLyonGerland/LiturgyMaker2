@@ -28,11 +28,11 @@ import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/confi
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { getLiturgy, getRecitations, getSongs, updateLiturgy } from "@/lib/api";
 import { createDefaultBlock } from "@/lib/default-liturgy";
-import { firebaseAuth } from "@/lib/firebase";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import { liturgySchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
+import { userContext } from "@/lib/user-context";
 
 import type { Route } from "./+types/liturgy";
 
@@ -77,7 +77,8 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   return { liturgy, songs, recitations };
 }
 
-export async function clientAction({ params, request }: Route.ClientActionArgs) {
+export async function clientAction({ params, request, context }: Route.ClientActionArgs) {
+  const user = context.get(userContext);
   const { liturgyId } = params;
   const data = await request.json();
 
@@ -86,7 +87,7 @@ export async function clientAction({ params, request }: Route.ClientActionArgs) 
 
     const liturgy = {
       ...output,
-      uid: firebaseAuth.currentUser?.uid || "",
+      uid: user.auth.uid,
     };
 
     await updateLiturgy(liturgyId, liturgy);
