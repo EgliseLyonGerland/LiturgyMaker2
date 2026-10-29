@@ -33,14 +33,42 @@ import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
 import { useLiturgyBlockContext } from "@/lib/liturgy-context";
 import type { LiturgyBlockType } from "@/lib/schemas";
 
-const colorByType: Record<LiturgyBlockType, string> = {
-  announcements: cn("bg-taupe-600/10"),
-  openDoors: cn("bg-purple-900/10"),
-  reading: cn("bg-pink-900/10"),
-  recitation: cn("bg-stone-900/10"),
-  section: cn("bg-emerald-900/10"),
-  sermon: cn("bg-amber-900/10"),
-  songs: cn("bg-blue-900/10"),
+const colorByType: Record<LiturgyBlockType, Record<string, string>> = {
+  announcements: {
+    "--color-50": "var(--color-taupe-100)",
+    "--color-400": "var(--color-taupe-400)",
+    "--color-900": "var(--color-taupe-600)",
+  },
+  openDoors: {
+    "--color-50": "var(--color-purple-50)",
+    "--color-400": "var(--color-purple-400)",
+    "--color-900": "var(--color-purple-900)",
+  },
+  reading: {
+    "--color-50": "var(--color-pink-50)",
+    "--color-400": "var(--color-pink-400)",
+    "--color-900": "var(--color-pink-900)",
+  },
+  recitation: {
+    "--color-50": "var(--color-stone-50)",
+    "--color-400": "var(--color-stone-400)",
+    "--color-900": "var(--color-stone-900)",
+  },
+  section: {
+    "--color-50": "var(--color-emerald-50)",
+    "--color-400": "var(--color-emerald-400)",
+    "--color-900": "var(--color-emerald-900)",
+  },
+  sermon: {
+    "--color-50": "var(--color-amber-50)",
+    "--color-400": "var(--color-amber-400)",
+    "--color-900": "var(--color-amber-900)",
+  },
+  songs: {
+    "--color-50": "var(--color-blue-50)",
+    "--color-400": "var(--color-blue-400)",
+    "--color-900": "var(--color-blue-900)",
+  },
 };
 
 interface Context {
@@ -67,7 +95,15 @@ interface LiturgyCardProps extends ComponentProps<typeof Card> {
 function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
   return (
     <context.Provider value={{ type }}>
-      <Card id={id} {...props} className={cn("pt-0", colorByType[type], className)} />
+      <Card
+        id={id}
+        {...props}
+        className={cn(
+          "pt-0 ring ring-(--color-400) dark:bg-(--color-900)/10 dark:ring-(--color-900)/60",
+          className,
+        )}
+        style={colorByType[type] as React.CSSProperties}
+      />
     </context.Provider>
   );
 }
@@ -75,12 +111,17 @@ function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
 
 function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderProps) {
+  const { type } = useLiturgyCardContext();
   const { remove, fillFromPreviousWeek } = useLiturgyBlockContext();
 
   return (
     <CardHeader
       {...props}
-      className={cn("mb-0 flex h-16 items-center border-b border-border pb-0!", className)}
+      className={cn(
+        "mb-0 flex h-16 items-center border-b border-border bg-(--color-50) pb-0! dark:bg-transparent",
+        className,
+      )}
+      style={colorByType[type] as React.CSSProperties}
     >
       {children}
 
@@ -163,7 +204,15 @@ function LiturgyCardContent(props: LiturgyCardContentProps) {
 interface LiturgyCardFooterProps extends ComponentProps<typeof CardFooter> {}
 
 function LiturgyCardFooter({ className, ...props }: LiturgyCardFooterProps) {
-  return <CardFooter {...props} className={cn("bg-black/20", className)} />;
+  const { type } = useLiturgyCardContext();
+
+  return (
+    <CardFooter
+      {...props}
+      className={cn("bg-(--color-50)/50 dark:bg-(--color-900)/10", className)}
+      style={colorByType[type] as React.CSSProperties}
+    />
+  );
 }
 
 interface LiturgyCardSeparatorProps extends React.ComponentProps<"div"> {}
