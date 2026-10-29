@@ -171,6 +171,17 @@ const recitationSchema = v.object({
 });
 
 type Liturgy = v.InferOutput<typeof liturgySchema>;
+type LiturgyWithId = Liturgy & { id: string };
+
+type LiturgyBlocks = {
+  announcements: AnnouncementsBlock;
+  reading: ReadingBlock;
+  section: SectionBlock;
+  sermon: SermonBlock;
+  songs: SongsBlock;
+  recitation: RecitationBlock;
+  openDoors: OpenDoorsBlock;
+};
 
 type Lyrics = v.InferOutput<typeof lyricsSchema>;
 type AnnouncementsBlock = v.InferOutput<typeof announcementsBlockSchema>;
@@ -214,6 +225,8 @@ export type {
   RecitationBlock,
   OpenDoorsBlock,
   Liturgy,
+  LiturgyWithId,
+  LiturgyBlocks,
   LiturgyBlockType,
   Song,
   SongWithId,

@@ -1,7 +1,14 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import type { Lens } from "@hookform/lenses";
-import { EllipsisVerticalIcon, GripHorizontalIcon, PlusIcon, TrashIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  EllipsisVerticalIcon,
+  GripHorizontalIcon,
+  PlusIcon,
+  TrashIcon,
+} from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import { Controller, useController, useFieldArray } from "react-hook-form";
 
@@ -189,10 +196,10 @@ function PassageItem({
                 <DropdownMenuContent className="w-auto" align="start">
                   <DropdownMenuGroup>
                     <DropdownMenuItem onClick={onInsertBefore}>
-                      <PlusIcon /> Ajouter au dessus
+                      <ArrowUpIcon /> Ajouter au dessus
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={onInsertAfter}>
-                      <PlusIcon />
+                      <ArrowDownIcon />
                       Ajouter en dessous
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

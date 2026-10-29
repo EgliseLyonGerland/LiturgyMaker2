@@ -1,12 +1,10 @@
-import { Popover as PopoverPrimitive } from "@base-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { addDays, format, subDays } from "date-fns";
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, SaveIcon } from "lucide-react";
+import { format, subDays } from "date-fns";
+import { PlusIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { fr } from "react-day-picker/locale";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useBlocker, useFetcher, useNavigate, useNavigation } from "react-router";
+import { useBlocker, useFetcher, useNavigation } from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
@@ -19,12 +17,12 @@ import { RecitationBlockForm } from "@/components/liturgy/block-forms/recitation
 import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
+import { CodeDialog } from "@/components/liturgy/code-dialog";
+import { LiturgyHeader } from "@/components/liturgy/header";
 import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
@@ -37,8 +35,6 @@ import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import { liturgySchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
 
 import type { Route } from "./+types/liturgy";
-
-const datePickerHandle = PopoverPrimitive.createHandle();
 
 async function getPreviousWeekBlock<T extends LiturgyBlockType>(
   blocks: Liturgy["blocks"],
@@ -117,7 +113,6 @@ export default function EditLiturgy(props: Route.ComponentProps) {
 }
 
 function Content({ loaderData, params }: Route.ComponentProps) {
-  const navigate = useNavigate();
   const navigation = useNavigation();
   const fetcher = useFetcher();
 
@@ -150,79 +145,16 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const [listElementRef] = useAutoAnimate();
 
   const date = converToDate(liturgyId);
-  const previousDate = subDays(date, 7);
-  const nextDate = addDays(date, 7);
 
   return (
     <>
       <Title>{`Présidence du ${format(date, "do MMMM y")}`}</Title>
       <HeaderSlot>
-        <div className="flex items-center">
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            title={`Aller à la la liturgie du ${format(previousDate, "do MMMM y")}`}
-            onClick={() => {
-              navigate(`/liturgies/${convertToId(previousDate)}`);
-            }}
-          >
-            <ChevronLeftIcon />
-          </Button>
-          <Popover handle={datePickerHandle}>
-            <PopoverTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="group"
-                  disabled={disabled}
-                  title="Sélectionner une date"
-                >
-                  <span>
-                    <span className="hidden xs:inline">Présidence du</span>{" "}
-                    {format(date, "do MMMM y")}
-                  </span>
-                </Button>
-              }
-            />
-            <PopoverContent className="p-0" align="start">
-              <Calendar
-                className="w-full min-w-(--anchror-width)"
-                mode="single"
-                locale={fr}
-                selected={date}
-                defaultMonth={date}
-                onSelect={(selectedDate) => {
-                  if (selectedDate) {
-                    datePickerHandle.close();
-                    navigate(`/liturgies/${convertToId(selectedDate)}`);
-                  }
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            title={`Aller à la la liturgie du ${format(nextDate, "do MMMM y")}`}
-            onClick={() => {
-              navigate(`/liturgies/${convertToId(nextDate)}`);
-            }}
-          >
-            <ChevronRightIcon />
-          </Button>
-
-          <Button
-            className="ml-auto"
-            type="submit"
-            form="liturgy-form"
-            disabled={disabled || !isDirty}
-          >
-            {fetcher.state !== "idle" && <Spinner />}
-            <span className="hidden sm:block">Enregistrer</span>
-            <SaveIcon className="md:hidden" />
-          </Button>
-        </div>
+        <LiturgyHeader
+          date={date}
+          disabled={disabled || !isDirty}
+          loading={fetcher.state !== "idle"}
+        />
       </HeaderSlot>
       <FormProvider {...form}>
         <div className="@container flex w-full flex-1 gap-4 px-4 md:px-8">
@@ -313,6 +245,8 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             }}
           />
         </div>
+
+        <CodeDialog date={date} songs={songs} recitations={recitations} />
       </FormProvider>
 
       {blocker.state === "blocked" && <DiscardAlertDialog blocker={blocker} />}
