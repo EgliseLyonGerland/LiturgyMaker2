@@ -3,9 +3,10 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
+  getDocFromServer,
   getDocs,
   query,
+  runTransaction,
   setDoc,
 } from "firebase/firestore";
 import { sort } from "radashi";
@@ -132,7 +133,7 @@ export async function getLiturgy(id: string) {
   return await queryClient.query({
     queryKey: ["liturgies", id],
     queryFn: async () => {
-      const snapshot = await getDoc(doc(firebaseDb, "liturgies", id));
+      const snapshot = await getDocFromServer(doc(firebaseDb, "liturgies", id));
 
       if (!snapshot.exists()) {
         return createDefaultLiturgy();
@@ -147,8 +148,29 @@ export async function getLiturgy(id: string) {
   });
 }
 
-export async function updateLiturgy(id: string, data: Liturgy) {
-  await setDoc(doc(firebaseDb, "liturgies", id), data);
+export class LiturgyConflictError extends Error {
+  constructor() {
+    super("La liturgie a été modifiée depuis son ouverture.");
+    this.name = "LiturgyConflictError";
+  }
+}
 
-  return queryClient.invalidateQueries({ queryKey: ["liturgies", id] });
+export async function updateLiturgy(id: string, data: Liturgy, overwrite = false) {
+  const ref = doc(firebaseDb, "liturgies", id);
+  const revision = crypto.randomUUID();
+
+  await runTransaction(firebaseDb, async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    const currentRevision = snapshot.exists()
+      ? v.parse(v.optional(v.string()), snapshot.data().revision)
+      : undefined;
+
+    if (!overwrite && currentRevision !== data.revision) {
+      throw new LiturgyConflictError();
+    }
+
+    transaction.set(ref, { ...data, revision });
+  });
+
+  queryClient.setQueryData(["liturgies", id], { ...data, revision });
 }

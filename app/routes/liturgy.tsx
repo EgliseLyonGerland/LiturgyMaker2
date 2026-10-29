@@ -2,12 +2,22 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format, subDays } from "date-fns";
 import { PlusIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useBlocker, useFetcher, useNavigation } from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
+import {
+  ConfirmDropdown,
+  ConfirmDropdownActions,
+  ConfirmDropdownCancel,
+  ConfirmDropdownConfirm,
+  ConfirmDropdownContent,
+  ConfirmDropdownDescription,
+  ConfirmDropdownTitle,
+  ConfirmDropdownTrigger,
+} from "@/components/confirm-dropdown";
 import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
 import { HeaderSlot } from "@/components/header-slot";
 import { AnnouncementsBlockForm } from "@/components/liturgy/block-forms/announcements";
@@ -21,16 +31,32 @@ import { CodeDialog } from "@/components/liturgy/code-dialog";
 import { LiturgyHeader } from "@/components/liturgy/header";
 import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
 import { Title } from "@/components/title";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/components/ui/toast";
 import { liturgyBlockIcons, liturgyBlockNames, liturgyBlockTypes } from "@/config";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
-import { getLiturgy, getRecitations, getSongs, updateLiturgy } from "@/lib/api";
+import {
+  getLiturgy,
+  getRecitations,
+  getSongs,
+  LiturgyConflictError,
+  updateLiturgy,
+} from "@/lib/api";
 import { createDefaultBlock } from "@/lib/default-liturgy";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
+import { queryClient } from "@/lib/query-client";
 import { liturgySchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
 import { userContext } from "@/lib/user-context";
 
@@ -77,31 +103,56 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   return { liturgy, songs, recitations };
 }
 
+const submissionSchema = v.variant("intent", [
+  v.object({ intent: v.literal("reload") }),
+  v.object({
+    intent: v.literal("save"),
+    liturgy: liturgySchema,
+    overwrite: v.boolean(),
+  }),
+]);
+
 export async function clientAction({ params, request, context }: Route.ClientActionArgs) {
   const user = context.get(userContext);
   const { liturgyId } = params;
-  const data = await request.json();
 
   try {
-    const output = v.parse(liturgySchema, data);
+    const submission = v.parse(submissionSchema, await request.json());
+
+    if (submission.intent === "reload") {
+      await queryClient.invalidateQueries({
+        queryKey: ["liturgies", liturgyId],
+        exact: true,
+        refetchType: "none",
+      });
+      await getLiturgy(liturgyId);
+
+      return { status: "reloaded" as const };
+    }
 
     const liturgy = {
-      ...output,
+      ...submission.liturgy,
       uid: user.auth.uid,
     };
 
-    await updateLiturgy(liturgyId, liturgy);
+    await updateLiturgy(liturgyId, liturgy, submission.overwrite);
 
     toast.add({
       title: "Enregistrement réussi",
       type: "success",
     });
+    return { status: "saved" as const };
   } catch (error) {
-    console.log(error);
+    if (error instanceof LiturgyConflictError) {
+      return { status: "conflict" as const };
+    }
+
     toast.add({
-      title: "Echec de l'enregistrement",
+      title: "Echec de l'opération",
       type: "error",
     });
+
+    return { status: "error" as const };
   }
 }
 
@@ -115,7 +166,15 @@ export default function EditLiturgy(props: Route.ComponentProps) {
 
 function Content({ loaderData, params }: Route.ComponentProps) {
   const navigation = useNavigation();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
+  const [lastResult, setLastResult] = useState(fetcher.data);
+  const [conflictOpen, setConflictOpen] = useState(false);
+
+  if (fetcher.state === "idle" && fetcher.data?.status !== "error" && fetcher.data !== lastResult) {
+    setLastResult(fetcher.data);
+    setConflictOpen(fetcher.data?.status === "conflict");
+  }
+  const conflicted = lastResult?.status === "conflict";
 
   const { liturgyId } = params;
   const { liturgy, songs, recitations } = loaderData;
@@ -131,8 +190,17 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isDirty, isReady },
   } = form;
+
+  useEffect(() => {
+    if (fetcher.state !== "idle") return;
+
+    if (fetcher.data?.status === "saved" || fetcher.data?.status === "reloaded") {
+      reset(liturgy);
+    }
+  }, [fetcher.state, fetcher.data, liturgy, reset]);
 
   const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
 
@@ -146,6 +214,13 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const [listElementRef] = useAutoAnimate();
 
   const date = converToDate(liturgyId);
+
+  function save(data: Liturgy, overwrite = false) {
+    return fetcher.submit(
+      { intent: "save", liturgy: data, overwrite },
+      { method: "post", encType: "application/json" },
+    );
+  }
 
   return (
     <>
@@ -162,13 +237,90 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           <form
             id="liturgy-form"
             className="w-full flex-1 py-4 sm:max-w-xl"
-            onSubmit={handleSubmit((data) =>
-              fetcher.submit(data, {
-                method: "post",
-                encType: "application/json",
-              }),
-            )}
+            onSubmit={handleSubmit((data) => save(data))}
           >
+            {conflicted && (
+              <AlertDialog
+                open={conflictOpen}
+                onOpenChange={(open) => {
+                  if (!disabled) {
+                    setConflictOpen(open);
+                  }
+                }}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>La liturgie a été modifiée</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Une autre version a été enregistrée depuis votre ouverture. Votre saisie est
+                      conservée et n'a pas été enregistrée.
+                      <br />
+                      <br />
+                      Que souhaitez-vous faire ?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="flex-wrap">
+                    <AlertDialogCancel disabled={disabled}>Continuer l'édition</AlertDialogCancel>
+                    <ConfirmDropdown>
+                      <ConfirmDropdownTrigger
+                        render={
+                          <Button type="button" variant="outline" disabled={disabled}>
+                            Recharger
+                          </Button>
+                        }
+                      />
+                      <ConfirmDropdownContent className="max-w-xs text-center">
+                        <ConfirmDropdownDescription>
+                          Votre saisie sera perdue et remplacée par la dernière version enregistrée.
+                        </ConfirmDropdownDescription>
+                        <ConfirmDropdownActions>
+                          <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
+                          <ConfirmDropdownConfirm
+                            variant="destructive"
+                            disabled={disabled}
+                            onClick={() => {
+                              void fetcher.submit(
+                                { intent: "reload" },
+                                { method: "post", encType: "application/json" },
+                              );
+                            }}
+                          >
+                            Confirmer
+                          </ConfirmDropdownConfirm>
+                        </ConfirmDropdownActions>
+                      </ConfirmDropdownContent>
+                    </ConfirmDropdown>
+                    <ConfirmDropdown>
+                      <ConfirmDropdownTrigger
+                        render={
+                          <Button type="button" variant="destructive" disabled={disabled}>
+                            Écraser
+                          </Button>
+                        }
+                      />
+                      <ConfirmDropdownContent className="max-w-xs text-center">
+                        <ConfirmDropdownDescription>
+                          La dernière version enregistrée sera remplacée par la votre,
+                          souhaitiez-vous confirmer ?
+                        </ConfirmDropdownDescription>
+                        <ConfirmDropdownActions>
+                          <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
+                          <ConfirmDropdownConfirm
+                            variant="destructive"
+                            disabled={disabled}
+                            onClick={() => {
+                              void handleSubmit((data) => save(data, true))();
+                            }}
+                          >
+                            Confirmer
+                          </ConfirmDropdownConfirm>
+                        </ConfirmDropdownActions>
+                      </ConfirmDropdownContent>
+                    </ConfirmDropdown>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <AddBlockButton
               onSelect={(type) => {
                 prepend(createDefaultBlock(type), { focusName: getBlockFocusName(type, 0) });

@@ -77,6 +77,7 @@ function ConfirmDropdownContent({ children, className, ...props }: ConfirmDropdo
   return (
     <Popover.Portal>
       <Popover.Positioner
+        className="isolate z-50"
         sideOffset={8}
         collisionAvoidance={{
           align: "shift",
@@ -102,6 +103,17 @@ interface ConfirmDropdownTitleProps extends React.HTMLProps<HTMLDivElement> {}
 
 function ConfirmDropdownTitle({ className, ...props }: ConfirmDropdownTitleProps) {
   return <div {...props} className={cn("text-base", className)} />;
+}
+
+interface ConfirmDropdownDescriptionProps extends React.HTMLProps<HTMLDivElement> {}
+
+function ConfirmDropdownDescription({ className, ...props }: ConfirmDropdownDescriptionProps) {
+  return (
+    <div
+      {...props}
+      className={cn("text-sm text-balance text-muted-foreground md:text-pretty", className)}
+    />
+  );
 }
 
 interface ConfirmDropdownActionsProps extends React.HTMLProps<HTMLDivElement> {}
@@ -158,6 +170,7 @@ export {
   ConfirmDropdownTrigger,
   ConfirmDropdownContent,
   ConfirmDropdownTitle,
+  ConfirmDropdownDescription,
   ConfirmDropdownActions,
   ConfirmDropdownCancel,
   ConfirmDropdownConfirm,
@@ -168,6 +181,7 @@ export type {
   ConfirmDropdownTriggerProps,
   ConfirmDropdownContentProps,
   ConfirmDropdownTitleProps,
+  ConfirmDropdownDescriptionProps,
   ConfirmDropdownActionsProps,
   ConfirmDropdownCancelProps,
   ConfirmDropdownConfirmProps,

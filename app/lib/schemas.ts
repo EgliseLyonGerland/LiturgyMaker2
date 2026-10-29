@@ -123,6 +123,7 @@ const openDoorsBlockSchema = v.object({
 const liturgySchema = v.object({
   uid: v.string(),
   version: v.literal(liturgyDocumentVersion),
+  revision: v.optional(v.string()),
   blocks: v.array(
     v.variant("type", [
       announcementsBlockSchema,
