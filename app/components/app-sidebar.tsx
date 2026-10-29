@@ -20,6 +20,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { firebaseAuth } from "@/lib/firebase";
 
+import { ThemeSwitcherDropdownMenuGroup } from "./theme";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,6 +142,8 @@ function Footer({ user }: FooterProps) {
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <ThemeSwitcherDropdownMenuGroup />
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem

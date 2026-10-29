@@ -14,13 +14,14 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import { ThemeProvider } from "@/components/theme";
+import { Title } from "@/components/title";
 import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
 import type { Route } from "./+types/root";
-import { Title } from "./components/title";
 
 setDefaultOptions({ locale: fr });
 
@@ -46,8 +47,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  var stored = localStorage.getItem('theme') || 'system';
+                  var media = window.matchMedia('(prefers-color-scheme: dark)');
+                  var isDark = stored === 'dark' || (stored === 'system' && media.matches);
+
+                  document.documentElement.dataset.theme = stored;
+                  if (isDark) document.documentElement.classList.add('dark');
+                } catch (_) {}
+              })();
+            `,
+          }}
+        />
       </head>
-      <body className="dark">
+      <body>
         {children}
         <Title />
         <ScrollRestoration />
@@ -60,13 +77,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <LucideProvider strokeWidth={1.5}>
-        <TooltipProvider>
-          <Outlet />
-          <Toaster />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </TooltipProvider>
-      </LucideProvider>
+      <ThemeProvider>
+        <LucideProvider strokeWidth={2}>
+          <TooltipProvider>
+            <Outlet />
+            <Toaster />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </TooltipProvider>
+        </LucideProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
