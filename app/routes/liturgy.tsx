@@ -165,7 +165,6 @@ export default function EditLiturgy(props: Route.ComponentProps) {
 }
 
 function Content({ loaderData, params }: Route.ComponentProps) {
-  const navigation = useNavigation();
   const fetcher = useFetcher<typeof clientAction>();
   const [lastResult, setLastResult] = useState(fetcher.data);
   const [conflictOpen, setConflictOpen] = useState(false);
@@ -179,7 +178,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const { liturgyId } = params;
   const { liturgy, songs, recitations } = loaderData;
 
-  const disabled = navigation.state !== "idle" || fetcher.state !== "idle";
+  const disabled = fetcher.state !== "idle";
 
   const form = useForm({
     resolver: valibotResolver(liturgySchema),
