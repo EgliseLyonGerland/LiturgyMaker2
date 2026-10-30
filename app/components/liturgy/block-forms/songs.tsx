@@ -486,7 +486,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
 
   const form = useForm<{ lyrics: Lyrics }>({
     defaultValues: {
-      lyrics: value ?? song.lyrics,
+      lyrics: value.length > 0 ? value : song.lyrics,
     },
   });
 
