@@ -1,4 +1,4 @@
-import type { User } from "firebase/auth";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, type QueryDocumentSnapshot } from "firebase/firestore";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -6,6 +6,11 @@ import { toast } from "@/components/ui/toast";
 
 import { getCurrentUser } from "../current-user";
 import { firebaseAuth, firebaseDb } from "../firebase";
+import { queryClient } from "../query-client";
+
+vi.mock("firebase/auth", () => ({
+  onAuthStateChanged: vi.fn(),
+}));
 
 vi.mock("../firebase", () => ({
   firebaseAuth: {
@@ -36,6 +41,15 @@ const auth = {
   getIdToken: vi.fn(),
 } satisfies Partial<User>;
 
+const authStateObserver = vi.mocked(onAuthStateChanged).mock.calls[0][1];
+
+function notifyAuthStateChanged() {
+  if (typeof authStateObserver !== "function") {
+    throw new Error("Expected an auth state callback");
+  }
+  authStateObserver(firebaseAuth.currentUser);
+}
+
 function setAuth(user: Partial<User> | null) {
   Object.defineProperty(firebaseAuth, "currentUser", {
     configurable: true,
@@ -54,6 +68,7 @@ function setProfile(data: unknown, exists = true) {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  queryClient.clear();
   setAuth(auth);
 });
 
@@ -88,11 +103,51 @@ describe("getCurrentUser()", () => {
     expect(toast.add).not.toHaveBeenCalled();
   });
 
+  it("reuses the profile across consecutive navigation checks", async () => {
+    setProfile(profile);
+
+    await getCurrentUser();
+    expect(await getCurrentUser()).toEqual({ auth, profile });
+
+    expect(getDoc).toHaveBeenCalledOnce();
+    expect(firebaseAuth.authStateReady).toHaveBeenCalledTimes(2);
+  });
+
+  it("deduplicates concurrent profile requests", async () => {
+    setProfile(profile);
+
+    const users = await Promise.all([getCurrentUser(), getCurrentUser()]);
+
+    expect(users).toEqual([
+      { auth, profile },
+      { auth, profile },
+    ]);
+    expect(getDoc).toHaveBeenCalledOnce();
+  });
+
+  it("preserves the current account cache when its initial auth event arrives", async () => {
+    setProfile(profile);
+    await getCurrentUser();
+
+    notifyAuthStateChanged();
+
+    expect(await getCurrentUser()).toEqual({ auth, profile });
+    expect(getDoc).toHaveBeenCalledOnce();
+  });
+
   it("allows an absent profile with the email still available", async () => {
     setProfile(undefined, false);
 
     expect(await getCurrentUser()).toEqual({ auth, profile: null });
     expect(toast.add).not.toHaveBeenCalled();
+  });
+
+  it("also caches absent profiles", async () => {
+    setProfile(undefined, false);
+
+    await getCurrentUser();
+    expect(await getCurrentUser()).toEqual({ auth, profile: null });
+    expect(getDoc).toHaveBeenCalledOnce();
   });
 
   it.each([null, {}, { ...profile, firstName: 42 }, { ...profile, displayName: null }])(
@@ -101,6 +156,9 @@ describe("getCurrentUser()", () => {
       setProfile(data);
 
       expect(await getCurrentUser()).toEqual({ auth, profile: null });
+      await getCurrentUser();
+      expect(getDoc).toHaveBeenCalledOnce();
+      expect(toast.add).toHaveBeenCalledOnce();
       expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ type: "warning" }));
     },
   );
@@ -110,10 +168,30 @@ describe("getCurrentUser()", () => {
     await getCurrentUser();
     const nextAuth = { ...auth, uid: "user-2", email: "other@example.com" };
     setAuth(nextAuth);
+    notifyAuthStateChanged();
     setProfile(undefined, false);
 
     expect(await getCurrentUser()).toEqual({ auth: nextAuth, profile: null });
     expect(doc).toHaveBeenLastCalledWith(firebaseDb, "users", "user-2");
+    expect(queryClient.getQueryData(["user-profile", auth.uid])).toBeUndefined();
+  });
+
+  it("clears the profile on sign-out and reloads it when the same account signs back in", async () => {
+    setProfile(profile);
+    await getCurrentUser();
+
+    setAuth(null);
+    notifyAuthStateChanged();
+    expect(await getCurrentUser()).toBeNull();
+    expect(queryClient.getQueryData(["user-profile", auth.uid])).toBeUndefined();
+
+    setAuth(auth);
+    notifyAuthStateChanged();
+    const updatedProfile = { ...profile, firstName: "Paul" };
+    setProfile(updatedProfile);
+
+    expect(await getCurrentUser()).toEqual({ auth, profile: updatedProfile });
+    expect(getDoc).toHaveBeenCalledTimes(2);
   });
 
   it("propagates Firestore failures instead of treating them as missing profiles", async () => {
@@ -121,6 +199,10 @@ describe("getCurrentUser()", () => {
     vi.mocked(getDoc).mockRejectedValue(error);
 
     await expect(getCurrentUser()).rejects.toBe(error);
+
+    setProfile(profile);
+    expect(await getCurrentUser()).toEqual({ auth, profile });
+    expect(getDoc).toHaveBeenCalledTimes(2);
   });
 
   it("propagates authentication initialization failures", async () => {
