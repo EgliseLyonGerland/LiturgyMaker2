@@ -9,6 +9,7 @@ import { Navigate, useFetcher, useSearchParams } from "react-router";
 import * as v from "valibot";
 
 import { FormFieldError } from "@/components/form-field-error";
+import { LoadingScreen } from "@/components/loading-screen";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,7 +101,12 @@ export default function Auth() {
   if (user) {
     const redirect = searchParams.get("redirect");
 
-    return <Navigate to={redirect || "/"} replace />;
+    return (
+      <>
+        <Navigate to={redirect || "/"} replace />
+        <LoadingScreen />
+      </>
+    );
   }
 
   return (

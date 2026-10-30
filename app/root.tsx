@@ -15,9 +15,9 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import { LoadingScreen } from "@/components/loading-screen";
 import { ThemeProvider } from "@/components/theme";
 import { Title } from "@/components/title";
-import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
@@ -121,9 +121,5 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export function HydrateFallback() {
-  return (
-    <div className="flex h-svh w-full items-center justify-center">
-      <Spinner className="size-8" />
-    </div>
-  );
+  return <LoadingScreen />;
 }
