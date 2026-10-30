@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import {
-  browserSessionPersistence,
+  browserLocalPersistence,
   connectAuthEmulator,
   debugErrorMap,
   initializeAuth,
@@ -13,7 +13,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 const firebaseAuth = initializeAuth(firebaseApp, {
   errorMap: debugErrorMap,
-  persistence: browserSessionPersistence,
+  persistence: browserLocalPersistence,
 });
 const firebaseDb = initializeFirestore(firebaseApp, {});
 
