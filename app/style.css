@@ -144,8 +144,19 @@
   --invert-foreground: var(--color-zinc-50);
 }
 
+@keyframes global-spinner {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 @theme {
   --breakpoint-xs: 30rem;
+
+  --animate-global-spinner: global-spinner 1s linear infinite;
 }
 
 @layer base {
