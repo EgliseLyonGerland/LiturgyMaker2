@@ -1,7 +1,8 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { CheckIcon, ChevronLeftIcon, TriangleAlertIcon } from "lucide-react";
-import { useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
 import { Navigate, useFetcher, useSearchParams } from "react-router";
@@ -123,10 +124,21 @@ interface ViewProps {
 
 function LoginView({ onViewChange }: ViewProps) {
   const fetcher = useFetcher();
+  const [email, setEmail] = useQueryState("email", parseAsString);
 
-  const { handleSubmit, register, formState } = useForm({
+  const { handleSubmit, register, subscribe, formState } = useForm({
     resolver: valibotResolver(loginSchema),
+    defaultValues: {
+      email: email ?? "",
+    },
   });
+
+  useEffect(() => {
+    return subscribe({
+      formState: { values: true },
+      callback: ({ values }) => setEmail(values.email),
+    });
+  }, [subscribe, setEmail]);
 
   const { errors, isSubmitting } = formState;
 
@@ -198,10 +210,21 @@ function LoginView({ onViewChange }: ViewProps) {
 
 function ForgotPasswordView({ onViewChange }: ViewProps) {
   const fetcher = useFetcher();
+  const [email, setEmail] = useQueryState("email", parseAsString);
 
-  const { handleSubmit, register, formState } = useForm({
+  const { handleSubmit, register, subscribe, formState } = useForm({
     resolver: valibotResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: email ?? "",
+    },
   });
+
+  useEffect(() => {
+    return subscribe({
+      formState: { values: true },
+      callback: ({ values }) => setEmail(values.email),
+    });
+  }, [subscribe, setEmail]);
 
   const { errors, isSubmitting } = formState;
 

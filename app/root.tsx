@@ -5,6 +5,7 @@ import { setDefaultOptions } from "date-fns";
 import "./style.css";
 import { fr } from "date-fns/locale";
 import { LucideProvider } from "lucide-react";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v8";
 import {
   isRouteErrorResponse,
   Links,
@@ -76,17 +77,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LucideProvider strokeWidth={2}>
-          <TooltipProvider>
-            <Outlet />
-            <Toaster />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </TooltipProvider>
-        </LucideProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <NuqsAdapter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <LucideProvider strokeWidth={2}>
+            <TooltipProvider>
+              <Outlet />
+              <Toaster />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </TooltipProvider>
+          </LucideProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </NuqsAdapter>
   );
 }
 
