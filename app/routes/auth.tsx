@@ -1,10 +1,11 @@
-import * as formisch from "@formisch/react";
-import { useEffect } from "react";
-import { useAuthState, useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
-import { Navigate, useSearchParams } from "react-router";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useForm } from "react-hook-form";
+import { Navigate, useFetcher, useSearchParams } from "react-router";
 import * as v from "valibot";
 
-import { FormishFieldError } from "@/components/formisch-field-error";
+import { FormFieldError } from "@/components/form-field-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -12,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { firebaseAuth } from "@/lib/firebase";
+
+import type { Route } from "./+types/auth";
 
 const formSchema = v.object({
   email: v.pipe(
@@ -22,24 +25,31 @@ const formSchema = v.object({
   password: v.pipe(v.string(), v.nonEmpty("Le mot de passe est requis")),
 });
 
+export async function clientAction({ request }: Route.ClientActionArgs) {
+  const data = await request.json();
+
+  try {
+    const { email, password } = v.parse(formSchema, data);
+    await signInWithEmailAndPassword(firebaseAuth, email, password);
+  } catch {
+    toast.add({
+      title: "Connexion impossible",
+      description: "Veuillez vérifier vos identifiants et réessayer.",
+      type: "error",
+    });
+  }
+}
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const [signInWithEmailAndPassword, , , authError] = useSignInWithEmailAndPassword(firebaseAuth);
   const [user] = useAuthState(firebaseAuth);
+  const fetcher = useFetcher();
 
-  const form = formisch.useForm({
-    schema: formSchema,
+  const { handleSubmit, register, formState } = useForm({
+    resolver: valibotResolver(formSchema),
   });
 
-  useEffect(() => {
-    if (authError) {
-      toast.add({
-        title: "Connexion impossible",
-        description: authError.message,
-        type: "error",
-      });
-    }
-  }, [authError]);
+  const { errors, isSubmitting } = formState;
 
   if (user) {
     const redirect = searchParams.get("redirect");
@@ -57,73 +67,51 @@ export default function Auth() {
               <CardDescription>Veuillez saisir vos identifiants.</CardDescription>
             </CardHeader>
             <CardContent>
-              <formisch.Form
-                of={form}
-                onSubmit={async ({ email, password }) => {
-                  await signInWithEmailAndPassword(email, password);
-                }}
+              <form
+                onSubmit={handleSubmit((data) => {
+                  return fetcher.submit(data, {
+                    method: "post",
+                    encType: "application/json",
+                  });
+                }, console.error)}
               >
                 <FieldGroup>
-                  <formisch.Field of={form} path={["email"]}>
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.props.name}>Email</FieldLabel>
-                        <Input
-                          {...field.props}
-                          id={field.props.name}
-                          value={field.input}
-                          type="email"
-                          placeholder="m@exemple.com"
-                          autoFocus
-                          aria-invalid={!field.isValid}
-                          required
-                        />
-                        <FormishFieldError
-                          errors={field.errors}
-                          isEdited={field.isEdited}
-                          isSubmitted={form.isSubmitted}
-                        />
-                      </Field>
-                    )}
-                  </formisch.Field>
-                  <formisch.Field of={form} path={["password"]}>
-                    {(field) => (
-                      <Field>
-                        <div className="flex items-center">
-                          <FieldLabel htmlFor={field.props.name}>Mot de passe</FieldLabel>
-                          {/* <a
-                        href="#"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      >
-                        Mot de passe oublié ?
-                      </a> */}
-                        </div>
-                        <Input
-                          {...field.props}
-                          id={field.props.name}
-                          value={field.input}
-                          type="password"
-                          aria-invalid={!field.isValid}
-                          required
-                        />
-                        <FormishFieldError
-                          errors={field.errors}
-                          isEdited={field.isEdited}
-                          isSubmitted={form.isSubmitted}
-                        />
-                      </Field>
-                    )}
-                  </formisch.Field>
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input
+                      {...register("email")}
+                      id="email"
+                      type="email"
+                      placeholder="m@exemple.com"
+                      aria-invalid={!!errors.email}
+                      disabled={isSubmitting}
+                      autoFocus
+                    />
+                    <FormFieldError formState={formState} name="email" />
+                  </Field>
+                  <Field>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                    </div>
+                    <Input
+                      {...register("password")}
+                      id="password"
+                      type="password"
+                      aria-invalid={!!errors.password}
+                      disabled={isSubmitting}
+                    />
+                    <FormFieldError formState={formState} name="password" />
+                  </Field>
                   <Field className="gap-8">
-                    <Button type="submit" disabled={form.isSubmitting}>
-                      {form.isSubmitting ? <Spinner /> : "Connexion"}
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? <Spinner /> : "Connexion"}
                     </Button>
                     <FieldDescription className="text-center">
                       Vous n'avez pas d'accès ? Veuillez contacter un membre du staff.
                     </FieldDescription>
                   </Field>
                 </FieldGroup>
-              </formisch.Form>
+              </form>
             </CardContent>
           </Card>
         </div>
