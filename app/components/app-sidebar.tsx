@@ -153,15 +153,8 @@ function Footer({ user }: FooterProps) {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onClick={async () => {
-                    if (await signOut()) {
-                      navigate("/auth");
-                    } else {
-                      toast.add({
-                        title: "Déconnexion impossible",
-                        type: "error",
-                      });
-                    }
+                  onClick={() => {
+                    navigate("/logout");
                   }}
                 >
                   <LogOutIcon />

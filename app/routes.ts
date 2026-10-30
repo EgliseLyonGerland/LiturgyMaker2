@@ -2,6 +2,7 @@ import { type RouteConfig, index, layout, prefix, route } from "@react-router/de
 
 export default [
   route("auth", "routes/auth.tsx"),
+  route("logout", "routes/logout.tsx"),
   layout("layouts/main.tsx", [
     index("routes/home.tsx"),
     ...prefix("liturgies", [
