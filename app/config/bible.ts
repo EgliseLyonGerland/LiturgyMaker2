@@ -24,7 +24,7 @@ const books: { name: string; alt?: string }[] = [
   { name: "Ésaïe" },
   { name: "Jérémie" },
   { name: "Lamentations" },
-  { name: "Ézékiel" },
+  { name: "Ézéchiel" },
   { name: "Daniel" },
   { name: "Osée" },
   { name: "Joël" },
