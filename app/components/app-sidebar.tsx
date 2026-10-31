@@ -1,7 +1,7 @@
 import { ChurchIcon, ListMusicIcon, LogOutIcon, MessageSquareTextIcon } from "lucide-react";
 import { ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
-import { NavLink, useLocation, useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate, useNavigation } from "react-router";
 
 import {
   Sidebar,
@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { CurrentUser } from "@/lib/current-user";
@@ -50,8 +51,16 @@ const navItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useCurrentUser();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const location = useLocation();
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [navigation.location, isMobile, setOpenMobile]);
 
   return (
     <Sidebar {...props}>
