@@ -9,7 +9,6 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
-import { sort } from "radashi";
 import * as v from "valibot";
 
 import { createDefaultLiturgy } from "./default-liturgy";

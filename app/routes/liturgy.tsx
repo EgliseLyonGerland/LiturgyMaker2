@@ -4,7 +4,7 @@ import { format, subDays } from "date-fns";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { useBlocker, useFetcher, useNavigation } from "react-router";
+import { useBlocker, useFetcher } from "react-router";
 import * as v from "valibot";
 
 import { AddButton } from "@/components/add-button";
@@ -15,7 +15,6 @@ import {
   ConfirmDropdownConfirm,
   ConfirmDropdownContent,
   ConfirmDropdownDescription,
-  ConfirmDropdownTitle,
   ConfirmDropdownTrigger,
 } from "@/components/confirm-dropdown";
 import { DiscardAlertDialog } from "@/components/discard-alert-dialog";

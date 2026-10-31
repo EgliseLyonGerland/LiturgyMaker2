@@ -1,7 +1,6 @@
 import { ChurchIcon, ListMusicIcon, LogOutIcon, MessageSquareTextIcon } from "lucide-react";
 import { ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
-import { useSignOut } from "react-firebase-hooks/auth";
 import { NavLink, useLocation, useNavigate } from "react-router";
 
 import {
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { CurrentUser } from "@/lib/current-user";
-import { firebaseAuth } from "@/lib/firebase";
 import { useCurrentUser } from "@/lib/user-context";
 
 import { ThemeSwitcherDropdownMenuGroup } from "./theme";
@@ -31,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { toast } from "./ui/toast";
 
 const navItems = [
   {
@@ -104,7 +101,6 @@ interface FooterProps {
 
 function Footer({ user }: FooterProps) {
   const isMobile = useIsMobile();
-  const [signOut] = useSignOut(firebaseAuth);
   const navigate = useNavigate();
 
   return (
