@@ -169,7 +169,7 @@ export default function Songs(props: Route.ComponentProps) {
         open={!!songId || location.pathname === "/songs/create"}
         onOpenChange={(open) => {
           if (!open) {
-            navigate("/songs", { preventScrollReset: true });
+            navigate("/songs", { preventScrollReset: true, replace: true });
           }
         }}
         swipeDirection={isMobile ? "down" : "right"}

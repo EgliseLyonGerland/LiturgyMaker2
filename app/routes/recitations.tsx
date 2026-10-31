@@ -240,7 +240,7 @@ export default function Recitations(props: Route.ComponentProps) {
         open={!!recitationId || location.pathname === "/recitations/create"}
         onOpenChange={(open) => {
           if (!open) {
-            navigate("/recitations", { preventScrollReset: true });
+            navigate("/recitations", { preventScrollReset: true, replace: true });
           }
         }}
         swipeDirection={isMobile ? "down" : "right"}
