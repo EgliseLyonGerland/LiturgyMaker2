@@ -34,38 +34,38 @@ import { useLiturgyBlockContext } from "@/lib/liturgy-context";
 import type { LiturgyBlockType } from "@/lib/schemas";
 
 const colorByType: Record<LiturgyBlockType, Record<string, string>> = {
-  announcements: {
-    "--color-50": "var(--color-taupe-100)",
+  reading: {
+    "--color-100": "var(--color-taupe-100)",
     "--color-400": "var(--color-taupe-400)",
     "--color-900": "var(--color-taupe-600)",
   },
   openDoors: {
-    "--color-50": "var(--color-purple-50)",
-    "--color-400": "var(--color-purple-400)",
-    "--color-900": "var(--color-purple-900)",
+    "--color-100": "var(--color-indigo-100)",
+    "--color-400": "var(--color-indigo-400)",
+    "--color-900": "var(--color-indigo-900)",
   },
-  reading: {
-    "--color-50": "var(--color-pink-50)",
-    "--color-400": "var(--color-pink-400)",
-    "--color-900": "var(--color-pink-900)",
+  announcements: {
+    "--color-100": "var(--color-fuchsia-100)",
+    "--color-400": "var(--color-fuchsia-400)",
+    "--color-900": "var(--color-fuchsia-900)",
   },
   recitation: {
-    "--color-50": "var(--color-stone-50)",
-    "--color-400": "var(--color-stone-400)",
-    "--color-900": "var(--color-stone-900)",
+    "--color-100": "var(--color-red-100)",
+    "--color-400": "var(--color-red-400)",
+    "--color-900": "var(--color-red-900)",
   },
   section: {
-    "--color-50": "var(--color-emerald-50)",
+    "--color-100": "var(--color-emerald-100)",
     "--color-400": "var(--color-emerald-400)",
     "--color-900": "var(--color-emerald-900)",
   },
   sermon: {
-    "--color-50": "var(--color-amber-50)",
+    "--color-100": "var(--color-amber-100)",
     "--color-400": "var(--color-amber-400)",
     "--color-900": "var(--color-amber-900)",
   },
   songs: {
-    "--color-50": "var(--color-blue-50)",
+    "--color-100": "var(--color-blue-100)",
     "--color-400": "var(--color-blue-400)",
     "--color-900": "var(--color-blue-900)",
   },
@@ -118,7 +118,7 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
     <CardHeader
       {...props}
       className={cn(
-        "mb-0 flex h-16 items-center border-b border-border bg-(--color-50) pb-0! dark:bg-transparent",
+        "mb-0 flex h-16 items-center border-b border-border bg-(--color-100)/70 pb-0! dark:bg-transparent",
         className,
       )}
       style={colorByType[type] as React.CSSProperties}
@@ -209,7 +209,7 @@ function LiturgyCardFooter({ className, ...props }: LiturgyCardFooterProps) {
   return (
     <CardFooter
       {...props}
-      className={cn("bg-(--color-50)/50 dark:bg-(--color-900)/10", className)}
+      className={cn("bg-(--color-100)/50 dark:bg-(--color-900)/10", className)}
       style={colorByType[type] as React.CSSProperties}
     />
   );
