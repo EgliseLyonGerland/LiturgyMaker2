@@ -13,6 +13,10 @@ export function getBlockFocusName(
     return `${name}.data.items.${itemIndex}.id`;
   }
 
+  if (type === "recitation") {
+    return `${name}.data.items.${itemIndex}.id`;
+  }
+
   if (type === "reading") {
     return `${name}.data.bibleRefs.${itemIndex}.id`;
   }

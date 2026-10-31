@@ -2,9 +2,17 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { useLens, type Lens } from "@hookform/lenses";
 import { cn } from "cn";
-import { AlertTriangleIcon, PlusIcon, SaveIcon, TrashIcon, XIcon } from "lucide-react";
+import Fuse from "fuse.js";
+import {
+  AlertTriangleIcon,
+  ChevronDownIcon,
+  PlusIcon,
+  SaveIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
 import { get } from "radashi";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FormProvider,
   useController,
@@ -44,6 +52,8 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
 } from "@/components/ui/combobox";
 import {
   Drawer,
@@ -67,6 +77,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { highlightMatches } from "@/lib/fuzy";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { isEqualLyrics, prepareLyrics } from "@/lib/lyrics-utils";
 import {
@@ -236,6 +247,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref: sortableRef } = useSortable({ id, index, handle: handleRef });
   const isMobile = useIsMobile();
+  const [query, setQuery] = useState("");
 
   const idName = `${name}.id` as const;
   const infosName = `${name}.infos` as const;
@@ -243,12 +255,44 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const lyricsName = `${name}.lyrics` as const;
 
   const {
-    field: { value, onChange, ...field },
+    field: { value, onChange },
   } = useController({ control, name: idName });
 
   const lens = useLens({ control });
 
-  const song = songs.find((song) => song.id === value);
+  const selectedSong = songs.find((item) => item.id === value);
+
+  const items = useMemo(
+    () =>
+      songs.map((song) => ({
+        ...song,
+        title: song.aka ? `${song.title} (${song.aka})` : song.title,
+        lyrics: (song.lyrics || []).map((line) => line.text).join("\n"),
+      })),
+    [songs],
+  );
+
+  const selectedItem = items.find((item) => item.id === value);
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(items, {
+        keys: ["title", "authors", "lyrics"],
+        ignoreDiacritics: true,
+        includeMatches: true,
+        threshold: 0.2,
+        distance: Infinity,
+      }),
+    [items],
+  );
+
+  const filteredItems = useMemo(
+    () =>
+      query.trim()
+        ? fuse.search(query).map(({ item, matches }) => ({ ...item, matches }))
+        : items.map((item) => ({ ...item, matches: [] })),
+    [fuse, items, query],
+  );
 
   return (
     <div ref={sortableRef} className="group">
@@ -278,30 +322,72 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
             <Field>
               <FieldLabel htmlFor={name}>Chant</FieldLabel>
               <Combobox
-                items={songs}
-                itemToStringLabel={(song) => song.title}
-                value={song}
-                onValueChange={(song) => {
-                  if (song) {
-                    onChange(song.id);
+                items={items}
+                filteredItems={filteredItems}
+                value={selectedItem}
+                onInputValueChange={setQuery}
+                onValueChange={(item) => {
+                  if (item) {
+                    onChange(item.id);
                   }
                 }}
                 autoHighlight
               >
-                <ComboboxInput
-                  id={name}
-                  placeholder="Choisissez un chant"
-                  className="flex-1"
-                  {...field}
+                <ComboboxTrigger
+                  render={
+                    <Button variant="outline" className="h-auto justify-between py-2 text-left">
+                      <ComboboxValue placeholder="Choisissez un chant">
+                        {(selectedItem: (typeof items)[number] | null) =>
+                          selectedItem ? (
+                            <div className="flex flex-col gap-1">
+                              <span>{selectedItem.title}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {selectedItem.authors ?? <i>Aucun auteur</i>}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">Choisissez un chant</span>
+                          )
+                        }
+                      </ComboboxValue>
+
+                      <ChevronDownIcon />
+                    </Button>
+                  }
                 />
+
                 <ComboboxContent>
+                  <ComboboxInput showTrigger={false} placeholder="Search" />
                   <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
                   <ComboboxList>
-                    {(song: SongWithId) => (
-                      <ComboboxItem key={song.id} value={song}>
-                        {song.title} {song.aka && `(${song.aka})`}
-                      </ComboboxItem>
-                    )}
+                    {({ matches, ...item }: (typeof filteredItems)[number]) => {
+                      const titleMatch = matches?.find((m) => m.key === "title")?.indices ?? [];
+                      const authorsMatch = matches?.find((m) => m.key === "authors")?.indices ?? [];
+                      const lyricsMatch = matches?.find((m) => m.key === "lyrics")?.indices ?? [];
+
+                      return (
+                        <ComboboxItem
+                          key={item.id}
+                          value={item}
+                          className="flex flex-col items-start gap-1 py-2"
+                        >
+                          <span>{highlightMatches(item.title, titleMatch)}</span>
+                          <span
+                            className={cn(
+                              "text-xs text-muted-foreground!",
+                              !item.authors && "italic",
+                            )}
+                          >
+                            {highlightMatches(item.authors, authorsMatch) || "Aucun auteur"}
+                          </span>
+                          {lyricsMatch.length > 0 && (
+                            <div className="my-1 w-full max-w-full rounded border bg-black/5 p-1 text-xs text-muted-foreground/60! italic">
+                              {highlightMatches(item.lyrics, lyricsMatch.slice(0, 1), 50)}
+                            </div>
+                          )}
+                        </ComboboxItem>
+                      );
+                    }}
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
@@ -349,7 +435,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 </FieldContent>
               </Field>
 
-              {song && (
+              {selectedSong && (
                 <Drawer showSwipeHandle={isMobile} swipeDirection={isMobile ? "down" : "right"}>
                   <DrawerTrigger
                     render={
@@ -359,7 +445,10 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                     }
                   />
                   <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
-                    <ItemInformationDrawerContent lens={lens.focus(lyricsName)} song={song} />
+                    <ItemInformationDrawerContent
+                      lens={lens.focus(lyricsName)}
+                      song={selectedSong}
+                    />
                   </DrawerContent>
                 </Drawer>
               )}
