@@ -9,27 +9,25 @@ import version7 from "./version7";
 import version8 from "./version8";
 import version9 from "./version9";
 
+const versions: Record<`version${number}`, (data: any) => any> = {
+  version2,
+  version3,
+  version4,
+  version5,
+  version6,
+  version7,
+  version8,
+  version9,
+} as const;
+
 function toVersion(version: number, data: any) {
-  switch (version) {
-    case 2:
-      return version2(data);
-    case 3:
-      return version3(data);
-    case 4:
-      return version4(data);
-    case 5:
-      return version5(data);
-    case 6:
-      return version6(data);
-    case 7:
-      return version7(data);
-    case 8:
-      return version8(data);
-    case 9:
-      return version9(data);
-    default:
-      return data;
+  const key = `version${version}` as const;
+
+  if (key in versions) {
+    return versions[key](data);
   }
+
+  return data;
 }
 
 export default function migrate(doc: any) {
@@ -39,7 +37,7 @@ export default function migrate(doc: any) {
     return doc;
   }
 
-  const result = [...Array(liturgyDocumentVersion - version)].reduce((acc, curr) => {
+  const result = [...Array(liturgyDocumentVersion - version).keys()].reduce((acc, curr) => {
     return toVersion(curr + version + 1, acc);
   }, doc);
 
