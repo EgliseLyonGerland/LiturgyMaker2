@@ -231,7 +231,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
         />
       </HeaderSlot>
       <FormProvider {...form}>
-        <div className="@container flex w-full flex-1 gap-4 px-4 md:px-8">
+        <div className="@container flex w-full max-w-7xl flex-1 justify-between gap-4 px-4 md:px-8">
           <form
             id="liturgy-form"
             className="w-full flex-1 py-4 sm:max-w-xl"
@@ -376,7 +376,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             fields={fields}
             songs={songs}
             recitations={recitations}
-            className="hidden max-w-70 sm:block @min-3xl:max-w-xs"
+            className="hidden max-w-70 self-start sm:block @min-3xl:max-w-xs"
             onClick={(field) => {
               const blockElement = document.getElementById(field.id);
 

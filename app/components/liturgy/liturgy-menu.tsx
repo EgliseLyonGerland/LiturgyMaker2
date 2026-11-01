@@ -94,20 +94,22 @@ export function LiturgyMenu({
     >
       <div
         className={cn(
-          "sticky top-(--header-height) h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-contain py-4 pr-4",
+          "sticky top-(--header-height) max-h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-contain py-8 pr-4",
           className,
         )}
       >
-        {fields.map((field, index) => (
-          <MenuItem
-            key={field.id}
-            field={field}
-            index={index}
-            songs={songs}
-            recitations={recitations}
-            onClick={() => onClick(field)}
-          />
-        ))}
+        <div className="border-l border-muted pl-4">
+          {fields.map((field, index) => (
+            <MenuItem
+              key={field.id}
+              field={field}
+              index={index}
+              songs={songs}
+              recitations={recitations}
+              onClick={() => onClick(field)}
+            />
+          ))}
+        </div>
       </div>
     </DragDropProvider>
   );
