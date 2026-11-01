@@ -11,6 +11,7 @@ const bibleRefSchema = v.pipe(
     v.literal(""),
     v.pipe(
       v.string(),
+      v.transform((ref) => ref.replace("Ézékiel", "Ézéchiel")),
       v.check((ref) => validate(ref), "Format de référence invalide"),
     ),
   ]),
