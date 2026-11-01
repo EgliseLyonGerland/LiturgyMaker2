@@ -138,9 +138,7 @@ export async function getLiturgy(id: string) {
         return createDefaultLiturgy();
       }
 
-      const { success, output } = v.safeParse(liturgySchema, migrate(snapshot.data()));
-
-      return success ? output : createDefaultLiturgy();
+      return v.parse(liturgySchema, migrate(snapshot.data()));
     },
     staleTime: Infinity,
     gcTime: Infinity,
