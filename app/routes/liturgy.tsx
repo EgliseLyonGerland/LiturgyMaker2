@@ -234,91 +234,9 @@ function Content({ loaderData, params }: Route.ComponentProps) {
         <div className="@container flex w-full max-w-7xl flex-1 justify-between gap-4 px-4 md:px-8">
           <form
             id="liturgy-form"
-            className="w-full flex-1 py-4 sm:max-w-xl"
+            className="mx-auto w-full flex-1 py-4 sm:max-w-xl"
             onSubmit={handleSubmit((data) => save(data))}
           >
-            {conflicted && (
-              <AlertDialog
-                open={conflictOpen}
-                onOpenChange={(open) => {
-                  if (!disabled) {
-                    setConflictOpen(open);
-                  }
-                }}
-              >
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>La liturgie a été modifiée</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Une autre version a été enregistrée depuis votre ouverture. Votre saisie est
-                      conservée et n'a pas été enregistrée.
-                      <br />
-                      <br />
-                      Que souhaitez-vous faire ?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="flex-wrap">
-                    <AlertDialogCancel disabled={disabled}>Continuer l'édition</AlertDialogCancel>
-                    <ConfirmDropdown>
-                      <ConfirmDropdownTrigger
-                        render={
-                          <Button type="button" variant="outline" disabled={disabled}>
-                            Recharger
-                          </Button>
-                        }
-                      />
-                      <ConfirmDropdownContent className="max-w-xs text-center">
-                        <ConfirmDropdownDescription>
-                          Votre saisie sera perdue et remplacée par la dernière version enregistrée.
-                        </ConfirmDropdownDescription>
-                        <ConfirmDropdownActions>
-                          <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
-                          <ConfirmDropdownConfirm
-                            variant="destructive"
-                            disabled={disabled}
-                            onClick={() => {
-                              void fetcher.submit(
-                                { intent: "reload" },
-                                { method: "post", encType: "application/json" },
-                              );
-                            }}
-                          >
-                            Confirmer
-                          </ConfirmDropdownConfirm>
-                        </ConfirmDropdownActions>
-                      </ConfirmDropdownContent>
-                    </ConfirmDropdown>
-                    <ConfirmDropdown>
-                      <ConfirmDropdownTrigger
-                        render={
-                          <Button type="button" variant="destructive" disabled={disabled}>
-                            Écraser
-                          </Button>
-                        }
-                      />
-                      <ConfirmDropdownContent className="max-w-xs text-center">
-                        <ConfirmDropdownDescription>
-                          La dernière version enregistrée sera remplacée par la votre,
-                          souhaitiez-vous confirmer ?
-                        </ConfirmDropdownDescription>
-                        <ConfirmDropdownActions>
-                          <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
-                          <ConfirmDropdownConfirm
-                            variant="destructive"
-                            disabled={disabled}
-                            onClick={() => {
-                              void handleSubmit((data) => save(data, true))();
-                            }}
-                          >
-                            Confirmer
-                          </ConfirmDropdownConfirm>
-                        </ConfirmDropdownActions>
-                      </ConfirmDropdownContent>
-                    </ConfirmDropdown>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
             <AddBlockButton
               onSelect={(type) => {
                 prepend(createDefaultBlock(type), { focusName: getBlockFocusName(type, 0) });
@@ -399,6 +317,89 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 
         <CodeDialog date={date} songs={songs} recitations={recitations} />
       </FormProvider>
+
+      {conflicted && (
+        <AlertDialog
+          open={conflictOpen}
+          onOpenChange={(open) => {
+            if (!disabled) {
+              setConflictOpen(open);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>La liturgie a été modifiée</AlertDialogTitle>
+              <AlertDialogDescription>
+                Une autre version a été enregistrée depuis votre ouverture. Votre saisie est
+                conservée et n'a pas été enregistrée.
+                <br />
+                <br />
+                Que souhaitez-vous faire ?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-wrap">
+              <AlertDialogCancel disabled={disabled}>Continuer l'édition</AlertDialogCancel>
+              <ConfirmDropdown>
+                <ConfirmDropdownTrigger
+                  render={
+                    <Button type="button" variant="outline" disabled={disabled}>
+                      Recharger
+                    </Button>
+                  }
+                />
+                <ConfirmDropdownContent className="max-w-xs text-center">
+                  <ConfirmDropdownDescription>
+                    Votre saisie sera perdue et remplacée par la dernière version enregistrée.
+                  </ConfirmDropdownDescription>
+                  <ConfirmDropdownActions>
+                    <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
+                    <ConfirmDropdownConfirm
+                      variant="destructive"
+                      disabled={disabled}
+                      onClick={() => {
+                        void fetcher.submit(
+                          { intent: "reload" },
+                          { method: "post", encType: "application/json" },
+                        );
+                      }}
+                    >
+                      Confirmer
+                    </ConfirmDropdownConfirm>
+                  </ConfirmDropdownActions>
+                </ConfirmDropdownContent>
+              </ConfirmDropdown>
+              <ConfirmDropdown>
+                <ConfirmDropdownTrigger
+                  render={
+                    <Button type="button" variant="destructive" disabled={disabled}>
+                      Écraser
+                    </Button>
+                  }
+                />
+                <ConfirmDropdownContent className="max-w-xs text-center">
+                  <ConfirmDropdownDescription>
+                    La dernière version enregistrée sera remplacée par la votre, souhaitiez-vous
+                    confirmer ?
+                  </ConfirmDropdownDescription>
+                  <ConfirmDropdownActions>
+                    <ConfirmDropdownCancel>Annuler</ConfirmDropdownCancel>
+                    <ConfirmDropdownConfirm
+                      variant="destructive"
+                      disabled={disabled}
+                      onClick={() => {
+                        void handleSubmit((data) => save(data, true))();
+                      }}
+                    >
+                      Confirmer
+                    </ConfirmDropdownConfirm>
+                  </ConfirmDropdownActions>
+                </ConfirmDropdownContent>
+              </ConfirmDropdown>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
 
       {blocker.state === "blocked" && <DiscardAlertDialog blocker={blocker} />}
     </>
