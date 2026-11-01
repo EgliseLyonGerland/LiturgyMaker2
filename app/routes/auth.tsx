@@ -111,14 +111,12 @@ export default function Auth() {
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 transition-[transform_opacity] duration-1000 md:p-10 starting:scale-95 starting:opacity-0">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          {view === "login" ? (
-            <LoginView onViewChange={setView} />
-          ) : (
-            <ForgotPasswordView onViewChange={setView} />
-          )}
-        </div>
+      <div className="w-full max-w-sm space-y-4">
+        {view === "login" ? (
+          <LoginView onViewChange={setView} />
+        ) : (
+          <ForgotPasswordView onViewChange={setView} />
+        )}
       </div>
     </div>
   );
@@ -179,7 +177,7 @@ function LoginView({ onViewChange }: ViewProps) {
                 placeholder="m@exemple.com"
                 aria-invalid={!!errors.email}
                 disabled={isSubmitting}
-                autoFocus
+                autoFocus={!email}
               />
               <FormFieldError formState={formState} name="email" />
             </Field>
@@ -193,6 +191,7 @@ function LoginView({ onViewChange }: ViewProps) {
                 type="password"
                 aria-invalid={!!errors.password}
                 disabled={isSubmitting}
+                autoFocus={!!email}
               />
               <FormFieldError formState={formState} name="password" />
             </Field>
@@ -258,53 +257,55 @@ function ForgotPasswordView({ onViewChange }: ViewProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Mot de passe oublié</CardTitle>
-        <CardDescription>
-          Veuillez saisir votre email pour réinitialiser votre mot de passe.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={handleSubmit((data) => {
-            return fetcher.submit(
-              {
-                action: "forgot-password",
-                data,
-              },
-              {
-                method: "post",
-                encType: "application/json",
-              },
-            );
-          }, console.error)}
-        >
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                {...register("email")}
-                id="email"
-                type="email"
-                placeholder="m@exemple.com"
-                aria-invalid={!!errors.email}
-                disabled={isSubmitting}
-                autoFocus
-              />
-              <FormFieldError formState={formState} name="email" />
-            </Field>
-            <Field className="gap-2">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <Spinner /> : "Réinitialiser"}
-              </Button>
-              <Button variant="link" type="button" onClick={() => onViewChange("login")}>
-                <ChevronLeftIcon /> Retour
-              </Button>
-            </Field>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+    <>
+      <Button variant="link" type="button" onClick={() => onViewChange("login")}>
+        <ChevronLeftIcon /> Retour
+      </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Mot de passe oublié</CardTitle>
+          <CardDescription>
+            Veuillez saisir votre email pour réinitialiser votre mot de passe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={handleSubmit((data) => {
+              return fetcher.submit(
+                {
+                  action: "forgot-password",
+                  data,
+                },
+                {
+                  method: "post",
+                  encType: "application/json",
+                },
+              );
+            }, console.error)}
+          >
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  {...register("email")}
+                  id="email"
+                  type="email"
+                  placeholder="m@exemple.com"
+                  aria-invalid={!!errors.email}
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+                <FormFieldError formState={formState} name="email" />
+              </Field>
+              <Field className="gap-2">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? <Spinner /> : "Réinitialiser"}
+                </Button>
+              </Field>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+    </>
   );
 }
