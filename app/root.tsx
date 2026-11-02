@@ -1,8 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Analytics } from "@vercel/analytics/react";
 import { setDefaultOptions } from "date-fns";
-
-import "./style.css";
 import { fr } from "date-fns/locale";
 import { LucideProvider } from "lucide-react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v8";
@@ -23,6 +22,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
 import type { Route } from "./+types/root";
+
+import "./style.css";
 
 setDefaultOptions({ locale: fr });
 
@@ -70,6 +71,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Title />
         <ScrollRestoration />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );
