@@ -93,6 +93,8 @@ export function LiturgyMenu({
       }}
     >
       <div
+        role="navigation"
+        aria-label="Plan de la liturgie"
         className={cn(
           "sticky top-(--header-height) max-h-[calc(100vh-var(--header-height))] min-h-0 w-full scroll-fade scrollbar-thumb-muted overflow-y-auto overscroll-contain py-8 pr-4",
           className,
@@ -132,43 +134,39 @@ function MenuItem({ field, index, songs, recitations, onClick }: MenuItemProps) 
   const description = getDescription(block, songs, recitations);
 
   return (
-    <Item
-      ref={ref}
-      className="group"
-      size="xs"
-      render={
-        <a
-          href="#"
-          className="flex-nowrap!"
-          onClick={(event) => {
-            event.preventDefault();
-            onClick();
-          }}
-        >
-          <ItemMedia>
-            <BlockIcon type={field.type} className="size-4" />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>{liturgyBlockNames[field.type]}</ItemTitle>
-            {description && (
-              <ItemDescription className="flex max-w-full min-w-0 flex-1 shrink flex-col text-xs">
-                {description.filter(Boolean).map((line, index) => (
-                  <span key={`${line}-${index}`} className="mt-0.5 block truncate">
-                    {line}
-                  </span>
-                ))}
-              </ItemDescription>
-            )}
-          </ItemContent>
-          <ItemActions>
-            <SortableButton
-              className="invisible h-auto group-hover:visible group-focus-visible:visible"
-              ref={handleRef}
-            />
-          </ItemActions>
-        </a>
-      }
-    />
+    <Item ref={ref} className="group flex-nowrap hover:bg-muted" size="xs">
+      <a
+        href={`#${field.id}`}
+        className="flex min-w-0 flex-1 items-center gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-ring"
+        onClick={(event) => {
+          event.preventDefault();
+          onClick();
+        }}
+      >
+        <ItemMedia>
+          <BlockIcon type={field.type} className="size-4" />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{liturgyBlockNames[field.type]}</ItemTitle>
+          {description && (
+            <ItemDescription className="flex max-w-full min-w-0 flex-1 shrink flex-col text-xs">
+              {description.filter(Boolean).map((line, index) => (
+                <span key={`${line}-${index}`} className="mt-0.5 block truncate">
+                  {line}
+                </span>
+              ))}
+            </ItemDescription>
+          )}
+        </ItemContent>
+      </a>
+      <ItemActions>
+        <SortableButton
+          aria-label={`Déplacer le bloc ${index + 1} : ${liturgyBlockNames[field.type]}`}
+          className="h-auto opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+          ref={handleRef}
+        />
+      </ItemActions>
+    </Item>
   );
 }
 

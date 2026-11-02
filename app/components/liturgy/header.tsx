@@ -42,10 +42,11 @@ export function LiturgyHeader({ date, disabled, loading }: LiturgyHeaderProps) {
 
   return (
     <div className="flex items-center">
+      <h1 className="sr-only">Présidence du {format(date, "do MMMM y")}</h1>
       <Button
         size="icon-sm"
         variant="ghost"
-        title={`Aller à la la liturgie du ${format(previousDate, "do MMMM y")}`}
+        aria-label={`Aller à la liturgie du ${format(previousDate, "do MMMM y")}`}
         onClick={() => {
           navigate(`/liturgies/${convertToId(previousDate)}`);
         }}
@@ -79,7 +80,7 @@ export function LiturgyHeader({ date, disabled, loading }: LiturgyHeaderProps) {
       <Button
         size="icon-sm"
         variant="ghost"
-        title={`Aller à la la liturgie du ${format(nextDate, "do MMMM y")}`}
+        aria-label={`Aller à la liturgie du ${format(nextDate, "do MMMM y")}`}
         onClick={() => {
           navigate(`/liturgies/${convertToId(nextDate)}`);
         }}
@@ -87,7 +88,13 @@ export function LiturgyHeader({ date, disabled, loading }: LiturgyHeaderProps) {
         <ChevronRightIcon />
       </Button>
 
-      <Button className="ml-auto" type="submit" form="liturgy-form" disabled={disabled}>
+      <Button
+        className="ml-auto"
+        type="submit"
+        form="liturgy-form"
+        disabled={disabled}
+        aria-label="Enregistrer la liturgie"
+      >
         {loading && <Spinner />}
         <span className="hidden sm:block">Enregistrer</span>
         <SaveIcon className="md:hidden" />
@@ -95,7 +102,13 @@ export function LiturgyHeader({ date, disabled, loading }: LiturgyHeaderProps) {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button type="button" variant="ghost" size="icon" className="ml-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="ml-2"
+              aria-label="Actions de la liturgie"
+            >
               <EllipsisVerticalIcon />
             </Button>
           }

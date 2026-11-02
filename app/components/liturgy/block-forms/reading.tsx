@@ -131,7 +131,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
     <div ref={ref} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
-          <SortableButton ref={handleRef} />
+          <SortableButton ref={handleRef} aria-label={`Déplacer la référence ${index + 1}`} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Référence {index + 1}
@@ -141,7 +141,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
             type="button"
             size="icon"
             variant="ghost"
-
+            aria-label={`Supprimer la référence ${index + 1}`}
             className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
             onClick={onRemove}
           >
@@ -156,7 +156,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
             <Field>
               <FieldLabel htmlFor={idName}>Référence</FieldLabel>
               <BibleRefField control={control} name={idName} />
-              <FieldError errors={[get(errors, idName)]} />
+              <FieldError id={`${idName}-error`} errors={[get(errors, idName)]} />
             </Field>
             <Field>
               <FieldLabel htmlFor={excerptName}>Extrait</FieldLabel>

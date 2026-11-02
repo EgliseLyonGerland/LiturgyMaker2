@@ -8,6 +8,7 @@ export function SortableButton({ className, ...props }: SortableButtonProps) {
   return (
     <button
       type="button"
+      aria-label="Déplacer cet élément"
       className={cn(
         "h-8 cursor-grab opacity-80 hover:not-disabled:opacity-100 focus-visible:ring focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-30",
         className,

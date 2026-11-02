@@ -11,12 +11,14 @@ export default function Preview({ title, url }: PreviewProps) {
       <iframe
         height="140"
         src={url.replace("/view", "/preview")}
-        title={`${title} preview`}
+        title={`Aperçu du chant ${title}`}
         width="100%"
         loading="lazy"
       />
     );
   }
 
-  return <Player src={url} width="100%" height={260} controls />;
+  return (
+    <Player src={url} width="100%" height={260} controls aria-label={`Aperçu du chant ${title}`} />
+  );
 }

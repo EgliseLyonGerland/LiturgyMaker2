@@ -240,6 +240,7 @@ function AutocompleteClear({
   return (
     <AutocompletePrimitive.Clear
       data-slot="autocomplete-clear"
+      aria-label="Effacer la saisie"
       className={cn(
         "absolute top-1/2 -translate-y-1/2 cursor-pointer opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-disabled:pointer-events-none",
         className,
@@ -258,6 +259,7 @@ function AutocompleteTrigger({
   return (
     <AutocompletePrimitive.Trigger
       data-slot="autocomplete-trigger"
+      aria-label="Afficher les suggestions"
       className={cn(
         "absolute top-1/2 -translate-y-1/2 cursor-pointer ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none has-[+[data-slot=autocomplete-clear]]:hidden data-disabled:pointer-events-none",
         className,

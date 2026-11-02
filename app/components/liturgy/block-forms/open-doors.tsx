@@ -151,9 +151,14 @@ function PrayerTopicsFieldItem({
   return (
     <Field ref={ref}>
       <div className="flex gap-2">
-        <SortableButton ref={handleRef} disabled={actionsDisabled} />
+        <SortableButton
+          ref={handleRef}
+          disabled={actionsDisabled}
+          aria-label={`Déplacer le sujet de prière ${index + 1}`}
+        />
         <Textarea
           id={name}
+          aria-label={`Sujet de prière ${index + 1}`}
           {...register(name)}
           className="min-h-lh"
           aria-invalid={!!get(errors, name)}
@@ -162,6 +167,7 @@ function PrayerTopicsFieldItem({
           type="button"
           size="icon"
           variant="ghost"
+          aria-label={`Supprimer le sujet de prière ${index + 1}`}
           disabled={actionsDisabled}
           onClick={onRemove}
         >

@@ -21,17 +21,19 @@ function isSimilar(value: string, prefix: string) {
 interface BibleRefFieldProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues, any, TFieldValues>;
   name: FieldPath<TFieldValues>;
+  "aria-label"?: string;
 }
 
 export function BibleRefField<TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
+  "aria-label": ariaLabel,
 }: BibleRefFieldProps<TFieldValues>) {
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field }) => (
+      render={({ field, fieldState: { error } }) => (
         <Autocomplete
           items={books}
           autoHighlight
@@ -40,7 +42,13 @@ export function BibleRefField<TFieldValues extends FieldValues = FieldValues>({
             field.onChange(value);
           }}
         >
-          <AutocompleteInput {...field} />
+          <AutocompleteInput
+            {...field}
+            id={name}
+            aria-label={ariaLabel}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${name}-error` : undefined}
+          />
           <AutocompleteContent className="data-empty:hidden">
             <AutocompleteList>
               {(item: (typeof books)[number]) => (

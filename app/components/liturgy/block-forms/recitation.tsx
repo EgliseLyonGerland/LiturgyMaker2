@@ -107,8 +107,13 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
             >
               <ComboboxTrigger
                 render={
-                  <Button variant="outline" className="h-auto justify-between py-2 text-left">
-                    <ComboboxValue placeholder="Choisissez un chant">
+                  <Button
+                    id={idName}
+                    variant="outline"
+                    className="h-auto justify-between py-2 text-left"
+                    aria-invalid={!!get(errors, idName)}
+                  >
+                    <ComboboxValue placeholder="Choisissez une récitation">
                       {(selectedItem: (typeof items)[number] | null) =>
                         selectedItem ? (
                           <span>{selectedItem.title}</span>
@@ -123,7 +128,11 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
                 }
               />
               <ComboboxContent>
-                <ComboboxInput showTrigger={false} placeholder="Search" />
+                <ComboboxInput
+                  showTrigger={false}
+                  placeholder="Rechercher une récitation…"
+                  aria-label="Rechercher une récitation"
+                />
                 <ComboboxEmpty>Auncun texte trouvé</ComboboxEmpty>
                 <ComboboxList>
                   {({ matches, ...item }: (typeof filteredItems)[number]) => {

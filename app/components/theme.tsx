@@ -43,7 +43,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" className={className}>
+          <Button variant="ghost" size="icon" className={className} aria-label="Choisir le thème">
             {theme === "light" && <SunIcon className="size-5" />}
             {theme === "dark" && <MoonIcon className="size-5" />}
             {theme === "system" && (

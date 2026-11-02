@@ -12,7 +12,7 @@ import { PassageFieldArray } from "@/components/lyrics-field-array";
 import Preview from "@/components/preview";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import { DrawerClose, DrawerHeader } from "@/components/ui/drawer";
+import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   Field,
   FieldDescription,
@@ -88,10 +88,16 @@ export default function SongEdit({ loaderData }: Route.ComponentProps) {
       <Title>{song.title}</Title>
 
       <DrawerHeader>
+        <DrawerTitle className="sr-only">Modifier le chant {song.title}</DrawerTitle>
         <div className="flex justify-between gap-2">
           <DrawerClose
             render={
-              <Button type="button" variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fermer le formulaire du chant"
+              >
                 <XIcon />
               </Button>
             }
@@ -142,8 +148,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="title"
             {...lens.focus("title").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "title")}
+            aria-describedby={get(errors, "title") ? "title-error" : undefined}
           />
-          <FieldError errors={[get(errors, "title")]} />
+          <FieldError id="title-error" errors={[get(errors, "title")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="aka">Titre secondaire</FieldLabel>
@@ -151,8 +158,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="aka"
             {...lens.focus("aka").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "aka")}
+            aria-describedby={get(errors, "aka") ? "aka-error" : undefined}
           />
-          <FieldError errors={[get(errors, "aka")]} />
+          <FieldError id="aka-error" errors={[get(errors, "aka")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="authors">Auteurs</FieldLabel>
@@ -160,8 +168,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="authors"
             {...lens.focus("authors").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "authors")}
+            aria-describedby={get(errors, "authors") ? "authors-error" : undefined}
           />
-          <FieldError errors={[get(errors, "authors")]} />
+          <FieldError id="authors-error" errors={[get(errors, "authors")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="copyright">Copyrights</FieldLabel>
@@ -171,12 +180,13 @@ export function SongForm({ lens }: SongFormProps) {
               className="min-h-lh"
               {...lens.focus("copyright").interop((control, name) => control.register(name))}
               aria-invalid={!!get(errors, "copyright")}
+              aria-describedby={get(errors, "copyright") ? "copyright-error" : undefined}
             />
             <InputGroupAddon align="inline-start">
               <CopyrightIcon className="text-muted-foreground" />
             </InputGroupAddon>
           </InputGroup>
-          <FieldError errors={[get(errors, "copyright")]} />
+          <FieldError id="copyright-error" errors={[get(errors, "copyright")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="translation">Traduction</FieldLabel>
@@ -184,8 +194,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="translation"
             {...lens.focus("translation").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "translation")}
+            aria-describedby={get(errors, "translation") ? "translation-error" : undefined}
           />
-          <FieldError errors={[get(errors, "translation")]} />
+          <FieldError id="translation-error" errors={[get(errors, "translation")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="collection">Recueils</FieldLabel>
@@ -193,8 +204,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="collection"
             {...lens.focus("collection").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "collection")}
+            aria-describedby={get(errors, "collection") ? "collection-error" : undefined}
           />
-          <FieldError errors={[get(errors, "collection")]} />
+          <FieldError id="collection-error" errors={[get(errors, "collection")]} />
         </Field>
         <Field>
           <FieldLabel htmlFor="previewUrl">Aperçu</FieldLabel>
@@ -202,8 +214,9 @@ export function SongForm({ lens }: SongFormProps) {
             id="previewUrl"
             {...lens.focus("previewUrl").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "previewUrl")}
+            aria-describedby={get(errors, "previewUrl") ? "previewUrl-error" : undefined}
           />
-          <FieldError errors={[get(errors, "previewUrl")]} />
+          <FieldError id="previewUrl-error" errors={[get(errors, "previewUrl")]} />
         </Field>
         <Watch
           {...lens.focus("previewUrl").interop()}

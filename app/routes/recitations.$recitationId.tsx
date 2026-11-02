@@ -11,7 +11,7 @@ import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
 import { PassageFieldArray } from "@/components/lyrics-field-array";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import { DrawerClose, DrawerHeader } from "@/components/ui/drawer";
+import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   Field,
   FieldDescription,
@@ -85,10 +85,16 @@ export default function RecitationEdit({ loaderData }: Route.ComponentProps) {
     <>
       <Title>{recitation.title}</Title>
       <DrawerHeader>
+        <DrawerTitle className="sr-only">Modifier la récitation {recitation.title}</DrawerTitle>
         <div className="flex justify-between gap-2">
           <DrawerClose
             render={
-              <Button type="button" variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fermer le formulaire de la récitation"
+              >
                 <XIcon />
               </Button>
             }
@@ -139,8 +145,9 @@ export function RecitationForm({ lens }: RecitationFormProps) {
             id="title"
             {...lens.focus("title").interop((control, name) => control.register(name))}
             aria-invalid={!!get(errors, "title")}
+            aria-describedby={get(errors, "title") ? "title-error" : undefined}
           />
-          <FieldError errors={[get(errors, "title")]} />
+          <FieldError id="title-error" errors={[get(errors, "title")]} />
         </Field>
       </FieldSet>
       <FieldSeparator />

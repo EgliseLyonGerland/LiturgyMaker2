@@ -135,7 +135,7 @@ function PassageItem({
   onInsertAfter,
   onRemove,
 }: PassageItemProps) {
-  const handleRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLButtonElement>(null);
   const { ref, isDragging } = useSortable({ id, index, handle: handleRef });
 
   const {
@@ -151,7 +151,9 @@ function PassageItem({
             {...field}
             className="dark:bg-transparent"
             placeholder="Saisir le texte du passage"
+            aria-label={`Texte du passage ${index + 1}`}
             aria-invalid={!!error}
+            aria-describedby={error ? `passage.${id}.error` : undefined}
           />
 
           <InputGroupAddon
@@ -167,6 +169,7 @@ function PassageItem({
                     <Switch
                       id={`passage.${id}.type`}
                       size="sm"
+                      aria-label={`Refrain pour le passage ${index + 1}`}
                       checked={field.value === "chorus"}
                       onCheckedChange={(checked) => {
                         field.onChange(checked ? "chorus" : "verse");
@@ -180,15 +183,25 @@ function PassageItem({
               <div />
             )}
 
-            <div ref={handleRef} className="flex cursor-grab px-4">
+            <button
+              type="button"
+              ref={handleRef}
+              aria-label={`Déplacer le passage ${index + 1}`}
+              className="flex cursor-grab px-4 focus-visible:outline-2 focus-visible:outline-ring"
+            >
               <GripHorizontalIcon className="size-4" />
-            </div>
+            </button>
 
             <div className="flex justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
-                    <Button type="button" variant="ghost" size="icon">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Actions du passage ${index + 1}`}
+                    >
                       <EllipsisVerticalIcon />
                     </Button>
                   }
@@ -213,7 +226,7 @@ function PassageItem({
             </div>
           </InputGroupAddon>
         </InputGroup>
-        <FieldError errors={[error]} />
+        <FieldError id={`passage.${id}.error`} errors={[error]} />
       </Field>
     </div>
   );

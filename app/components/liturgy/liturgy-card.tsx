@@ -128,7 +128,13 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button type="button" variant="ghost" size="icon" className="ml-auto">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              aria-label={`Actions du bloc ${liturgyBlockNames[type]}`}
+            >
               <EllipsisVerticalIcon />
             </Button>
           }
@@ -177,6 +183,8 @@ function LiturgyCardTitle({ className, extraLabel, ...props }: LiturgyCardTitleP
 
   return (
     <CardTitle
+      role="heading"
+      aria-level={2}
       {...props}
       className={cn("grid grid-cols-[auto_1fr] items-center gap-0.5 gap-x-3", className)}
     >

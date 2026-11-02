@@ -22,5 +22,5 @@ export function FormFieldError<T extends FieldValues>({ formState, name }: FormF
     return null;
   }
 
-  return <FieldError>{message}</FieldError>;
+  return <FieldError id={`${String(name)}-error`}>{message}</FieldError>;
 }

@@ -110,7 +110,7 @@ export default function Auth() {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 transition-[transform_opacity] duration-1000 md:p-10 starting:scale-95 starting:opacity-0">
+    <main className="flex min-h-svh w-full items-center justify-center p-6 transition-[transform_opacity] duration-1000 md:p-10 starting:scale-95 starting:opacity-0">
       <div className="w-full max-w-sm space-y-4">
         {view === "login" ? (
           <LoginView onViewChange={setView} />
@@ -118,7 +118,7 @@ export default function Auth() {
           <ForgotPasswordView onViewChange={setView} />
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -149,7 +149,9 @@ function LoginView({ onViewChange }: ViewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Connexion</CardTitle>
+        <CardTitle role="heading" aria-level={1}>
+          Connexion
+        </CardTitle>
         <CardDescription>Veuillez saisir vos identifiants.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -176,6 +178,8 @@ function LoginView({ onViewChange }: ViewProps) {
                 type="email"
                 placeholder="m@exemple.com"
                 aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                autoComplete="email"
                 disabled={isSubmitting}
                 autoFocus={!email}
               />
@@ -190,13 +194,15 @@ function LoginView({ onViewChange }: ViewProps) {
                 id="password"
                 type="password"
                 aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "password-error" : undefined}
+                autoComplete="current-password"
                 disabled={isSubmitting}
                 autoFocus={!!email}
               />
               <FormFieldError formState={formState} name="password" />
             </Field>
             <Field className="gap-2">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} aria-label="Connexion">
                 {isSubmitting ? <Spinner /> : "Connexion"}
               </Button>
               <Button variant="link" type="button" onClick={() => onViewChange("forgot-password")}>
@@ -238,7 +244,7 @@ function ForgotPasswordView({ onViewChange }: ViewProps) {
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 text-center">
           <CheckIcon className="size-10 text-success" />
-          <h2 className="font-semibold">Regardez votre boîte de réception…</h2>
+          <h1 className="font-semibold">Regardez votre boîte de réception…</h1>
           <p className="text-muted-foreground">
             Vous allez recevoir un email dans lequel vous trouverez un lien pour réinitialiser votre
             mot de passe. Après quoi vous pourrez vous connecter avec votre nouveau mot de passe.
@@ -263,7 +269,9 @@ function ForgotPasswordView({ onViewChange }: ViewProps) {
       </Button>
       <Card>
         <CardHeader>
-          <CardTitle>Mot de passe oublié</CardTitle>
+          <CardTitle role="heading" aria-level={1}>
+            Mot de passe oublié
+          </CardTitle>
           <CardDescription>
             Veuillez saisir votre email pour réinitialiser votre mot de passe.
           </CardDescription>
@@ -292,13 +300,19 @@ function ForgotPasswordView({ onViewChange }: ViewProps) {
                   type="email"
                   placeholder="m@exemple.com"
                   aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  autoComplete="email"
                   disabled={isSubmitting}
                   autoFocus
                 />
                 <FormFieldError formState={formState} name="email" />
               </Field>
               <Field className="gap-2">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  aria-label="Réinitialiser le mot de passe"
+                >
                   {isSubmitting ? <Spinner /> : "Réinitialiser"}
                 </Button>
               </Field>

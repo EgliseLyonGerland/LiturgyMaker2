@@ -108,6 +108,7 @@ export default function Recitations(props: Route.ComponentProps) {
 
           <Button
             className="ml-auto"
+            aria-label="Ajouter une récitation"
             onClick={() => navigate("create", { preventScrollReset: true })}
           >
             <span className="hidden sm:block">Ajouter une récitation</span>
@@ -115,10 +116,11 @@ export default function Recitations(props: Route.ComponentProps) {
           </Button>
         </div>
       </HeaderSlot>
-      <main className="mb-[30vh]">
+      <div className="mb-[30vh]">
         <div className="sticky top-16 z-10 backdrop-blur-2xl">
           <div className="flex w-full max-w-5xl items-center p-4 md:px-8">
             <label className="relative block w-full max-w-60">
+              <span className="sr-only">Rechercher une récitation</span>
               <InputGroup>
                 <InputGroupInput placeholder="Recherche…" type="search" {...register("search")} />
                 <InputGroupAddon>
@@ -127,7 +129,7 @@ export default function Recitations(props: Route.ComponentProps) {
               </InputGroup>
             </label>
 
-            <div className="ml-auto text-sm text-muted-foreground">
+            <div className="ml-auto text-sm text-muted-foreground" role="status" aria-atomic="true">
               {results.length} {results.length > 1 ? "récitations" : "récitation"}
               {results.length !== recitations.length && ` sur ${recitations.length}`}
             </div>
@@ -162,6 +164,7 @@ export default function Recitations(props: Route.ComponentProps) {
                       <Button
                         variant="outline"
                         size="icon"
+                        aria-label={`Modifier la récitation ${item.title}`}
                         onClick={() =>
                           navigate(`/recitations/${item.id}`, { preventScrollReset: true })
                         }
@@ -172,7 +175,12 @@ export default function Recitations(props: Route.ComponentProps) {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
-                            <Button type="button" variant="ghost" size="icon">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Actions de la récitation ${item.title}`}
+                            >
                               <EllipsisVerticalIcon />
                             </Button>
                           }
@@ -234,7 +242,7 @@ export default function Recitations(props: Route.ComponentProps) {
             </Empty>
           )}
         </div>
-      </main>
+      </div>
 
       <Drawer
         open={!!recitationId || location.pathname === "/recitations/create"}

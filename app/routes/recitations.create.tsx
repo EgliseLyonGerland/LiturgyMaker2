@@ -9,7 +9,7 @@ import * as v from "valibot";
 import { DiscardAlertDialog } from "@/components/discard-alert-dialog";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import { DrawerClose, DrawerHeader } from "@/components/ui/drawer";
+import { DrawerClose, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
@@ -61,10 +61,16 @@ export default function RecitationsCreate() {
     <>
       <Title>Nouvelle récitation</Title>
       <DrawerHeader>
+        <DrawerTitle className="sr-only">Nouvelle récitation</DrawerTitle>
         <div className="flex justify-between gap-2">
           <DrawerClose
             render={
-              <Button type="button" variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fermer le formulaire de la récitation"
+              >
                 <XIcon />
               </Button>
             }

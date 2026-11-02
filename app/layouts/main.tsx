@@ -35,10 +35,16 @@ export default function MainLayout() {
 
   return (
     <SidebarProvider>
+      <a
+        href="#main-content"
+        className="fixed top-2 left-2 z-50 -translate-y-[200%] rounded-md bg-background p-3 text-foreground focus:translate-y-0 focus:ring-2 focus:ring-ring"
+      >
+        Aller au contenu principal
+      </a>
       {isNavigating && <GlobalSpinner />}
 
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset id="main-content" tabIndex={-1}>
         <header className="sticky top-0 z-10 flex h-(--header-height) shrink-0 items-center gap-2 border-b px-4 backdrop-blur-2xl">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="data-vertical:h-4 data-vertical:self-auto" />

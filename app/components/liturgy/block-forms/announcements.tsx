@@ -125,7 +125,7 @@ function AnnouncementsBlockFormItem({
     <div ref={ref} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
-          <SortableButton ref={handleRef} />
+          <SortableButton ref={handleRef} aria-label={`Déplacer l'annonce ${index + 1}`} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Annonce {index + 1}
@@ -135,6 +135,7 @@ function AnnouncementsBlockFormItem({
             type="button"
             size="icon"
             variant="ghost"
+            aria-label={`Supprimer l'annonce ${index + 1}`}
             className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
             onClick={onRemove}
           >
@@ -152,8 +153,9 @@ function AnnouncementsBlockFormItem({
                 id={titleName}
                 {...register(titleName)}
                 aria-invalid={!!get(errors, titleName)}
+                aria-describedby={get(errors, titleName) ? `${titleName}-error` : undefined}
               />
-              <FieldError errors={get(errors, titleName)} />
+              <FieldError id={`${titleName}-error`} errors={[get(errors, titleName)]} />
             </Field>
             <Field>
               <FieldLabel htmlFor={detailName}>Détails</FieldLabel>
@@ -161,8 +163,9 @@ function AnnouncementsBlockFormItem({
                 id={detailName}
                 {...register(detailName)}
                 aria-invalid={!!get(errors, detailName)}
+                aria-describedby={get(errors, detailName) ? `${detailName}-error` : undefined}
               />
-              <FieldError errors={get(errors, detailName)} />
+              <FieldError id={`${detailName}-error`} errors={[get(errors, detailName)]} />
             </Field>
           </FieldGroup>
         </div>

@@ -117,6 +117,7 @@ export default function Songs(props: Route.ComponentProps) {
 
           <Button
             className="ml-auto"
+            aria-label="Ajouter un chant"
             onClick={() => navigate("create", { preventScrollReset: true })}
           >
             <span className="hidden sm:block">Ajouter un chant</span>
@@ -124,10 +125,11 @@ export default function Songs(props: Route.ComponentProps) {
           </Button>
         </div>
       </HeaderSlot>
-      <main className="mb-[30vh]">
+      <div className="mb-[30vh]">
         <div className="sticky top-16 z-10 backdrop-blur-2xl">
           <div className="flex w-full max-w-5xl items-center p-4 md:px-8">
             <label className="relative block w-full max-w-60">
+              <span className="sr-only">Rechercher un chant</span>
               <InputGroup>
                 <InputGroupInput placeholder="Recherche…" type="search" {...register("search")} />
                 <InputGroupAddon>
@@ -136,7 +138,7 @@ export default function Songs(props: Route.ComponentProps) {
               </InputGroup>
             </label>
 
-            <div className="ml-auto text-sm text-muted-foreground">
+            <div className="ml-auto text-sm text-muted-foreground" role="status" aria-atomic="true">
               {results.length} {results.length > 1 ? "chants" : "chant"}
               {results.length !== songs.length && ` sur ${songs.length}`}
             </div>
@@ -163,7 +165,7 @@ export default function Songs(props: Route.ComponentProps) {
             </Empty>
           )}
         </div>
-      </main>
+      </div>
 
       <Drawer
         open={!!songId || location.pathname === "/songs/create"}
@@ -230,6 +232,7 @@ const Results = memo(function Results({
               <Button
                 variant="outline"
                 size="icon"
+                aria-label={`Modifier le chant ${item.title}`}
                 onClick={() => navigate(`/songs/${item.id}`, { preventScrollReset: true })}
               >
                 <PenIcon />
@@ -238,7 +241,12 @@ const Results = memo(function Results({
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
-                    <Button type="button" variant="ghost" size="icon">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Actions du chant ${item.title}`}
+                    >
                       <EllipsisVerticalIcon />
                     </Button>
                   }

@@ -13,7 +13,14 @@ import {
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { type SermonBlock, type Liturgy } from "@/lib/schemas";
 
@@ -158,25 +165,38 @@ function BibleRefsFieldItem({
   actionsDisabled,
   onRemove,
 }: BibleRefsFieldItemProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
 
   return (
     <Field ref={ref}>
       <div className="flex gap-2">
-        <SortableButton ref={handleRef} disabled={actionsDisabled} />
-        <BibleRefField control={control} name={name} />
+        <SortableButton
+          ref={handleRef}
+          disabled={actionsDisabled}
+          aria-label={`Déplacer la référence ${index + 1}`}
+        />
+        <BibleRefField
+          control={control}
+          name={name}
+          aria-label={`Référence biblique ${index + 1}`}
+        />
         <Button
           type="button"
           size="icon"
           variant="ghost"
+          aria-label={`Supprimer la référence ${index + 1}`}
           disabled={actionsDisabled}
           onClick={onRemove}
         >
           <TrashIcon />
         </Button>
       </div>
+      <FieldError id={`${name}-error`} errors={[get(errors, name)]} />
     </Field>
   );
 }
@@ -261,9 +281,14 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
   return (
     <Field ref={ref}>
       <div className="flex gap-2">
-        <SortableButton ref={handleRef} disabled={actionsDisabled} />
+        <SortableButton
+          ref={handleRef}
+          disabled={actionsDisabled}
+          aria-label={`Déplacer le point ${index + 1}`}
+        />
         <Input
           id={name}
+          aria-label={`Point ${index + 1} de la prédication`}
           {...register(name)}
           className="min-h-lh"
           aria-invalid={!!get(errors, name)}
@@ -272,6 +297,7 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
           type="button"
           size="icon"
           variant="ghost"
+          aria-label={`Supprimer le point ${index + 1}`}
           disabled={actionsDisabled}
           onClick={onRemove}
         >

@@ -298,7 +298,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
     <div ref={sortableRef} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
-          <SortableButton ref={handleRef} />
+          <SortableButton ref={handleRef} aria-label={`Déplacer le chant ${index + 1}`} />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Chant {index + 1}
@@ -308,6 +308,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
             type="button"
             size="icon"
             variant="ghost"
+            aria-label={`Supprimer le chant ${index + 1}`}
             className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
             onClick={onRemove}
           >
@@ -320,7 +321,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
 
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={name}>Chant</FieldLabel>
+              <FieldLabel htmlFor={idName}>Chant</FieldLabel>
               <Combobox
                 items={items}
                 filteredItems={filteredItems}
@@ -335,7 +336,12 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               >
                 <ComboboxTrigger
                   render={
-                    <Button variant="outline" className="h-auto justify-between py-2 text-left">
+                    <Button
+                      id={idName}
+                      variant="outline"
+                      className="h-auto justify-between py-2 text-left"
+                      aria-invalid={!!get(errors, idName)}
+                    >
                       <ComboboxValue placeholder="Choisissez un chant">
                         {(selectedItem: (typeof items)[number] | null) =>
                           selectedItem ? (
@@ -357,7 +363,11 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 />
 
                 <ComboboxContent>
-                  <ComboboxInput showTrigger={false} placeholder="Search" />
+                  <ComboboxInput
+                    showTrigger={false}
+                    placeholder="Rechercher un chant…"
+                    aria-label="Rechercher un chant"
+                  />
                   <ComboboxEmpty>Auncun chant trouvé</ComboboxEmpty>
                   <ComboboxList>
                     {({ matches, ...item }: (typeof filteredItems)[number]) => {
@@ -439,7 +449,12 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 <Drawer showSwipeHandle={isMobile} swipeDirection={isMobile ? "down" : "right"}>
                   <DrawerTrigger
                     render={
-                      <Button type="button" size="sm" variant="outline">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Informations sur le chant ${selectedSong.title}`}
+                      >
                         Informations
                       </Button>
                     }
@@ -600,10 +615,16 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
   return (
     <FormProvider {...form}>
       <DrawerHeader>
+        <DrawerTitle className="sr-only">Modifier les paroles de {song.title}</DrawerTitle>
         <div className="flex justify-between gap-2">
           <DrawerClose
             render={
-              <Button type="button" variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fermer l'édition des paroles"
+              >
                 <XIcon />
               </Button>
             }

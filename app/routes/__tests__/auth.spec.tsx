@@ -76,6 +76,10 @@ describe("Auth loading screen", () => {
 
     expect(html).toContain("<form");
     expect(html).toContain("Connexion");
+    expect(html).toContain("<main");
+    expect(html).toContain('role="heading" aria-level="1"');
+    expect(html).toContain('autoComplete="email"');
+    expect(html).toContain('autoComplete="current-password"');
     expect(html).not.toContain('role="status"');
     expect(Navigate).not.toHaveBeenCalled();
   });
