@@ -16,6 +16,7 @@ import {
   ConfirmDropdownTrigger,
 } from "@/components/confirm-dropdown";
 import { HeaderSlot } from "@/components/header-slot";
+import { RecitationInformationDrawer } from "@/components/recitation-information-drawer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -84,8 +85,10 @@ export default function Recitations(props: Route.ComponentProps) {
   const fuse = useMemo(() => {
     return new Fuse(
       recitations.map((recitation) => ({
-        ...recitation,
+        id: recitation.id,
+        title: recitation.title,
         content: (recitation.content || []).map((line) => line.text).join("\n"),
+        recitation,
       })),
       {
         keys: ["title", "content"],
@@ -151,11 +154,28 @@ export default function Recitations(props: Route.ComponentProps) {
                     className="grid grid-cols-[1fr_auto] items-center border-b border-muted-foreground/10 py-3 last:border-b-0 md:py-4"
                   >
                     <div>
-                      <div className="mb-1 flex items-center gap-2">
-                        <span className="font-medium text-balance">
-                          {highlightMatches(item.title, titleMatch)}
-                        </span>
-                      </div>
+                      <RecitationInformationDrawer
+                        recitation={item.recitation}
+                        trigger={
+                          <button className="mb-1 flex cursor-pointer items-center gap-2 hover:underline">
+                            <span className="font-medium">
+                              {highlightMatches(item.title, titleMatch)}
+                            </span>
+                          </button>
+                        }
+                        footer={
+                          <Button
+                            variant="outline"
+                            aria-label={`Modifier la récitation ${item.title}`}
+                            onClick={() =>
+                              navigate(`/recitations/${item.id}`, { preventScrollReset: true })
+                            }
+                          >
+                            Modifier la récitation <PenIcon />
+                          </Button>
+                        }
+                      />
+
                       {contentMatch.length > 0 && (
                         <div className="mt-4 max-w-full text-xs text-muted-foreground">
                           {highlightMatches(item.content, contentMatch.slice(0, 1), 40)}

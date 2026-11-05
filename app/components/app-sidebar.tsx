@@ -1,4 +1,4 @@
-import { ChurchIcon, ListMusicIcon, LogOutIcon, MessageSquareTextIcon } from "lucide-react";
+import { ChurchIcon, LogOutIcon } from "lucide-react";
 import { ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
 import { NavLink, useLocation, useNavigate, useNavigation } from "react-router";
@@ -16,6 +16,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { liturgyBlockIcons } from "@/config";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { CurrentUser } from "@/lib/current-user";
 import { useCurrentUser } from "@/lib/user-context";
@@ -31,6 +32,9 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+const SongsIcon = liturgyBlockIcons["songs"];
+const RecitationsIcon = liturgyBlockIcons["recitation"];
+
 const navItems = [
   {
     title: "Présidences",
@@ -40,12 +44,12 @@ const navItems = [
   {
     title: "Chants",
     to: "/songs",
-    icon: <ListMusicIcon />,
+    icon: <SongsIcon />,
   },
   {
     title: "Récitations",
     to: "/recitations",
-    icon: <MessageSquareTextIcon />,
+    icon: <RecitationsIcon />,
   },
 ];
 

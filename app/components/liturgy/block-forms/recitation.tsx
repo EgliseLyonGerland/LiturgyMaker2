@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, InfoIcon } from "lucide-react";
 import { get } from "radashi";
 import { useMemo, useState } from "react";
 import { useController, useFormContext } from "react-hook-form";
@@ -10,6 +10,7 @@ import {
   LiturgyCardHeader,
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
+import { RecitationInformationDrawer } from "@/components/recitation-information-drawer";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -55,8 +56,10 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
   const items = useMemo(
     () =>
       recitations.map((recitation) => ({
-        ...recitation,
+        id: recitation.id,
+        title: recitation.title,
         content: (recitation.content || []).map((line) => line.text).join("\n"),
+        recitation,
       })),
     [recitations],
   );
@@ -158,6 +161,25 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
               </ComboboxContent>
             </Combobox>
           </Field>
+
+          <div className="flex justify-end">
+            {selectedItem && (
+              <RecitationInformationDrawer
+                recitation={selectedItem.recitation}
+                trigger={
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    aria-label={`Informations sur la récitation ${selectedItem.title}`}
+                    className="self-end"
+                  >
+                    Informations <InfoIcon />
+                  </Button>
+                }
+              />
+            )}
+          </div>
 
           <Field>
             <FieldLabel htmlFor={infosName}>Infos</FieldLabel>

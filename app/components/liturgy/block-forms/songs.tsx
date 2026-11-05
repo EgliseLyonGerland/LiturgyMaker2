@@ -6,6 +6,7 @@ import Fuse from "fuse.js";
 import {
   AlertTriangleIcon,
   ChevronDownIcon,
+  InfoIcon,
   PlusIcon,
   SaveIcon,
   TrashIcon,
@@ -451,7 +452,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                       variant="outline"
                       aria-label={`Informations sur le chant ${selectedSong.title}`}
                     >
-                      Informations
+                      Informations <InfoIcon />
                     </Button>
                   }
                   footer={<EditLyricsDrawer lens={lens.focus(lyricsName)} song={selectedSong} />}
