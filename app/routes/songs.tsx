@@ -30,6 +30,7 @@ import { Empty, EmptyContent, EmptyHeader, EmptyTitle } from "@/components/ui/em
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigateBack } from "@/hooks/use-navigate-back";
 import { deleteSong, getSongs } from "@/lib/api";
 import { highlightMatches } from "@/lib/fuzy";
 import type { SongWithId } from "@/lib/schemas";
@@ -85,6 +86,7 @@ export default function Songs(props: Route.ComponentProps) {
   const { submit } = useFetcher();
   const location = useLocation();
   const navigate = useNavigate();
+  const navigateBack = useNavigateBack();
   const isMobile = useIsMobile();
 
   const { control, register, setValue } = useForm<{ search: string }>({
@@ -171,7 +173,7 @@ export default function Songs(props: Route.ComponentProps) {
         open={!!songId || location.pathname === "/songs/create"}
         onOpenChange={(open) => {
           if (!open) {
-            navigate("/songs", { preventScrollReset: true, replace: true });
+            navigateBack("/songs", { preventScrollReset: true });
           }
         }}
         swipeDirection={isMobile ? "down" : "right"}

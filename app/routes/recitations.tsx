@@ -30,6 +30,7 @@ import { Empty, EmptyContent, EmptyHeader, EmptyTitle } from "@/components/ui/em
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigateBack } from "@/hooks/use-navigate-back";
 import { deleteRecitation, getRecitations } from "@/lib/api";
 import { highlightMatches } from "@/lib/fuzy";
 
@@ -68,6 +69,7 @@ export default function Recitations(props: Route.ComponentProps) {
   const { submit } = useFetcher();
   const location = useLocation();
   const navigate = useNavigate();
+  const navigateBack = useNavigateBack();
   const isMobile = useIsMobile();
 
   const { control, register, setValue } = useForm<{ search: string }>({
@@ -248,7 +250,7 @@ export default function Recitations(props: Route.ComponentProps) {
         open={!!recitationId || location.pathname === "/recitations/create"}
         onOpenChange={(open) => {
           if (!open) {
-            navigate("/recitations", { preventScrollReset: true, replace: true });
+            navigateBack("/recitations", { preventScrollReset: true });
           }
         }}
         swipeDirection={isMobile ? "down" : "right"}
