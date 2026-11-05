@@ -1,6 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { useLens, type Lens } from "@hookform/lenses";
+import { valibotResolver } from "@hookform/resolvers/valibot";
 import { cn } from "cn";
 import Fuse from "fuse.js";
 import {
@@ -14,14 +15,8 @@ import {
 } from "lucide-react";
 import { get } from "radashi";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  FormProvider,
-  useController,
-  useFieldArray,
-  useForm,
-  useFormContext,
-  Watch,
-} from "react-hook-form";
+import { useController, useFieldArray, useForm, useFormContext, Watch } from "react-hook-form";
+import * as v from "valibot";
 import { create } from "zustand";
 
 import {
@@ -79,6 +74,7 @@ import { highlightMatches } from "@/lib/fuzy";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { isEqualLyrics } from "@/lib/lyrics-utils";
 import {
+  lyricsFormSchema,
   type Liturgy,
   type Lyrics,
   type Song,
@@ -533,6 +529,10 @@ function EditLyricsDrawer(props: EditLyricsDrawerProps) {
   );
 }
 
+const editLyricsFormSchema = v.object({
+  lyrics: lyricsFormSchema,
+});
+
 function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
   const setOpen = useLyricsEdit((state) => state.setOpen);
   const setDirty = useLyricsEdit((state) => state.setDirty);
@@ -541,17 +541,16 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
     field: { value, onChange },
   } = useController(lens.interop());
 
-  const form = useForm<{ lyrics: Lyrics }>({
-    defaultValues: {
-      lyrics: value.length > 0 ? value : song.lyrics,
-    },
-  });
-
   const {
     control,
     handleSubmit,
     formState: { isDirty },
-  } = form;
+  } = useForm({
+    resolver: valibotResolver(editLyricsFormSchema),
+    defaultValues: {
+      lyrics: value.length > 0 ? value : song.lyrics,
+    },
+  });
 
   const lyricsLens = useLens({ control });
 
@@ -566,7 +565,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
   }, [isDirty, setDirty]);
 
   return (
-    <FormProvider {...form}>
+    <>
       <DrawerHeader>
         <DrawerTitle className="sr-only">Modifier les paroles de {song.title}</DrawerTitle>
         <div className="flex justify-between gap-2">
@@ -609,6 +608,6 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
           <PassageFieldArray kind="song" lens={lyricsLens.focus("lyrics")} />
         </form>
       </div>
-    </FormProvider>
+    </>
   );
 }

@@ -319,6 +319,7 @@ type RecitationForm = v.InferOutput<typeof recitationFormSchema>;
 
 export {
   lyricsSchema,
+  lyricsFormSchema,
   liturgyFormSchema,
   announcementsBlockSchema,
   readingBlockSchema,
