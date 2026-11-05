@@ -31,7 +31,7 @@ import {
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
 import { PassageFieldArray } from "@/components/lyrics-field-array";
-import Preview from "@/components/preview";
+import { SongInformationDrawer } from "@/components/song-information-drawer";
 import { Alert, AlertAction, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -59,8 +59,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -73,13 +71,12 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { highlightMatches } from "@/lib/fuzy";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
-import { isEqualLyrics, prepareLyrics } from "@/lib/lyrics-utils";
+import { isEqualLyrics } from "@/lib/lyrics-utils";
 import {
   type Liturgy,
   type Lyrics,
@@ -246,7 +243,6 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref: sortableRef } = useSortable({ id, index, handle: handleRef });
-  const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
 
   const idName = `${name}.id` as const;
@@ -446,26 +442,20 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               </Field>
 
               {selectedSong && (
-                <Drawer showSwipeHandle={isMobile} swipeDirection={isMobile ? "down" : "right"}>
-                  <DrawerTrigger
-                    render={
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        aria-label={`Informations sur le chant ${selectedSong.title}`}
-                      >
-                        Informations
-                      </Button>
-                    }
-                  />
-                  <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
-                    <ItemInformationDrawerContent
-                      lens={lens.focus(lyricsName)}
-                      song={selectedSong}
-                    />
-                  </DrawerContent>
-                </Drawer>
+                <SongInformationDrawer
+                  song={selectedSong}
+                  trigger={
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      aria-label={`Informations sur le chant ${selectedSong.title}`}
+                    >
+                      Informations
+                    </Button>
+                  }
+                  footer={<EditLyricsDrawer lens={lens.focus(lyricsName)} song={selectedSong} />}
+                />
               )}
             </div>
           </FieldGroup>
@@ -475,12 +465,14 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   );
 }
 
-interface ItemInformationDrawerContentProps {
+interface EditLyricsDrawerProps {
   lens: Lens<Lyrics>;
   song: Song;
 }
 
-function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerContentProps) {
+function EditLyricsDrawer(props: EditLyricsDrawerProps) {
+  const { lens, song } = props;
+
   const drawerOpen = useLyricsEdit((state) => state.open);
   const setDrawerOpen = useLyricsEdit((state) => state.setOpen);
   const requestDiscard = useLyricsEdit((state) => state.requestDiscard);
@@ -490,97 +482,57 @@ function ItemInformationDrawerContent({ lens, song }: ItemInformationDrawerConte
 
   return (
     <>
-      <DrawerHeader>
-        <DrawerTitle className="text-lg">
-          {song.title} {song.aka && <span>({song.aka})</span>}
-        </DrawerTitle>
-        <DrawerDescription>{song.authors || <i>Aucun auteur</i>}</DrawerDescription>
-      </DrawerHeader>
+      <Watch
+        {...lens.interop()}
+        render={(value) =>
+          value.length > 0 && (
+            <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+              <AlertTriangleIcon />
+              <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
+              <AlertAction>
+                <Button
+                  size="xs"
 
-      <Separator className="my-4" />
-
-      <div className="flex-1 scroll-fade overflow-y-auto px-4">
-        {song.previewUrl && (
-          <>
-            <Preview title={song.title} url={song.previewUrl} />
-            <Separator className="my-4" />
-          </>
-        )}
-
-        <div className="mb-10 flex flex-col gap-4">
-          {prepareLyrics(song.lyrics).map(({ type, lines }, lyricIndex) => (
-            <div key={lyricIndex}>
-              {lines.map((line, lineIndex) => (
-                <div
-                  key={lineIndex}
-                  className={cn("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
+                  onClick={() => {
+                    lyricsField.field.onChange(null);
+                  }}
                 >
-                  {line}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+                  Rétablir
+                </Button>
+              </AlertAction>
+            </Alert>
+          )
+        }
+      />
 
-      <DrawerFooter>
-        <Watch
-          {...lens.interop()}
-          render={(value) =>
-            value.length > 0 && (
-              <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-                <AlertTriangleIcon />
-                <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
-                <AlertAction>
-                  <Button
-                    size="xs"
-
-                    onClick={() => {
-                      lyricsField.field.onChange(null);
-                    }}
-                  >
-                    Rétablir
-                  </Button>
-                </AlertAction>
-              </Alert>
-            )
+      <Drawer
+        showSwipeHandle={isMobile}
+        swipeDirection={isMobile ? "down" : "right"}
+        open={drawerOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setDrawerOpen(true);
+          } else {
+            requestDiscard();
+          }
+        }}
+      >
+        <DrawerTrigger
+          render={
+            <Button type="button" size="lg">
+              Modifier les paroles pour ce culte
+            </Button>
           }
         />
-
-        <Drawer
-          showSwipeHandle={isMobile}
-          swipeDirection={isMobile ? "down" : "right"}
-          open={drawerOpen}
-          onOpenChange={(open) => {
-            if (open) {
-              setDrawerOpen(true);
-            } else {
-              requestDiscard();
-            }
-          }}
-        >
-          <DrawerTrigger
-            render={
-              <Button type="button" size="lg">
-                Modifier les paroles pour ce culte
-              </Button>
-            }
-          />
-          <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
-            <EditLyricsDrawerContent lens={lens} song={song} />
-          </DrawerContent>
-        </Drawer>
-      </DrawerFooter>
+        <DrawerContent className={cn(!isMobile && "w-[90%] max-w-xl")}>
+          <EditLyricsDrawerContent lens={lens} song={song} />
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
 
-interface EditLyricsDrawerContentProps {
-  lens: Lens<Lyrics>;
-  song: Song;
-}
-
-function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerContentProps) {
+function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
   const setOpen = useLyricsEdit((state) => state.setOpen);
   const setDirty = useLyricsEdit((state) => state.setDirty);
 

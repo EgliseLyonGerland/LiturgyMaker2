@@ -16,6 +16,7 @@ import {
   ConfirmDropdownTrigger,
 } from "@/components/confirm-dropdown";
 import { HeaderSlot } from "@/components/header-slot";
+import { SongInformationDrawer } from "@/components/song-information-drawer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -40,11 +41,14 @@ import type { Route } from "./+types/songs";
 function getFuseInstance(songs: SongWithId[]) {
   return new Fuse(
     songs.map((song) => ({
-      ...song,
+      id: song.id,
+      title: song.aka ? `${song.title} (${song.aka})` : song.title,
+      authors: song.authors,
       lyrics: (song.lyrics || []).map((line) => line.text).join("\n"),
+      song,
     })),
     {
-      keys: ["title", "authors", "aka", "lyrics"],
+      keys: ["title", "authors", "lyrics"],
       ignoreDiacritics: true,
       includeMatches: true,
       threshold: 0.2,
@@ -196,98 +200,111 @@ const Results = memo(function Results({
   const navigate = useNavigate();
 
   return (
-    <div>
-      {data.map(({ item, matches }) => {
-        const titleMatch = matches?.find((m) => m.key === "title")?.indices ?? [];
-        const akaMatch = matches?.find((m) => m.key === "aka")?.indices ?? [];
-        const authorsMatch = matches?.find((m) => m.key === "authors")?.indices ?? [];
-        const lyricsMatch = matches?.find((m) => m.key === "lyrics")?.indices ?? [];
+    <>
+      <div className="grid grid-cols-[1fr_auto]">
+        {data.map(({ item, matches }) => {
+          const titleMatch = matches?.find((m) => m.key === "title")?.indices ?? [];
+          const authorsMatch = matches?.find((m) => m.key === "authors")?.indices ?? [];
+          const lyricsMatch = matches?.find((m) => m.key === "lyrics")?.indices ?? [];
 
-        return (
-          <div
-            key={item.id}
-            className="grid grid-cols-[1fr_auto] border-b border-muted-foreground/10 py-3 last:border-b-0 md:py-4"
-          >
-            <div>
-              <div className="mb-1 flex items-center gap-2">
-                <span className="font-medium">{highlightMatches(item.title, titleMatch)}</span>
-                {item.aka && (
-                  <span className="text-muted-foreground">
-                    ({highlightMatches(item.aka, akaMatch)})
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {item.authors ? (
-                  highlightMatches(item.authors, authorsMatch)
-                ) : (
-                  <i>Auteur non renseigné</i>
-                )}
-              </div>
-              {lyricsMatch.length > 0 && (
-                <div className="mt-4 max-w-full text-xs text-muted-foreground">
-                  {highlightMatches(item.lyrics, lyricsMatch.slice(0, 1), 40)}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={`Modifier le chant ${item.title}`}
-                onClick={() => navigate(`/songs/${item.id}`, { preventScrollReset: true })}
-              >
-                <PenIcon />
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
+          return (
+            <div
+              key={item.id}
+              className="group relative col-span-2 grid grid-cols-subgrid border-b border-muted-foreground/10 py-3 last:border-b-0 md:py-4"
+            >
+              <div>
+                <SongInformationDrawer
+                  song={item.song}
+                  trigger={
+                    <button className="mb-1 flex cursor-pointer items-center gap-2 hover:underline">
+                      <span className="font-medium">
+                        {highlightMatches(item.title, titleMatch)}
+                      </span>
+                    </button>
+                  }
+                  footer={
                     <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Actions du chant ${item.title}`}
+                      variant="outline"
+                      aria-label={`Modifier le chant ${item.title}`}
+                      onClick={() => navigate(`/songs/${item.id}`, { preventScrollReset: true })}
                     >
-                      <EllipsisVerticalIcon />
+                      Modifier le chant <PenIcon />
                     </Button>
                   }
                 />
-                <DropdownMenuContent className="w-auto" align="start">
-                  <DropdownMenuGroup>
-                    <ConfirmDropdown>
-                      <ConfirmDropdownTrigger
-                        nativeButton={false}
-                        render={
-                          <DropdownMenuItem
-                            tabIndex={-1}
-                            closeOnClick={false}
-                            variant="destructive"
-                          >
-                            <TrashIcon />
-                            Supprimer
-                          </DropdownMenuItem>
-                        }
-                      />
-                      <ConfirmDropdownContent>
-                        <ConfirmDropdownTitle>
-                          Êtes-vous sûr de vouloir supprimer ce chant ?
-                        </ConfirmDropdownTitle>
-                        <ConfirmDropdownActions>
-                          <ConfirmDropdownCancel>Non</ConfirmDropdownCancel>
-                          <ConfirmDropdownConfirm onClick={() => onDelete(item.id)}>
-                            Oui
-                          </ConfirmDropdownConfirm>
-                        </ConfirmDropdownActions>
-                      </ConfirmDropdownContent>
-                    </ConfirmDropdown>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+                <div className="text-sm text-muted-foreground">
+                  {item.authors ? (
+                    highlightMatches(item.authors, authorsMatch)
+                  ) : (
+                    <i>Auteur non renseigné</i>
+                  )}
+                </div>
+                {lyricsMatch.length > 0 && (
+                  <div className="mt-4 max-w-full text-xs text-muted-foreground">
+                    {highlightMatches(item.lyrics, lyricsMatch.slice(0, 1), 40)}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={`Modifier le chant ${item.title}`}
+                  onClick={() => navigate(`/songs/${item.id}`, { preventScrollReset: true })}
+                >
+                  <PenIcon />
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Actions du chant ${item.title}`}
+                      >
+                        <EllipsisVerticalIcon />
+                      </Button>
+                    }
+                  />
+                  <DropdownMenuContent className="w-auto" align="start">
+                    <DropdownMenuGroup>
+                      <ConfirmDropdown>
+                        <ConfirmDropdownTrigger
+                          nativeButton={false}
+                          render={
+                            <DropdownMenuItem
+                              tabIndex={-1}
+                              closeOnClick={false}
+                              variant="destructive"
+                            >
+                              <TrashIcon />
+                              Supprimer
+                            </DropdownMenuItem>
+                          }
+                        />
+                        <ConfirmDropdownContent>
+                          <ConfirmDropdownTitle>
+                            Êtes-vous sûr de vouloir supprimer ce chant ?
+                          </ConfirmDropdownTitle>
+                          <ConfirmDropdownActions>
+                            <ConfirmDropdownCancel>Non</ConfirmDropdownCancel>
+                            <ConfirmDropdownConfirm onClick={() => onDelete(item.id)}>
+                              Oui
+                            </ConfirmDropdownConfirm>
+                          </ConfirmDropdownActions>
+                        </ConfirmDropdownContent>
+                      </ConfirmDropdown>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 });

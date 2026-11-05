@@ -67,10 +67,10 @@
     "vitest": "^5.0.5"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": "npm run lint",
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "oxlint --fix --max-warnings=0",
     "*": "oxfmt --no-error-on-unmatched-pattern"
   },
   "packageManager": "pnpm@12.16.1"
