@@ -29,7 +29,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { getSongs, updateSong } from "@/lib/api";
-import { songSchema, type Song } from "@/lib/schemas";
+import { songFormSchema, songSchema, type SongForm as SongFormType } from "@/lib/schemas";
 
 import type { Route } from "./+types/songs.$songId";
 
@@ -72,7 +72,7 @@ export default function SongEdit({ loaderData }: Route.ComponentProps) {
     handleSubmit,
     formState: { isDirty },
   } = useForm({
-    resolver: valibotResolver(songSchema),
+    resolver: valibotResolver(songFormSchema),
     defaultValues: song,
     disabled: fetcher.state !== "idle",
   });
@@ -133,7 +133,7 @@ export default function SongEdit({ loaderData }: Route.ComponentProps) {
 }
 
 interface SongFormProps {
-  lens: Lens<Song>;
+  lens: Lens<SongFormType>;
 }
 
 export function SongForm({ lens }: SongFormProps) {

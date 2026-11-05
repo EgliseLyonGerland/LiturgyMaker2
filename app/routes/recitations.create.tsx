@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { addRecitation } from "@/lib/api";
-import { recitationSchema } from "@/lib/schemas";
+import { recitationFormSchema } from "@/lib/schemas";
 
 import type { Route } from "./+types/recitations.create";
 import { RecitationForm } from "./recitations.$recitationId";
@@ -23,7 +23,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   const data = await request.json();
 
   try {
-    const output = v.parse(recitationSchema, data);
+    const output = v.parse(recitationFormSchema, data);
 
     await addRecitation(output);
 
@@ -44,7 +44,7 @@ export default function RecitationsCreate() {
     handleSubmit,
     formState: { isDirty },
   } = useForm({
-    resolver: valibotResolver(recitationSchema),
+    resolver: valibotResolver(recitationFormSchema),
     defaultValues: {
       title: "",
       content: [],

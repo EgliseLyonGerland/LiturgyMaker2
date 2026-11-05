@@ -56,7 +56,7 @@ import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import { queryClient } from "@/lib/query-client";
-import { liturgySchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
+import { liturgyFormSchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
 import { userContext } from "@/lib/user-context";
 
 import type { Route } from "./+types/liturgy";
@@ -106,7 +106,7 @@ const submissionSchema = v.variant("intent", [
   v.object({ intent: v.literal("reload") }),
   v.object({
     intent: v.literal("save"),
-    liturgy: liturgySchema,
+    liturgy: liturgyFormSchema,
     overwrite: v.boolean(),
   }),
 ]);
@@ -180,7 +180,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const disabled = fetcher.state !== "idle";
 
   const form = useForm({
-    resolver: valibotResolver(liturgySchema),
+    resolver: valibotResolver(liturgyFormSchema),
     values: liturgy,
     disabled,
   });

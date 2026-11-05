@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { addSong } from "@/lib/api";
-import { songSchema } from "@/lib/schemas";
+import { songFormSchema } from "@/lib/schemas";
 
 import type { Route } from "./+types/songs.create";
 import { SongForm } from "./songs.$songId";
@@ -23,7 +23,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   const data = await request.json();
 
   try {
-    const output = v.parse(songSchema, data);
+    const output = v.parse(songFormSchema, data);
 
     await addSong(output);
 
@@ -44,7 +44,7 @@ export default function SongsCreate() {
     handleSubmit,
     formState: { isDirty },
   } = useForm({
-    resolver: valibotResolver(songSchema),
+    resolver: valibotResolver(songFormSchema),
     defaultValues: {
       title: "",
       aka: "",

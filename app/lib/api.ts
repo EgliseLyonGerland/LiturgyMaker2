@@ -45,13 +45,11 @@ export async function getSongs() {
       const { docs } = await getDocs(query(collection(firebaseDb, "songs")));
 
       return sortSongs(
-        docs
-          .map((doc) => {
-            const { success, output } = v.safeParse(songSchema, doc.data());
+        docs.map((doc) => {
+          const output = v.parse(songSchema, doc.data());
 
-            return success ? { id: doc.id, ...output } : null;
-          })
-          .filter((item) => item !== null),
+          return { id: doc.id, ...output };
+        }),
       );
     },
     staleTime: Infinity,
@@ -90,13 +88,11 @@ export async function getRecitations() {
       const { docs } = await getDocs(query(collection(firebaseDb, "recitations")));
 
       return sortRecitations(
-        docs
-          .map((doc) => {
-            const { success, output } = v.safeParse(recitationSchema, doc.data());
+        docs.map((doc) => {
+          const output = v.parse(recitationSchema, doc.data());
 
-            return success ? { id: doc.id, ...output } : null;
-          })
-          .filter((item) => item !== null),
+          return { id: doc.id, ...output };
+        }),
       );
     },
     staleTime: Infinity,

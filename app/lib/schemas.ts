@@ -20,6 +20,13 @@ const bibleRefSchema = v.pipe(
 const lyricsSchema = v.array(
   v.object({
     type: v.picklist(["verse", "chorus"]),
+    text: v.string(),
+  }),
+);
+
+const lyricsFormSchema = v.array(
+  v.object({
+    type: v.picklist(["verse", "chorus"]),
     text: v.pipe(
       v.string(),
       v.trim(),
@@ -50,6 +57,19 @@ const readingBlockSchema = v.object({
   data: v.object({
     bibleRefs: v.array(
       v.object({
+        id: v.string(),
+        excerpt: v.string(),
+      }),
+    ),
+  }),
+});
+
+const readingBlockFormSchema = v.object({
+  type: v.literal("reading"),
+  title: v.string(),
+  data: v.object({
+    bibleRefs: v.array(
+      v.object({
         id: bibleRefSchema,
         excerpt: v.string(),
       }),
@@ -65,6 +85,24 @@ const sectionBlockSchema = v.object({
 });
 
 const sermonBlockSchema = v.object({
+  type: v.literal("sermon"),
+  data: v.object({
+    title: v.string(),
+    author: v.string(),
+    bibleRefs: v.array(
+      v.object({
+        id: v.string(),
+      }),
+    ),
+    plan: v.array(
+      v.object({
+        text: v.string(),
+      }),
+    ),
+  }),
+});
+
+const sermonBlockFormSchema = v.object({
   type: v.literal("sermon"),
   data: v.object({
     title: v.string(),
@@ -90,7 +128,21 @@ const songsBlockSchema = v.object({
         id: v.string(),
         infos: v.string(),
         repeat: v.boolean(),
-        lyrics: v.fallback(lyricsSchema, []),
+        lyrics: v.nullish(lyricsSchema, []),
+      }),
+    ),
+  }),
+});
+
+const songsBlockFormSchema = v.object({
+  type: v.literal("songs"),
+  data: v.object({
+    items: v.array(
+      v.object({
+        id: v.string(),
+        infos: v.string(),
+        repeat: v.boolean(),
+        lyrics: lyricsFormSchema,
       }),
     ),
   }),
@@ -138,38 +190,89 @@ const liturgySchema = v.object({
   ),
 });
 
-const songSchema = v.object({
-  title: v.pipe(v.string(), v.trim(), v.nonEmpty("Le titre est requis")),
-  aka: v.fallback(v.string(), ""),
-  authors: v.fallback(v.string(), ""),
-  number: v.fallback(v.number(), 0),
-  copyright: v.fallback(v.string(), ""),
-  translation: v.fallback(v.string(), ""),
-  collection: v.fallback(v.string(), ""),
-  previewUrl: v.fallback(
-    v.union([v.literal(""), v.pipe(v.string(), v.url("L’URL de l’aperçu est invalide"))]),
-    "",
+const liturgyFormSchema = v.object({
+  uid: v.string(),
+  version: v.literal(liturgyDocumentVersion),
+  revision: v.optional(v.string()),
+  blocks: v.array(
+    v.variant("type", [
+      announcementsBlockSchema,
+      readingBlockFormSchema,
+      sectionBlockSchema,
+      sermonBlockFormSchema,
+      songsBlockFormSchema,
+      recitationBlockSchema,
+      openDoorsBlockSchema,
+    ]),
   ),
-  lyrics: v.fallback(lyricsSchema, []),
+});
+
+const songSchema = v.object({
+  title: v.string(),
+  aka: v.nullish(v.string(), ""),
+  authors: v.nullish(v.string(), ""),
+  number: v.nullish(
+    v.pipe(
+      v.union([v.number(), v.string()]),
+      v.transform((input) => {
+        const number = Number(input);
+
+        if (Number.isInteger(number) && number > 0) {
+          return `${number}`;
+        }
+
+        return null;
+      }),
+    ),
+    null,
+  ),
+  copyright: v.nullish(v.string(), ""),
+  translation: v.nullish(v.string(), ""),
+  collection: v.nullish(v.string(), ""),
+  previewUrl: v.nullish(v.string(), ""),
+  lyrics: v.nullish(lyricsSchema, []),
+});
+
+const songFormSchema = v.object({
+  id: v.string(),
+  title: v.pipe(v.string(), v.trim(), v.nonEmpty("Le titre est requis")),
+  aka: v.string(),
+  authors: v.string(),
+  number: v.number(),
+  copyright: v.string(),
+  translation: v.string(),
+  collection: v.string(),
+  previewUrl: v.union([v.literal(""), v.pipe(v.string(), v.url("L’URL de l’aperçu est invalide"))]),
+  lyrics: lyricsFormSchema,
 });
 
 const recitationContentSchema = v.array(
   v.object({
-    text: v.pipe(
-      v.string(),
-      v.trim(),
-      v.nonEmpty("Ce passage ne peut pas être vide"),
-      v.check(
-        (text) => text.split(/\r\n|\r|\n/).length <= 8,
-        "Ce passage ne peut pas dépasser 8 lignes",
-      ),
-    ),
+    text: v.string(),
   }),
 );
 
 const recitationSchema = v.object({
   title: v.string(),
-  content: v.fallback(recitationContentSchema, []),
+  content: recitationContentSchema,
+});
+
+const recitationFormSchema = v.object({
+  id: v.string(),
+  title: v.string(),
+  content: v.array(
+    v.object({
+      text: v.pipe(
+        v.string(),
+        v.trim(),
+        v.nonEmpty("Ce passage ne peut pas être vide"),
+        v.check(
+          (text) => text.split(/\r\n|\r|\n/).length <= 8,
+          "Ce passage ne peut pas dépasser 8 lignes",
+        ),
+      ),
+    }),
+  ),
 });
 
 type Liturgy = v.InferOutput<typeof liturgySchema>;
@@ -195,15 +298,20 @@ type RecitationBlock = v.InferOutput<typeof recitationBlockSchema>;
 type OpenDoorsBlock = v.InferOutput<typeof openDoorsBlockSchema>;
 
 type LiturgyBlockType = Liturgy["blocks"][number]["type"];
+type LiturgyForm = v.InferOutput<typeof liturgyFormSchema>;
 
 type Song = v.InferOutput<typeof songSchema>;
 type SongWithId = v.InferOutput<typeof songSchema> & { id: string };
+type SongForm = v.InferOutput<typeof songFormSchema>;
+
 type Recitation = v.InferOutput<typeof recitationSchema>;
 type RecitationWithId = v.InferOutput<typeof recitationSchema> & { id: string };
 type RecitationContent = v.InferOutput<typeof recitationContentSchema>;
+type RecitationForm = v.InferOutput<typeof recitationFormSchema>;
 
 export {
   lyricsSchema,
+  liturgyFormSchema,
   announcementsBlockSchema,
   readingBlockSchema,
   sectionBlockSchema,
@@ -213,8 +321,10 @@ export {
   openDoorsBlockSchema,
   liturgySchema,
   songSchema,
+  songFormSchema,
   recitationSchema,
   recitationContentSchema,
+  recitationFormSchema,
 };
 
 export type {
@@ -230,9 +340,12 @@ export type {
   LiturgyWithId,
   LiturgyBlocks,
   LiturgyBlockType,
+  LiturgyForm,
   Song,
   SongWithId,
+  SongForm,
   Recitation,
   RecitationWithId,
   RecitationContent,
+  RecitationForm,
 };

@@ -6,6 +6,12 @@ interface PreviewProps {
 }
 
 export default function Preview({ title, url }: PreviewProps) {
+  try {
+    new URL(url);
+  } catch {
+    return null;
+  }
+
   if (url.includes("drive.google.com")) {
     return (
       <iframe

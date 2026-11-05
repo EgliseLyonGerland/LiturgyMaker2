@@ -17,13 +17,14 @@ import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
 import {
   type Liturgy,
   type LiturgyBlockType,
+  type LiturgyForm,
   type RecitationWithId,
   type SongWithId,
 } from "@/lib/schemas";
 
 import { SortableButton } from "./sortable-button";
 
-type Fields = UseFieldArrayReturn<Liturgy, "blocks", "id">["fields"];
+type Fields = UseFieldArrayReturn<LiturgyForm, "blocks", "id">["fields"];
 
 function getDescription(
   field: Liturgy["blocks"][number],
