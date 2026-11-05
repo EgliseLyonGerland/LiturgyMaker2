@@ -3,7 +3,7 @@ import { cn } from "cn";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { prepareLyrics } from "@/lib/lyrics-utils";
-import type { SongWithId } from "@/lib/schemas";
+import type { Lyrics, SongWithId } from "@/lib/schemas";
 
 import Preview from "./preview";
 import {
@@ -19,6 +19,7 @@ import { Separator } from "./ui/separator";
 
 interface SongInformationDrawerProps {
   song: SongWithId;
+  lyrics?: Lyrics;
   trigger: DrawerTriggerProps["render"];
   footer?: React.ReactNode;
 }
@@ -37,7 +38,7 @@ function SongInformationDrawer(props: SongInformationDrawerProps) {
   );
 }
 
-function ItemInformationDrawerContent({ song, footer }: SongInformationDrawerProps) {
+function ItemInformationDrawerContent({ song, lyrics, footer }: SongInformationDrawerProps) {
   return (
     <>
       <DrawerHeader>
@@ -58,7 +59,7 @@ function ItemInformationDrawerContent({ song, footer }: SongInformationDrawerPro
         )}
 
         <div className="mb-10 flex flex-col gap-4">
-          {prepareLyrics(song.lyrics).map(({ type, lines }, lyricIndex) => (
+          {prepareLyrics(lyrics ?? song.lyrics).map(({ type, lines }, lyricIndex) => (
             <div key={lyricIndex}>
               {lines.map((line, lineIndex) => (
                 <div

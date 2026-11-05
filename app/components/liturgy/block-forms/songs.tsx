@@ -439,19 +439,28 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               </Field>
 
               {selectedSong && (
-                <SongInformationDrawer
-                  song={selectedSong}
-                  trigger={
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      aria-label={`Informations sur le chant ${selectedSong.title}`}
-                    >
-                      Informations <InfoIcon />
-                    </Button>
-                  }
-                  footer={<EditLyricsDrawer lens={lens.focus(lyricsName)} song={selectedSong} />}
+                <Watch
+                  control={control}
+                  name={lyricsName}
+                  render={(lyrics) => (
+                    <SongInformationDrawer
+                      song={selectedSong}
+                      lyrics={lyrics.length ? lyrics : undefined}
+                      trigger={
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          aria-label={`Informations sur le chant ${selectedSong.title}`}
+                        >
+                          Informations <InfoIcon />
+                        </Button>
+                      }
+                      footer={
+                        <EditLyricsDrawer lens={lens.focus(lyricsName)} song={selectedSong} />
+                      }
+                    />
+                  )}
                 />
               )}
             </div>
