@@ -221,10 +221,10 @@ const songSchema = v.object({
           return `${number}`;
         }
 
-        return null;
+        return "";
       }),
     ),
-    null,
+    "",
   ),
   copyright: v.nullish(v.string(), ""),
   translation: v.nullish(v.string(), ""),
@@ -238,7 +238,15 @@ const songFormSchema = v.object({
   title: v.pipe(v.string(), v.trim(), v.nonEmpty("Le titre est requis")),
   aka: v.string(),
   authors: v.string(),
-  number: v.number(),
+  number: v.union([
+    v.literal(""),
+    v.pipe(
+      v.string(),
+      v.trim(),
+      v.regex(/^\d+$/, "La position doit être un nombre entier positif"),
+    ),
+  ]),
+
   copyright: v.string(),
   translation: v.string(),
   collection: v.string(),

@@ -209,6 +209,16 @@ export function SongForm({ lens }: SongFormProps) {
           <FieldError id="collection-error" errors={[get(errors, "collection")]} />
         </Field>
         <Field>
+          <FieldLabel htmlFor="collection">Position</FieldLabel>
+          <Input
+            id="collection"
+            {...lens.focus("number").interop((control, name) => control.register(name))}
+            aria-invalid={!!get(errors, "number")}
+            aria-describedby={get(errors, "number") ? "number-error" : undefined}
+          />
+          <FieldError id="number-error" errors={[get(errors, "number")]} />
+        </Field>
+        <Field>
           <FieldLabel htmlFor="previewUrl">Aperçu</FieldLabel>
           <Input
             id="previewUrl"

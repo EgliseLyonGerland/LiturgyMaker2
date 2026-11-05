@@ -49,7 +49,7 @@ export default function SongsCreate() {
       title: "",
       aka: "",
       authors: "",
-      number: 0,
+      number: "",
       copyright: "",
       translation: "",
       collection: "",
