@@ -66,7 +66,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-      <body>
+      <body className="">
         <div className="isolate">{children}</div>
         <Title />
         <ScrollRestoration />

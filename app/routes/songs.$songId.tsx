@@ -117,6 +117,8 @@ export default function SongEdit({ loaderData }: Route.ComponentProps) {
         <form
           id="edit-song-form"
           onSubmit={handleSubmit((data) => {
+            console.log(data);
+            return;
             return fetcher.submit(data, {
               method: "post",
               encType: "application/json",
