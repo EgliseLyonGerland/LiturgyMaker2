@@ -42,15 +42,15 @@ beforeEach(() => {
   authState.search = "";
 });
 
-describe("Auth loading screen", () => {
-  it("shows an accessible loader while Firebase restores the session", () => {
+describe("Auth session state", () => {
+  it("keeps the login form available while Firebase restores the session", () => {
     authState.loading = true;
 
     const html = renderToStaticMarkup(<Auth />);
 
-    expect(html).toContain('role="status"');
-    expect(html).toContain('aria-label="Chargement en cours"');
-    expect(html).not.toContain("<form");
+    expect(html).toContain("<form");
+    expect(html).toContain('aria-label="Connexion"');
+    expect(html).not.toContain('role="status"');
     expect(Navigate).not.toHaveBeenCalled();
   });
 

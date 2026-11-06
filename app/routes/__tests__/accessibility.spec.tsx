@@ -4,7 +4,10 @@ import { useForm } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 
 import { Drawer } from "@/components/ui/drawer";
-import type { Recitation, Song } from "@/lib/schemas";
+import type {
+  RecitationForm as RecitationFormValues,
+  SongForm as SongFormValues,
+} from "@/lib/schemas";
 
 import { RecitationForm } from "../recitations.$recitationId";
 import RecitationsCreate from "../recitations.create";
@@ -20,33 +23,51 @@ vi.mock("react-router", async (importOriginal) => ({
   useFetcher: () => ({ submit: vi.fn(), state: "idle" }),
 }));
 
-function InvalidSong() {
-  const { control } = useForm<Song>({
+function InvalidSong({ passageError }: { passageError?: string }) {
+  const { control } = useForm<SongFormValues>({
     defaultValues: {
+      id: "song-1",
       title: "",
       aka: "",
       authors: "",
-      number: 0,
+      number: "",
       copyright: "",
       translation: "",
       collection: "",
       previewUrl: "",
-      lyrics: [],
+      lyrics: passageError ? [{ type: "verse", text: "" }] : [],
     },
-    errors: { title: { type: "required", message: "Le titre est requis" } },
+    errors: {
+      title: { type: "required", message: "Le titre est requis" },
+      ...(passageError
+        ? { lyrics: [{ text: { type: "validation", message: passageError } }] }
+        : {}),
+    },
   });
   return <SongForm lens={useLens({ control })} />;
 }
 
 function InvalidRecitation() {
-  const { control } = useForm<Recitation>({
-    defaultValues: { title: "", content: [] },
+  const { control } = useForm<RecitationFormValues>({
+    defaultValues: { id: "recitation-1", title: "", content: [] },
     errors: { title: { type: "required", message: "Le titre est requis" } },
   });
   return <RecitationForm lens={useLens({ control })} />;
 }
 
 describe("Accessible editing forms", () => {
+  it.each(["Ce passage ne peut pas être vide", "Ce passage ne peut pas dépasser 8 lignes"])(
+    "displays the lyrics validation error next to its passage: %s",
+    (message) => {
+      const html = renderToStaticMarkup(<InvalidSong passageError={message} />);
+      expect(html).toMatch(
+        /<textarea[^>]*aria-label="Texte du passage 1"[^>]*aria-invalid="true"[^>]*aria-describedby="passage\.[^"]+\.error"/,
+      );
+      expect(html).toMatch(/id="passage\.[^"]+\.error"/);
+      expect(html).toContain(message);
+    },
+  );
+
   it.each([
     ["chant", <SongsCreate key="song" />, "Nouveau chant", "Fermer le formulaire du chant"],
     [

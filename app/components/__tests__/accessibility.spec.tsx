@@ -252,6 +252,6 @@ describe("Accessible names and relationships", () => {
     const html = renderToStaticMarkup(
       <Preview title={title} url="https://drive.google.com/file/d/example/view" />,
     );
-    expect(html).toContain(`title="${accessibleTitle}"`);
+    expect(html.match(/<iframe[^>]*title="([^"]*)"/)?.[1].trim()).toBe(accessibleTitle);
   });
 });
