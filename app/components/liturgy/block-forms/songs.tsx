@@ -500,7 +500,7 @@ function EditLyricsDrawer(props: EditLyricsDrawerProps) {
                   size="xs"
 
                   onClick={() => {
-                    lyricsField.field.onChange(null);
+                    lyricsField.field.onChange([]);
                   }}
                 >
                   Rétablir
