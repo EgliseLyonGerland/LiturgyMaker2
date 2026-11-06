@@ -51,6 +51,8 @@ const announcementsBlockSchema = v.object({
   }),
 });
 
+const announcementsBlockFormSchema = announcementsBlockSchema;
+
 const readingBlockSchema = v.object({
   type: v.literal("reading"),
   title: v.string(),
@@ -83,6 +85,8 @@ const sectionBlockSchema = v.object({
     title: v.string(),
   }),
 });
+
+const sectionBlockFormSchema = sectionBlockSchema;
 
 const sermonBlockSchema = v.object({
   type: v.literal("sermon"),
@@ -125,9 +129,9 @@ const songsBlockSchema = v.object({
   data: v.object({
     items: v.array(
       v.object({
-        id: v.string(),
-        infos: v.string(),
-        repeat: v.boolean(),
+        id: v.nullable(v.string(), ""),
+        infos: v.optional(v.string(), ""),
+        repeat: v.optional(v.boolean(), false),
         lyrics: v.nullish(lyricsSchema, []),
       }),
     ),
@@ -156,7 +160,22 @@ const recitationBlockSchema = v.object({
   }),
 });
 
+const recitationBlockFormSchema = recitationBlockSchema;
+
 const openDoorsBlockSchema = v.object({
+  type: v.literal("openDoors"),
+  data: v.object({
+    title: v.string(),
+    detail: v.string(),
+    prayerTopics: v.array(
+      v.object({
+        text: v.string(),
+      }),
+    ),
+  }),
+});
+
+const openDoorsBlockFormSchema = v.object({
   type: v.literal("openDoors"),
   data: v.object({
     title: v.string(),
@@ -174,7 +193,7 @@ const openDoorsBlockSchema = v.object({
 });
 
 const liturgySchema = v.object({
-  uid: v.string(),
+  uid: v.optional(v.string(), ""),
   version: v.literal(liturgyDocumentVersion),
   revision: v.optional(v.string()),
   blocks: v.array(
@@ -196,13 +215,13 @@ const liturgyFormSchema = v.object({
   revision: v.optional(v.string()),
   blocks: v.array(
     v.variant("type", [
-      announcementsBlockSchema,
+      announcementsBlockFormSchema,
       readingBlockFormSchema,
-      sectionBlockSchema,
+      sectionBlockFormSchema,
       sermonBlockFormSchema,
       songsBlockFormSchema,
-      recitationBlockSchema,
-      openDoorsBlockSchema,
+      recitationBlockFormSchema,
+      openDoorsBlockFormSchema,
     ]),
   ),
 });
