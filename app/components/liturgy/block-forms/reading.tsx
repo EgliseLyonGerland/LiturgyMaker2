@@ -41,7 +41,10 @@ interface ReadingBlockFormProps {
 }
 
 export function ReadingBlockForm({ id, index }: ReadingBlockFormProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { disabled },
+  } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -49,7 +52,7 @@ export function ReadingBlockForm({ id, index }: ReadingBlockFormProps) {
   });
 
   return (
-    <LiturgyCard id={id} type="reading">
+    <LiturgyCard id={id} type="reading" disabled={disabled}>
       <LiturgyCardHeader>
         <Watch
           control={control}
@@ -91,6 +94,7 @@ export function ReadingBlockForm({ id, index }: ReadingBlockFormProps) {
         <Button
           type="button"
           variant="outline"
+          disabled={disabled}
           onClick={() => {
             append(
               { id: "", excerpt: "" },
@@ -119,7 +123,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
     control,
     register,
     setValue,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
@@ -141,6 +145,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
             type="button"
             size="icon"
             variant="ghost"
+            disabled={disabled}
             aria-label={`Supprimer la référence ${index + 1}`}
             className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
             onClick={onRemove}
@@ -172,7 +177,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
                   const valid = validate(id);
 
                   return (
-                    <Tooltip disabled={valid}>
+                    <Tooltip disabled={valid || disabled}>
                       <TooltipTrigger
                         render={
                           <div className="w-auto! self-start">
@@ -180,7 +185,7 @@ function ReadingBlockFormItem({ id, index, name, sortable, onRemove }: ReadingBl
                               type="button"
                               variant="ghost"
                               size="xs"
-                              disabled={!valid}
+                              disabled={!valid || disabled}
                               onClick={async () => {
                                 const result = await getPassage(id);
 

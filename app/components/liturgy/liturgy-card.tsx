@@ -73,6 +73,7 @@ const colorByType: Record<LiturgyBlockType, Record<string, string>> = {
 
 interface Context {
   type: LiturgyBlockType;
+  disabled: boolean;
 }
 
 const context = createContext<Context | null>(null);
@@ -90,11 +91,12 @@ function useLiturgyCardContext() {
 interface LiturgyCardProps extends ComponentProps<typeof Card> {
   id: string;
   type: LiturgyBlockType;
+  disabled: boolean;
 }
 
-function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
+function LiturgyCard({ id, type, disabled, className, ...props }: LiturgyCardProps) {
   return (
-    <context.Provider value={{ type }}>
+    <context.Provider value={{ type, disabled }}>
       <Card
         id={id}
         {...props}
@@ -111,7 +113,7 @@ function LiturgyCard({ id, type, className, ...props }: LiturgyCardProps) {
 interface LiturgyCardHeaderProps extends ComponentProps<typeof CardHeader> {}
 
 function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderProps) {
-  const { type } = useLiturgyCardContext();
+  const { type, disabled } = useLiturgyCardContext();
   const { remove, fillFromPreviousWeek } = useLiturgyBlockContext();
 
   return (
@@ -133,6 +135,7 @@ function LiturgyCardHeader({ className, children, ...props }: LiturgyCardHeaderP
               variant="ghost"
               size="icon"
               className="ml-auto"
+              disabled={disabled}
               aria-label={`Actions du bloc ${liturgyBlockNames[type]}`}
             >
               <EllipsisVerticalIcon />

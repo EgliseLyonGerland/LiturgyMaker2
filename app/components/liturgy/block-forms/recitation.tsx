@@ -41,7 +41,7 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
   const {
     control,
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
 
   const idName = `blocks.${index}.data.id` as const;
@@ -87,7 +87,7 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
   );
 
   return (
-    <LiturgyCard id={id} type="recitation">
+    <LiturgyCard id={id} type="recitation" disabled={disabled}>
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>

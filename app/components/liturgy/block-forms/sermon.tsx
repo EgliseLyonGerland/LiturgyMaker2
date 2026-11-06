@@ -39,14 +39,14 @@ interface SermonBlockFormProps {
 export function SermonBlockForm({ id, index }: SermonBlockFormProps) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
 
   const titleName = `blocks.${index}.data.title` as const;
   const authorName = `blocks.${index}.data.author` as const;
 
   return (
-    <LiturgyCard id={id} type="sermon">
+    <LiturgyCard id={id} type="sermon" disabled={disabled}>
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
@@ -94,7 +94,10 @@ interface BibleRefsFieldProps {
 }
 
 function BibleRefsField({ index }: BibleRefsFieldProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { disabled },
+  } = useFormContext<FieldValues>();
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.bibleRefs`;
 
@@ -110,6 +113,7 @@ function BibleRefsField({ index }: BibleRefsFieldProps) {
           type="button"
           variant="outline"
           size="xs"
+          disabled={disabled}
           onClick={() => {
             append({ id: "" });
           }}
@@ -167,7 +171,7 @@ function BibleRefsFieldItem({
 }: BibleRefsFieldItemProps) {
   const {
     control,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
@@ -177,7 +181,7 @@ function BibleRefsFieldItem({
       <div className="flex gap-2">
         <SortableButton
           ref={handleRef}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           aria-label={`Déplacer la référence ${index + 1}`}
         />
         <BibleRefField
@@ -190,7 +194,7 @@ function BibleRefsFieldItem({
           size="icon"
           variant="ghost"
           aria-label={`Supprimer la référence ${index + 1}`}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           onClick={onRemove}
         >
           <TrashIcon />
@@ -206,7 +210,10 @@ interface PointsFieldProps {
 }
 
 function PointsField({ index }: PointsFieldProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { disabled },
+  } = useFormContext<FieldValues>();
 
   const name: FieldPath<FieldValues> = `blocks.${index}.data.plan`;
 
@@ -222,6 +229,7 @@ function PointsField({ index }: PointsFieldProps) {
           type="button"
           variant="outline"
           size="xs"
+          disabled={disabled}
           onClick={() => {
             append({ text: "" });
           }}
@@ -273,7 +281,7 @@ interface PointsFieldItemProps {
 function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsFieldItemProps) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
@@ -283,7 +291,7 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
       <div className="flex gap-2">
         <SortableButton
           ref={handleRef}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           aria-label={`Déplacer le point ${index + 1}`}
         />
         <Input
@@ -298,7 +306,7 @@ function PointsFieldItem({ id, index, name, actionsDisabled, onRemove }: PointsF
           size="icon"
           variant="ghost"
           aria-label={`Supprimer le point ${index + 1}`}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           onClick={onRemove}
         >
           <TrashIcon />
