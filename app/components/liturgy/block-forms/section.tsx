@@ -23,13 +23,13 @@ interface SectionBlockFormProps {
 export function SectionBlockForm({ id, index }: SectionBlockFormProps) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
 
   const name = `blocks.${index}.data.title` as const;
 
   return (
-    <LiturgyCard id={id} type="section">
+    <LiturgyCard id={id} type="section" disabled={disabled}>
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>

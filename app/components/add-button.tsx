@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 
 import { Button } from "./ui/button";
 
-export interface AddButtonProps extends ComponentProps<"button"> {}
+export interface AddButtonProps extends ComponentProps<typeof Button> {}
 
 export function AddButton({ children, className, ...props }: AddButtonProps) {
   return (

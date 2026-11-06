@@ -33,7 +33,7 @@ export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
   const {
     control,
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
 
   const titleName = `blocks.${index}.data.title` as const;
@@ -43,7 +43,7 @@ export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
   const { fields, append, remove, move } = useFieldArray({ control, name: prayerTopicsName });
 
   return (
-    <LiturgyCard id={id} type="openDoors">
+    <LiturgyCard id={id} type="openDoors" disabled={disabled}>
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
@@ -83,6 +83,7 @@ export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
               type="button"
               variant="outline"
               size="xs"
+              disabled={disabled}
               onClick={() => {
                 append({ text: "" });
               }}
@@ -143,7 +144,7 @@ function PrayerTopicsFieldItem({
 }: PrayerTopicsFieldItemProps) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
@@ -153,7 +154,7 @@ function PrayerTopicsFieldItem({
       <div className="flex gap-2">
         <SortableButton
           ref={handleRef}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           aria-label={`Déplacer le sujet de prière ${index + 1}`}
         />
         <Textarea
@@ -168,7 +169,7 @@ function PrayerTopicsFieldItem({
           size="icon"
           variant="ghost"
           aria-label={`Supprimer le sujet de prière ${index + 1}`}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || disabled}
           onClick={onRemove}
         >
           <TrashIcon />

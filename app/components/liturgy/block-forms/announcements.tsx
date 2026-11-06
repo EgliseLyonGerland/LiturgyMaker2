@@ -38,7 +38,10 @@ interface AnnouncementsBlockFormProps {
 }
 
 export function AnnouncementsBlockForm({ id, index }: AnnouncementsBlockFormProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { disabled },
+  } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -46,7 +49,7 @@ export function AnnouncementsBlockForm({ id, index }: AnnouncementsBlockFormProp
   });
 
   return (
-    <LiturgyCard id={id} type="announcements">
+    <LiturgyCard id={id} type="announcements" disabled={disabled}>
       <LiturgyCardHeader>
         <LiturgyCardTitle />
       </LiturgyCardHeader>
@@ -84,6 +87,7 @@ export function AnnouncementsBlockForm({ id, index }: AnnouncementsBlockFormProp
         <Button
           type="button"
           variant="outline"
+          disabled={disabled}
           onClick={() => {
             append({ title: "", detail: "" });
           }}
@@ -113,7 +117,7 @@ function AnnouncementsBlockFormItem({
 }: AnnouncementsBlockFormItemProps) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref } = useSortable({ id, index, handle: handleRef });
@@ -125,7 +129,11 @@ function AnnouncementsBlockFormItem({
     <div ref={ref} className="group">
       <FieldSet>
         <div className={cn("items-center gap-2", sortable ? "flex" : "hidden")}>
-          <SortableButton ref={handleRef} aria-label={`Déplacer l'annonce ${index + 1}`} />
+          <SortableButton
+            ref={handleRef}
+            disabled={disabled}
+            aria-label={`Déplacer l'annonce ${index + 1}`}
+          />
 
           <FieldLegend variant="label" className="m-0 mr-auto opacity-60">
             Annonce {index + 1}
@@ -135,8 +143,9 @@ function AnnouncementsBlockFormItem({
             type="button"
             size="icon"
             variant="ghost"
+            disabled={disabled}
             aria-label={`Supprimer l'annonce ${index + 1}`}
-            className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
+            className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100 disabled:opacity-0"
             onClick={onRemove}
           >
             <TrashIcon />

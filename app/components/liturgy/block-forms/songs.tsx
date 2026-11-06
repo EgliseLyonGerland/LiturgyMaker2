@@ -118,7 +118,10 @@ interface SongsBlockFormProps {
 }
 
 export function SongsBlockForm({ id, index, songs }: SongsBlockFormProps) {
-  const { control } = useFormContext<FieldValues>();
+  const {
+    control,
+    formState: { disabled },
+  } = useFormContext<FieldValues>();
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -127,7 +130,7 @@ export function SongsBlockForm({ id, index, songs }: SongsBlockFormProps) {
 
   return (
     <>
-      <LiturgyCard id={id} type="songs">
+      <LiturgyCard id={id} type="songs" disabled={disabled}>
         <LiturgyCardHeader>
           <LiturgyCardTitle />
         </LiturgyCardHeader>
@@ -166,6 +169,7 @@ export function SongsBlockForm({ id, index, songs }: SongsBlockFormProps) {
           <Button
             type="button"
             variant="outline"
+            disabled={disabled}
             onClick={() => {
               append(
                 { id: "", infos: "", lyrics: [], repeat: false },
@@ -236,7 +240,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
     control,
     register,
     setValue,
-    formState: { errors },
+    formState: { errors, disabled },
   } = useFormContext<FieldValues>();
   const handleRef = useRef<HTMLButtonElement>(null);
   const { ref: sortableRef } = useSortable({ id, index, handle: handleRef });
@@ -301,6 +305,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
             type="button"
             size="icon"
             variant="ghost"
+            disabled={disabled}
             aria-label={`Supprimer le chant ${index + 1}`}
             className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
             onClick={onRemove}
@@ -332,6 +337,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                     <Button
                       id={idName}
                       variant="outline"
+                      disabled={disabled}
                       className="h-auto justify-between py-2 text-left"
                       aria-invalid={!!get(errors, idName)}
                     >
@@ -425,7 +431,6 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               <Textarea
                 id={infosName}
                 {...register(infosName)}
-                className="min-h-lh"
                 aria-invalid={!!get(errors, infosName)}
               />
             </Field>
@@ -451,6 +456,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                           type="button"
                           size="sm"
                           variant="outline"
+                          disabled={disabled}
                           aria-label={`Informations sur le chant ${selectedSong.title}`}
                         >
                           Informations <InfoIcon />

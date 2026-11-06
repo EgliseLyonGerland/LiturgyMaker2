@@ -2,7 +2,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { format, subDays } from "date-fns";
 import { PlusIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useBlocker, useFetcher } from "react-router";
 import * as v from "valibot";
@@ -158,9 +158,10 @@ export async function clientAction({ params, request, context }: Route.ClientAct
 export default function EditLiturgy(props: Route.ComponentProps) {
   const {
     params: { liturgyId },
+    loaderData: { liturgy },
   } = props;
 
-  return <Content key={liturgyId} {...props} />;
+  return <Content key={liturgy.revision || liturgyId} {...props} />;
 }
 
 function Content({ loaderData, params }: Route.ComponentProps) {
@@ -188,17 +189,8 @@ function Content({ loaderData, params }: Route.ComponentProps) {
   const {
     control,
     handleSubmit,
-    reset,
     formState: { isDirty, isReady },
   } = form;
-
-  useEffect(() => {
-    if (fetcher.state !== "idle") return;
-
-    if (fetcher.data?.status === "saved" || fetcher.data?.status === "reloaded") {
-      reset(liturgy);
-    }
-  }, [fetcher.state, fetcher.data, liturgy, reset]);
 
   const blocker = useBlocker(useCallback(() => isDirty, [isDirty]));
 
@@ -238,6 +230,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             onSubmit={handleSubmit((data) => save(data))}
           >
             <AddBlockButton
+              disabled={disabled}
               onSelect={(type) => {
                 prepend(createDefaultBlock(type), { focusName: getBlockFocusName(type, 0) });
               }}
@@ -280,6 +273,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
                   )}
 
                   <AddBlockButton
+                    disabled={disabled}
                     onSelect={(type) => {
                       insert(index + 1, createDefaultBlock(type), {
                         focusName: getBlockFocusName(type, index + 1),
@@ -407,10 +401,11 @@ function Content({ loaderData, params }: Route.ComponentProps) {
 }
 
 interface AddBlockButtonProps {
+  disabled?: boolean;
   onSelect: (type: LiturgyBlockType) => void;
 }
 
-function AddBlockButton({ onSelect }: AddBlockButtonProps) {
+function AddBlockButton({ disabled, onSelect }: AddBlockButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -422,7 +417,7 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
     >
       <PopoverTrigger
         render={
-          <AddButton>
+          <AddButton disabled={disabled}>
             Ajouter un block <PlusIcon />
           </AddButton>
         }
@@ -435,6 +430,7 @@ function AddBlockButton({ onSelect }: AddBlockButtonProps) {
           <Button
             key={type}
             type="button"
+            disabled={disabled}
             className="flex h-auto flex-col items-center justify-center p-3"
             onClick={() => {
               setOpen(false);
