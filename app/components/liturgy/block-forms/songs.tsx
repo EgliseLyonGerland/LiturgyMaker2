@@ -15,7 +15,14 @@ import {
 } from "lucide-react";
 import { get } from "radashi";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useController, useFieldArray, useForm, useFormContext, Watch } from "react-hook-form";
+import {
+  Controller,
+  useController,
+  useFieldArray,
+  useForm,
+  useFormContext,
+  Watch,
+} from "react-hook-form";
 import * as v from "valibot";
 import { create } from "zustand";
 
@@ -437,7 +444,19 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
 
             <div className="grid grid-cols-[1fr_auto] items-center">
               <Field orientation="horizontal">
-                <Checkbox id={repeatName} {...register(repeatName)} />
+                <Controller
+                  control={control}
+                  name={repeatName}
+                  render={({ field: { value, ...field } }) => (
+                    <Checkbox
+                      id={field.name}
+                      {...field}
+                      checked={value}
+                      onCheckedChange={(checked) => field.onChange(checked)}
+                    />
+                  )}
+                />
+
                 <FieldContent>
                   <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
                 </FieldContent>
