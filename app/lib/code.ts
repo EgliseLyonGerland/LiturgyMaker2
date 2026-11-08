@@ -11,7 +11,10 @@ function getSong(data: SongsBlock["data"]["items"][number], songs: SongWithId[])
     return null;
   }
 
-  return { ...song, lyrics: data.lyrics || song.lyrics };
+  return {
+    ...song,
+    lyrics: data.lyrics.length > 0 ? data.lyrics : song.lyrics,
+  };
 }
 
 export function generateCode({
