@@ -26,7 +26,6 @@ vi.mock("react-router", async (importOriginal) => ({
 function InvalidSong({ passageError }: { passageError?: string }) {
   const { control } = useForm<SongFormValues>({
     defaultValues: {
-      id: "song-1",
       title: "",
       aka: "",
       authors: "",
@@ -49,7 +48,7 @@ function InvalidSong({ passageError }: { passageError?: string }) {
 
 function InvalidRecitation() {
   const { control } = useForm<RecitationFormValues>({
-    defaultValues: { id: "recitation-1", title: "", content: [] },
+    defaultValues: { title: "", content: [] },
     errors: { title: { type: "required", message: "Le titre est requis" } },
   });
   return <RecitationForm lens={useLens({ control })} />;

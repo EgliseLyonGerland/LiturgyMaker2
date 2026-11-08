@@ -253,7 +253,6 @@ const songSchema = v.object({
 });
 
 const songFormSchema = v.object({
-  id: v.string(),
   title: v.pipe(v.string(), v.trim(), v.nonEmpty("Le titre est requis")),
   aka: v.string(),
   authors: v.string(),
@@ -285,7 +284,6 @@ const recitationSchema = v.object({
 });
 
 const recitationFormSchema = v.object({
-  id: v.string(),
   title: v.string(),
   content: v.array(
     v.object({

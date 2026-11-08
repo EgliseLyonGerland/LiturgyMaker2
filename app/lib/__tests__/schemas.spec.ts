@@ -20,7 +20,6 @@ import {
 } from "../schemas";
 
 const song: SongForm = {
-  id: "song-1",
   title: "Mon chant",
   aka: "",
   authors: "",
@@ -150,12 +149,6 @@ describe("song storage and form schemas", () => {
     expect(v.safeParse(songFormSchema, { ...song, title: " \t " }).success).toBe(false);
   });
 
-  it("requires a form id but omits it from stored data", () => {
-    const { id: _id, ...withoutId } = song;
-    expect(v.safeParse(songFormSchema, withoutId).success).toBe(false);
-    expect(v.parse(songSchema, song)).not.toHaveProperty("id");
-  });
-
   it.each(["", "https://example.com/preview"])("accepts preview URL %j", (previewUrl) => {
     expect(v.safeParse(songFormSchema, { ...song, previewUrl }).success).toBe(true);
   });
@@ -200,7 +193,7 @@ describe("liturgy storage and form schemas", () => {
       uid: "",
       version: liturgyDocumentVersion,
       blocks: [
-        { type: "songs", data: { items: [{ id: null, lyrics: [], infos: "", repeat: false }] } },
+        { type: "songs", data: { items: [{ id: "", lyrics: [], infos: "", repeat: false }] } },
       ],
     });
     expect(v.safeParse(liturgyFormSchema, data).success).toBe(false);
