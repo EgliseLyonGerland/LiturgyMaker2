@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { maxPrayerTopics } from "@/config";
 import { type Liturgy, type OpenDoorsBlock } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
@@ -75,23 +76,9 @@ export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
 
       <LiturgyCardContent>
         <FieldSet>
-          <div className="flex items-center justify-between">
-            <FieldLegend variant="label" className="m-0">
-              Sujets de prière
-            </FieldLegend>
-            <Button
-              type="button"
-              variant="outline"
-              size="xs"
-              disabled={disabled}
-              onClick={() => {
-                append({ text: "" });
-              }}
-              // disabled={fields.length >= maxPrayerTopics}
-            >
-              Ajouter un sujet <PlusIcon />
-            </Button>
-          </div>
+          <FieldLegend variant="label" className="mb-4">
+            Sujets de prière
+          </FieldLegend>
 
           <DragDropProvider
             onDragEnd={(event) => {
@@ -121,6 +108,19 @@ export function OpenDoorsBlockForm({ id, index }: OpenDoorsBlockFormProps) {
               ))}
             </FieldGroup>
           </DragDropProvider>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="self-start"
+            disabled={fields.length >= maxPrayerTopics || disabled}
+            onClick={() => {
+              append({ text: "" });
+            }}
+          >
+            Ajouter un sujet <PlusIcon />
+          </Button>
         </FieldSet>
       </LiturgyCardContent>
     </LiturgyCard>

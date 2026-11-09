@@ -75,6 +75,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { highlightMatches } from "@/lib/fuzy";
@@ -325,8 +326,75 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
           {sortable && <div className="mr-4 ml-2 w-px bg-border" />}
 
           <FieldGroup>
+            <Watch
+              control={control}
+              name={lyricsName}
+              render={(value) =>
+                value.length > 0 && (
+                  <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+                    <AlertTriangleIcon />
+                    <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
+                    <AlertAction>
+                      <Button
+                        size="xs"
+
+                        onClick={() => {
+                          setValue(lyricsName, [], { shouldDirty: true });
+                        }}
+                      >
+                        Rétablir
+                      </Button>
+                    </AlertAction>
+                  </Alert>
+                )
+              }
+            />
+
             <Field>
-              <FieldLabel htmlFor={idName}>Chant</FieldLabel>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor={idName}>Chant</FieldLabel>
+
+                {selectedSong && (
+                  <Watch
+                    control={control}
+                    name={lyricsName}
+                    render={(lyrics) => (
+                      <Tooltip>
+                        <TooltipTrigger
+                          delay={500}
+                          render={
+                            <SongInformationDrawer
+                              song={selectedSong}
+                              lyrics={lyrics.length ? lyrics : undefined}
+                              trigger={
+                                <Button
+                                  type="button"
+                                  size="xs"
+                                  variant="ghost"
+                                  disabled={disabled}
+                                  aria-label={`Informations sur le chant ${selectedSong.title}`}
+                                >
+                                  Informations <InfoIcon />
+                                </Button>
+                              }
+                              footer={
+                                <EditLyricsDrawer
+                                  lens={lens.focus(lyricsName)}
+                                  song={selectedSong}
+                                />
+                              }
+                            />
+                          }
+                        />
+                        <TooltipContent>
+                          Afficher les informations du chant “{selectedSong.title}” et adapter les
+                          paroles si nécessaire pour ce culte uniquement.
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  />
+                )}
+              </div>
               <Combobox
                 items={items}
                 filteredItems={filteredItems}
@@ -354,7 +422,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                             <div className="flex flex-col gap-1">
                               <span>{selectedItem.title}</span>
                               <span className="text-xs text-muted-foreground">
-                                {selectedItem.authors ?? <i>Aucun auteur</i>}
+                                {selectedItem.authors || <i>Aucun auteur</i>}
                               </span>
                             </div>
                           ) : (
@@ -409,30 +477,6 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               </Combobox>
             </Field>
 
-            <Watch
-              control={control}
-              name={lyricsName}
-              render={(value) =>
-                value.length > 0 && (
-                  <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-                    <AlertTriangleIcon />
-                    <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
-                    <AlertAction>
-                      <Button
-                        size="xs"
-
-                        onClick={() => {
-                          setValue(lyricsName, [], { shouldDirty: true });
-                        }}
-                      >
-                        Rétablir
-                      </Button>
-                    </AlertAction>
-                  </Alert>
-                )
-              }
-            />
-
             <Field>
               <FieldLabel htmlFor={infosName}>Infos</FieldLabel>
               <Textarea
@@ -461,33 +505,6 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                   <FieldLabel htmlFor={repeatName}>Chanter deux fois</FieldLabel>
                 </FieldContent>
               </Field>
-
-              {selectedSong && (
-                <Watch
-                  control={control}
-                  name={lyricsName}
-                  render={(lyrics) => (
-                    <SongInformationDrawer
-                      song={selectedSong}
-                      lyrics={lyrics.length ? lyrics : undefined}
-                      trigger={
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={disabled}
-                          aria-label={`Informations sur le chant ${selectedSong.title}`}
-                        >
-                          Informations <InfoIcon />
-                        </Button>
-                      }
-                      footer={
-                        <EditLyricsDrawer lens={lens.focus(lyricsName)} song={selectedSong} />
-                      }
-                    />
-                  )}
-                />
-              )}
             </div>
           </FieldGroup>
         </div>

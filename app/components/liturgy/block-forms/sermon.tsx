@@ -105,22 +105,9 @@ function BibleRefsField({ index }: BibleRefsFieldProps) {
 
   return (
     <FieldSet>
-      <div className="flex items-center justify-between">
-        <FieldLegend variant="label" className="m-0">
-          Références bibliques
-        </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          disabled={disabled}
-          onClick={() => {
-            append({ id: "" });
-          }}
-        >
-          Ajouter une réf <PlusIcon />
-        </Button>
-      </div>
+      <FieldLegend variant="label" className="mb-4">
+        Références bibliques
+      </FieldLegend>
 
       <DragDropProvider
         onDragEnd={(event) => {
@@ -150,6 +137,19 @@ function BibleRefsField({ index }: BibleRefsFieldProps) {
           ))}
         </FieldGroup>
       </DragDropProvider>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="self-start"
+        disabled={disabled}
+        onClick={() => {
+          append({ id: "" });
+        }}
+      >
+        Ajouter une réf <PlusIcon />
+      </Button>
     </FieldSet>
   );
 }
@@ -221,22 +221,9 @@ function PointsField({ index }: PointsFieldProps) {
 
   return (
     <FieldSet>
-      <div className="flex items-center justify-between">
-        <FieldLegend variant="label" className="m-0">
-          Points
-        </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          disabled={disabled}
-          onClick={() => {
-            append({ text: "" });
-          }}
-        >
-          Ajouter un point <PlusIcon />
-        </Button>
-      </div>
+      <FieldLegend variant="label" className="mb-4">
+        Points
+      </FieldLegend>
 
       <DragDropProvider
         onDragEnd={(event) => {
@@ -266,6 +253,19 @@ function PointsField({ index }: PointsFieldProps) {
           ))}
         </FieldGroup>
       </DragDropProvider>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="self-start"
+        disabled={disabled}
+        onClick={() => {
+          append({ text: "" });
+        }}
+      >
+        Ajouter un point <PlusIcon />
+      </Button>
     </FieldSet>
   );
 }

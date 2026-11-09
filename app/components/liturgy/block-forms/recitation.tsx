@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/combobox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { highlightMatches } from "@/lib/fuzy";
 import { type RecitationBlock, type Liturgy, type RecitationWithId } from "@/lib/schemas";
 
@@ -95,7 +96,36 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
       <LiturgyCardContent>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={idName}>Texte</FieldLabel>
+            <div className="flex items-center justify-between">
+              <FieldLabel htmlFor={idName}>Texte</FieldLabel>
+
+              {selectedItem && (
+                <Tooltip>
+                  <TooltipTrigger
+                    delay={500}
+                    render={
+                      <RecitationInformationDrawer
+                        recitation={selectedItem.recitation}
+                        trigger={
+                          <Button
+                            type="button"
+                            size="xs"
+                            variant="ghost"
+                            aria-label={`Informations sur la récitation ${selectedItem.title}`}
+                            className="self-end"
+                          >
+                            Informations <InfoIcon />
+                          </Button>
+                        }
+                      />
+                    }
+                  />
+                  <TooltipContent>
+                    Afficher le contenu du texte “{selectedItem.title}”
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
             <Combobox
               items={items}
               filteredItems={filteredItems}
@@ -161,25 +191,6 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
               </ComboboxContent>
             </Combobox>
           </Field>
-
-          <div className="flex justify-end">
-            {selectedItem && (
-              <RecitationInformationDrawer
-                recitation={selectedItem.recitation}
-                trigger={
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    aria-label={`Informations sur la récitation ${selectedItem.title}`}
-                    className="self-end"
-                  >
-                    Informations <InfoIcon />
-                  </Button>
-                }
-              />
-            )}
-          </div>
 
           <Field>
             <FieldLabel htmlFor={infosName}>Infos</FieldLabel>
