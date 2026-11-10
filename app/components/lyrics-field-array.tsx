@@ -57,6 +57,15 @@ function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
           typeLens={fieldLens.focus("type")}
           onInsertBefore={() => insert(index, { type: "verse", text: "" })}
           onInsertAfter={() => insert(index + 1, { type: "verse", text: "" })}
+          onPaste={(texts) => {
+            if (texts.length > 0) {
+              insert(
+                index + 1,
+                texts.map((text) => ({ type: "verse", text })),
+                { shouldFocus: false },
+              );
+            }
+          }}
           onRemove={() => remove(index)}
         />
       ))}
@@ -77,6 +86,15 @@ function ContentFieldArray({ lens }: { lens: Lens<RecitationContent> }) {
           textLens={fieldLens.focus("text")}
           onInsertBefore={() => insert(index, { text: "" })}
           onInsertAfter={() => insert(index + 1, { text: "" })}
+          onPaste={(texts) => {
+            if (texts.length > 0) {
+              insert(
+                index + 1,
+                texts.map((text) => ({ text })),
+                { shouldFocus: false },
+              );
+            }
+          }}
           onRemove={() => remove(index)}
         />
       ))}
@@ -123,6 +141,7 @@ interface PassageItemProps {
   index: number;
   onInsertBefore: () => void;
   onInsertAfter: () => void;
+  onPaste: (texts: string[]) => void;
   onRemove: () => void;
 }
 
@@ -133,6 +152,7 @@ function PassageItem({
   index,
   onInsertBefore,
   onInsertAfter,
+  onPaste,
   onRemove,
 }: PassageItemProps) {
   const handleRef = useRef<HTMLButtonElement>(null);
@@ -154,6 +174,29 @@ function PassageItem({
             aria-label={`Texte du passage ${index + 1}`}
             aria-invalid={!!error}
             aria-describedby={error ? `passage.${id}.error` : undefined}
+            onPaste={(event) => {
+              event.preventDefault();
+
+              const textarea = event.currentTarget;
+              const { value, selectionStart, selectionEnd } = textarea;
+              const pastedText = event.clipboardData.getData("text/plain").replace(/\r\n?/g, "\n");
+
+              const splitText = pastedText.split(/\n{2,}/);
+              const [firstText, ...restText] = splitText;
+              const cursorPosition = selectionStart + splitText[0].length;
+
+              field.onChange(
+                value.slice(0, selectionStart) + firstText + value.slice(selectionEnd),
+              );
+
+              onPaste(restText);
+
+              requestAnimationFrame(() => {
+                if (document.activeElement === textarea) {
+                  textarea.setSelectionRange(cursorPosition, cursorPosition);
+                }
+              });
+            }}
           />
 
           <InputGroupAddon

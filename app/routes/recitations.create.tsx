@@ -47,7 +47,7 @@ export default function RecitationsCreate() {
     resolver: valibotResolver(recitationFormSchema),
     defaultValues: {
       title: "",
-      content: [],
+      content: [{ text: "" }],
     },
     disabled: fetcher.state !== "idle",
   });

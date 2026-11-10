@@ -54,7 +54,7 @@ export default function SongsCreate() {
       translation: "",
       collection: "",
       previewUrl: "",
-      lyrics: [],
+      lyrics: [{ type: "verse", text: "" }],
     },
     disabled: fetcher.state !== "idle",
   });
