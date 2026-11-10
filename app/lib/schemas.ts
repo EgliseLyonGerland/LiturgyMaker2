@@ -195,6 +195,7 @@ const openDoorsBlockFormSchema = v.object({
 const liturgySchema = v.object({
   uid: v.optional(v.string(), ""),
   version: v.literal(liturgyDocumentVersion),
+  date: v.number(),
   revision: v.optional(v.string()),
   blocks: v.array(
     v.variant("type", [
@@ -212,6 +213,7 @@ const liturgySchema = v.object({
 const liturgyFormSchema = v.object({
   uid: v.string(),
   version: v.literal(liturgyDocumentVersion),
+  date: v.number(),
   revision: v.optional(v.string()),
   blocks: v.array(
     v.variant("type", [
@@ -264,7 +266,6 @@ const songFormSchema = v.object({
       v.regex(/^\d+$/, "La position doit être un nombre entier positif"),
     ),
   ]),
-
   copyright: v.string(),
   translation: v.string(),
   collection: v.string(),

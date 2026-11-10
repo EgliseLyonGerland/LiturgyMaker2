@@ -8,6 +8,8 @@ import { getLiturgy, LiturgyConflictError, updateLiturgy } from "../api";
 import { createDefaultLiturgy } from "../default-liturgy";
 import { queryClient } from "../query-client";
 
+const defaultLiturgy = createDefaultLiturgy("20261101");
+
 vi.mock("../api", () => ({
   getLiturgy: vi.fn(),
   getSongs: vi.fn(),
@@ -39,7 +41,7 @@ function submit(data: unknown) {
 function save(overwrite = false) {
   return {
     intent: "save",
-    liturgy: { ...createDefaultLiturgy(), revision: "opened-revision" },
+    liturgy: { ...defaultLiturgy, revision: "opened-revision" },
     overwrite,
   };
 }
@@ -56,7 +58,7 @@ describe("liturgy submissions", () => {
       expect(await submit(save(overwrite))).toEqual({ status: "saved" });
       expect(updateLiturgy).toHaveBeenCalledWith(
         "2026-11-01",
-        { ...createDefaultLiturgy(), uid: "current-user", revision: "opened-revision" },
+        { ...defaultLiturgy, uid: "current-user", revision: "opened-revision" },
         overwrite,
       );
       expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
@@ -72,7 +74,7 @@ describe("liturgy submissions", () => {
   });
 
   it("reloads from the server without writing", async () => {
-    const liturgy = { ...createDefaultLiturgy(), revision: "old" };
+    const liturgy = { ...defaultLiturgy, revision: "old" };
     queryClient.setQueryData(["liturgies", "2026-11-01"], liturgy);
     vi.mocked(getLiturgy).mockImplementationOnce(async () => {
       expect(queryClient.getQueryState(["liturgies", "2026-11-01"])?.isInvalidated).toBe(true);
@@ -106,7 +108,7 @@ describe("liturgy submissions", () => {
     await vi.waitFor(() => expect(getLiturgy).toHaveBeenCalledOnce());
 
     expect(finished).not.toHaveBeenCalled();
-    finishRead(createDefaultLiturgy());
+    finishRead(defaultLiturgy);
     await reloading;
     expect(finished).toHaveBeenCalledWith({ status: "reloaded" });
   });

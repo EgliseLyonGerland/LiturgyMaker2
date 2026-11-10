@@ -2,6 +2,7 @@ import * as v from "valibot";
 
 import { liturgyDocumentVersion } from "@/config";
 
+import { converToDate } from "./liturgy-utils";
 import {
   announcementsBlockSchema,
   liturgySchema,
@@ -110,9 +111,10 @@ export function createDefaultBlock<T extends LiturgyBlockType>(
   return functions[type](...args);
 }
 
-export function createDefaultLiturgy(): v.InferOutput<typeof liturgySchema> {
+export function createDefaultLiturgy(id: string): v.InferOutput<typeof liturgySchema> {
   return {
     uid: "",
+    date: +converToDate(id),
     version: liturgyDocumentVersion,
     blocks: [
       createDefaultAnnouncementsBlock(),

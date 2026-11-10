@@ -131,7 +131,7 @@ export async function getLiturgy(id: string) {
       const snapshot = await getDocFromServer(doc(firebaseDb, "liturgies", id));
 
       if (!snapshot.exists()) {
-        return createDefaultLiturgy();
+        return createDefaultLiturgy(id);
       }
 
       return v.parse(liturgySchema, migrate(snapshot.data()));

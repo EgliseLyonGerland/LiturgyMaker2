@@ -32,6 +32,7 @@ const song: SongForm = {
 };
 
 const lines = (count: number, separator = "\n") => Array(count).fill("Line").join(separator);
+const defaultLiturgy = createDefaultLiturgy("20261101");
 
 describe("lyrics form validation", () => {
   it.each(["\n", "\r\n", "\r"])("accepts exactly 8 lines separated by %j", (separator) => {
@@ -179,19 +180,20 @@ describe("recitation storage and form schemas", () => {
 
 describe("liturgy storage and form schemas", () => {
   it("accepts the default liturgy in both schemas", () => {
-    const liturgy = createDefaultLiturgy();
-    expect(v.parse(liturgySchema, liturgy)).toEqual(liturgy);
-    expect(v.parse(liturgyFormSchema, liturgy)).toEqual(liturgy);
+    expect(v.parse(liturgySchema, defaultLiturgy)).toEqual(defaultLiturgy);
+    expect(v.parse(liturgyFormSchema, defaultLiturgy)).toEqual(defaultLiturgy);
   });
 
   it("defaults missing legacy fields without allowing them in form submissions", () => {
     const data = {
+      date: defaultLiturgy.date,
       version: liturgyDocumentVersion,
       blocks: [{ type: "songs", data: { items: [{ id: null, lyrics: null }] } }],
     };
     expect(v.parse(liturgySchema, data)).toEqual({
       uid: "",
       version: liturgyDocumentVersion,
+      date: defaultLiturgy.date,
       blocks: [
         { type: "songs", data: { items: [{ id: "", lyrics: [], infos: "", repeat: false }] } },
       ],
@@ -201,8 +203,7 @@ describe("liturgy storage and form schemas", () => {
 
   it("rejects a null song id in a form even when all other fields are present", () => {
     const data = {
-      uid: "",
-      version: liturgyDocumentVersion,
+      ...defaultLiturgy,
       blocks: [
         { type: "songs", data: { items: [{ id: null, lyrics: [], infos: "", repeat: false }] } },
       ],
@@ -213,8 +214,7 @@ describe("liturgy storage and form schemas", () => {
 
   it("validates overridden lyrics when submitting a liturgy", () => {
     const data = {
-      uid: "",
-      version: liturgyDocumentVersion,
+      ...defaultLiturgy,
       blocks: [
         {
           type: "songs",
@@ -243,8 +243,7 @@ describe("liturgy storage and form schemas", () => {
     "validates %i prayer topics only in the form schema",
     (count) => {
       const data = {
-        uid: "",
-        version: liturgyDocumentVersion,
+        ...defaultLiturgy,
         blocks: [
           {
             type: "openDoors",

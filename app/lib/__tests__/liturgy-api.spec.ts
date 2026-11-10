@@ -10,6 +10,9 @@ import { getLiturgy, LiturgyConflictError, updateLiturgy } from "../api";
 import { createDefaultLiturgy } from "../default-liturgy";
 import { queryClient } from "../query-client";
 
+const liturgyId = "20261101";
+const defaultLiturgy = createDefaultLiturgy(liturgyId);
+
 const { transactionGet, transactionSet } = vi.hoisted(() => ({
   transactionGet: vi.fn(),
   transactionSet: vi.fn(),
@@ -50,11 +53,11 @@ beforeEach(() => {
 describe("liturgy concurrency", () => {
   it("loads a missing document without a revision", async () => {
     vi.mocked(getDocFromServer, { partial: true }).mockResolvedValueOnce(snapshot(null));
-    expect(await getLiturgy("new")).toEqual(createDefaultLiturgy());
+    expect(await getLiturgy(liturgyId)).toEqual(defaultLiturgy);
   });
 
   it.each([undefined, "revision-1"])("caches a liturgy with revision %s", async (revision) => {
-    const liturgy = { ...createDefaultLiturgy(), ...(revision ? { revision } : {}) };
+    const liturgy = { ...defaultLiturgy, ...(revision ? { revision } : {}) };
     vi.mocked(getDocFromServer, { partial: true }).mockResolvedValueOnce(snapshot(liturgy));
 
     expect(await getLiturgy("existing")).toEqual(liturgy);
@@ -64,7 +67,7 @@ describe("liturgy concurrency", () => {
 
   it.each(["missing", "legacy", "revisioned"])("saves a %s liturgy", async (kind) => {
     const liturgy = {
-      ...createDefaultLiturgy(),
+      ...defaultLiturgy,
       ...(kind === "revisioned" ? { revision: "opened" } : {}),
     };
     transactionGet.mockResolvedValue(snapshot(kind === "missing" ? null : liturgy));
@@ -82,7 +85,7 @@ describe("liturgy concurrency", () => {
   });
 
   it("can save twice in succession using the updated cached revision", async () => {
-    const liturgy = { ...createDefaultLiturgy(), revision: "original" };
+    const liturgy = { ...defaultLiturgy, revision: "original" };
     transactionGet.mockResolvedValueOnce(snapshot(liturgy));
     await updateLiturgy("existing", liturgy);
     const saved = await getLiturgy("existing");
@@ -100,13 +103,11 @@ describe("liturgy concurrency", () => {
     ["opened", null],
     ["opened", undefined],
   ])("rejects revision %s against %s without modifying the cache", async (expected, current) => {
-    const liturgy = { ...createDefaultLiturgy(), ...(expected ? { revision: expected } : {}) };
+    const liturgy = { ...defaultLiturgy, ...(expected ? { revision: expected } : {}) };
     queryClient.setQueryData(["liturgies", "existing"], liturgy);
     transactionGet.mockResolvedValue(
       snapshot(
-        current === null
-          ? null
-          : { ...createDefaultLiturgy(), ...(current ? { revision: current } : {}) },
+        current === null ? null : { ...defaultLiturgy, ...(current ? { revision: current } : {}) },
       ),
     );
 
@@ -116,7 +117,7 @@ describe("liturgy concurrency", () => {
   });
 
   it("allows an explicitly confirmed overwrite", async () => {
-    const liturgy = { ...createDefaultLiturgy(), revision: "older" };
+    const liturgy = { ...defaultLiturgy, revision: "older" };
     transactionGet.mockResolvedValue(snapshot({ ...liturgy, revision: "newer" }));
 
     await updateLiturgy("existing", liturgy, true);
@@ -125,7 +126,7 @@ describe("liturgy concurrency", () => {
   });
 
   it("preserves the cache after a failed commit", async () => {
-    const liturgy = { ...createDefaultLiturgy(), revision: "original" };
+    const liturgy = { ...defaultLiturgy, revision: "original" };
     queryClient.setQueryData(["liturgies", "existing"], liturgy);
     const error = new Error("Offline");
     vi.mocked(runTransaction).mockRejectedValueOnce(error);
@@ -135,7 +136,7 @@ describe("liturgy concurrency", () => {
   });
 
   it("reads the server after invalidation", async () => {
-    const liturgy = { ...createDefaultLiturgy(), revision: "old" };
+    const liturgy = { ...defaultLiturgy, revision: "old" };
     queryClient.setQueryData(["liturgies", "existing"], liturgy);
     vi.mocked(getDocFromServer, { partial: true }).mockResolvedValueOnce(
       snapshot({ ...liturgy, revision: "new" }),
