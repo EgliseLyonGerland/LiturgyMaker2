@@ -34,6 +34,32 @@ const song: SongForm = {
 const lines = (count: number, separator = "\n") => Array(count).fill("Line").join(separator);
 const defaultLiturgy = createDefaultLiturgy("20261101");
 
+describe("sermon image validation", () => {
+  const withImage = (image?: string) => ({
+    ...defaultLiturgy,
+    blocks: [{ type: "sermon", data: { title: "", author: "", bibleRefs: [], plan: [], image } }],
+  });
+
+  it.each([undefined, "", "https://example.com/image.jpg", "https://unsplash.com/photos/example"])(
+    "accepts an optional image or web URL: %j",
+    (image) => {
+      expect(v.safeParse(liturgyFormSchema, withImage(image)).success).toBe(true);
+    },
+  );
+
+  it("trims the image URL before saving", () => {
+    const result = v.parse(liturgyFormSchema, withImage(" https://example.com/image.jpg "));
+    expect(result.blocks[0]).toMatchObject({ data: { image: "https://example.com/image.jpg" } });
+  });
+
+  it("preserves a page URL without requiring a direct image link", () => {
+    const image = "https://unsplash.com/photos/example";
+    const result = v.parse(liturgyFormSchema, withImage(image));
+
+    expect(result.blocks[0]).toMatchObject({ data: { image } });
+  });
+});
+
 describe("lyrics form validation", () => {
   it.each(["\n", "\r\n", "\r"])("accepts exactly 8 lines separated by %j", (separator) => {
     const lyrics = [{ type: "verse", text: lines(8, separator) }];

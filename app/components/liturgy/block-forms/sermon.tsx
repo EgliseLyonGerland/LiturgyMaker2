@@ -3,7 +3,7 @@ import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
-import { useFieldArray, useFormContext, type FieldPath } from "react-hook-form";
+import { useFieldArray, useFormContext, Watch, type FieldPath } from "react-hook-form";
 
 import {
   LiturgyCard,
@@ -12,9 +12,11 @@ import {
   LiturgyCardSeparator,
   LiturgyCardTitle,
 } from "@/components/liturgy/liturgy-card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -26,6 +28,7 @@ import { type SermonBlock, type Liturgy } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 import { BibleRefField } from "./fields/bible-ref";
+import { ImagePreview } from "./fields/image-preview";
 
 interface FieldValues extends Liturgy {
   blocks: SermonBlock[];
@@ -77,6 +80,12 @@ export function SermonBlockForm({ id, index }: SermonBlockFormProps) {
       <LiturgyCardSeparator />
 
       <LiturgyCardContent>
+        <ImageField index={index} />
+      </LiturgyCardContent>
+
+      <LiturgyCardSeparator />
+
+      <LiturgyCardContent>
         <BibleRefsField index={index} />
       </LiturgyCardContent>
 
@@ -86,6 +95,48 @@ export function SermonBlockForm({ id, index }: SermonBlockFormProps) {
         <PointsField index={index} />
       </LiturgyCardContent>
     </LiturgyCard>
+  );
+}
+
+function ImageField({ index }: { index: number }) {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<FieldValues>();
+
+  const imageName = `blocks.${index}.data.image` as const;
+
+  return (
+    <>
+      <Field>
+        <FieldLabel htmlFor={imageName}>
+          Image <Badge size="sm">Optionnel</Badge>
+        </FieldLabel>
+        <FieldDescription id={`${imageName}-description`}>
+          Fournissez l’URL d’une image libre de droits pour illustrer la prédication (par exemple
+          sur{" "}
+          <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">
+            Unsplash
+          </a>
+          ).
+        </FieldDescription>
+        <Input
+          id={imageName}
+          type="url"
+          {...register(imageName)}
+          aria-describedby={`${imageName}-description`}
+          aria-invalid={!!get(errors, imageName)}
+        />
+        <FieldError errors={[get(errors, imageName)]} />
+      </Field>
+
+      <Watch
+        control={control}
+        name={imageName}
+        render={(value) => <ImagePreview key={value?.trim()} url={value?.trim() ?? ""} />}
+      />
+    </>
   );
 }
 

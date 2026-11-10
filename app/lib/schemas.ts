@@ -93,6 +93,7 @@ const sermonBlockSchema = v.object({
   data: v.object({
     title: v.string(),
     author: v.string(),
+    image: v.optional(v.string()),
     bibleRefs: v.array(
       v.object({
         id: v.string(),
@@ -111,6 +112,12 @@ const sermonBlockFormSchema = v.object({
   data: v.object({
     title: v.string(),
     author: v.string(),
+    image: v.optional(
+      v.union([
+        v.literal(""),
+        v.pipe(v.string(), v.trim(), v.url("L’URL de l’image est invalide")),
+      ]),
+    ),
     bibleRefs: v.array(
       v.object({
         id: bibleRefSchema,

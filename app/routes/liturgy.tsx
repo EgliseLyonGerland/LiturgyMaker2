@@ -228,6 +228,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
             id="liturgy-form"
             className="mx-auto w-full flex-1 py-4 sm:max-w-xl"
             onSubmit={handleSubmit((data) => save(data))}
+            noValidate
           >
             <AddBlockButton
               disabled={disabled}
