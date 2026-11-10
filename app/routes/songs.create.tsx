@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { addSong } from "@/lib/api";
-import { songFormSchema } from "@/lib/schemas";
+import { songFormSchema, type SongForm as SongFormType } from "@/lib/schemas";
 
 import type { Route } from "./+types/songs.create";
 import { SongForm } from "./songs.$songId";
@@ -43,7 +43,7 @@ export default function SongsCreate() {
     control,
     handleSubmit,
     formState: { isDirty },
-  } = useForm({
+  } = useForm<SongFormType>({
     resolver: valibotResolver(songFormSchema),
     defaultValues: {
       title: "",
