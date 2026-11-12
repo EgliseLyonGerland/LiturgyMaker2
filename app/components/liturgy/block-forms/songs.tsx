@@ -180,7 +180,7 @@ export function SongsBlockForm({ id, index, songs }: SongsBlockFormProps) {
             disabled={disabled}
             onClick={() => {
               append(
-                { id: "", infos: "", lyrics: [], repeat: false },
+                { id: "", infos: "", lyrics: null, repeat: false },
                 { focusName: getBlockFocusName("songs", index, fields.length) },
               );
             }}
@@ -259,13 +259,11 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
   const repeatName = `${name}.repeat` as const;
   const lyricsName = `${name}.lyrics` as const;
 
-  const {
-    field: { value, onChange },
-  } = useController({ control, name: idName });
+  const { field } = useController({ control, name: idName });
 
   const lens = useLens({ control });
 
-  const selectedSong = songs.find((item) => item.id === value);
+  const selectedSong = songs.find((item) => item.id === field.value);
 
   const items = useMemo(
     () =>
@@ -277,7 +275,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
     [songs],
   );
 
-  const selectedItem = items.find((item) => item.id === value);
+  const selectedItem = items.find((item) => item.id === field.value);
 
   const fuse = useMemo(
     () =>
@@ -330,7 +328,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
               control={control}
               name={lyricsName}
               render={(value) =>
-                value.length > 0 && (
+                value && (
                   <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
                     <AlertTriangleIcon />
                     <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
@@ -339,7 +337,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                         size="xs"
 
                         onClick={() => {
-                          setValue(lyricsName, [], { shouldDirty: true });
+                          setValue(lyricsName, null, { shouldDirty: true });
                         }}
                       >
                         Rétablir
@@ -365,7 +363,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                           render={
                             <SongInformationDrawer
                               song={selectedSong}
-                              lyrics={lyrics.length ? lyrics : undefined}
+                              lyrics={lyrics}
                               trigger={
                                 <Button
                                   type="button"
@@ -402,6 +400,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                 onInputValueChange={setQuery}
                 onValueChange={(item) => {
                   if (item) {
+                    const onChange = (value: string) => field.onChange(value);
                     onChange(item.id);
                   }
                 }}
@@ -496,7 +495,10 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                       id={field.name}
                       {...field}
                       checked={value}
-                      onCheckedChange={(checked) => field.onChange(checked)}
+                      onCheckedChange={(checked) => {
+                        const onChange = (value: boolean) => field.onChange(value);
+                        onChange(checked);
+                      }}
                     />
                   )}
                 />
@@ -514,7 +516,7 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
 }
 
 interface EditLyricsDrawerProps {
-  lens: Lens<Lyrics>;
+  lens: Lens<Lyrics | null>;
   song: Song;
 }
 
@@ -533,16 +535,17 @@ function EditLyricsDrawer(props: EditLyricsDrawerProps) {
       <Watch
         {...lens.interop()}
         render={(value) =>
-          value.length > 0 && (
+          value && (
             <Alert className="border-orange-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
               <AlertTriangleIcon />
               <AlertTitle>Les paroles de ce chant ont été modifiées.</AlertTitle>
               <AlertAction>
                 <Button
                   size="xs"
-
                   onClick={() => {
-                    lyricsField.field.onChange([]);
+                    const onChange = (value: SongsBlock["data"]["items"][number]["lyrics"]) =>
+                      lyricsField.field.onChange(value);
+                    onChange(null);
                   }}
                 >
                   Rétablir
@@ -588,9 +591,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
   const setOpen = useLyricsEdit((state) => state.setOpen);
   const setDirty = useLyricsEdit((state) => state.setDirty);
 
-  const {
-    field: { value, onChange },
-  } = useController(lens.interop());
+  const { field } = useController(lens.interop());
 
   const {
     control,
@@ -599,7 +600,7 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
   } = useForm({
     resolver: valibotResolver(editLyricsFormSchema),
     defaultValues: {
-      lyrics: value.length > 0 ? value : song.lyrics,
+      lyrics: field.value ?? song.lyrics,
     },
   });
 
@@ -645,7 +646,12 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
             event?.stopPropagation();
 
             handleSubmit((data) => {
-              if (isEqualLyrics(data.lyrics, song.lyrics)) {
+              const onChange = (value: SongsBlock["data"]["items"][number]["lyrics"]) =>
+                field.onChange(value);
+
+              if (data.lyrics.length === 0) {
+                onChange(null);
+              } else if (isEqualLyrics(data.lyrics, song.lyrics)) {
                 onChange(null);
               } else {
                 onChange(data.lyrics);

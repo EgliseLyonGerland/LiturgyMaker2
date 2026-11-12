@@ -139,7 +139,7 @@ const songsBlockSchema = v.object({
         id: v.nullable(v.string(), ""),
         infos: v.optional(v.string(), ""),
         repeat: v.optional(v.boolean(), false),
-        lyrics: v.nullish(lyricsSchema, []),
+        lyrics: v.nullish(lyricsSchema, null),
       }),
     ),
   }),
@@ -153,7 +153,13 @@ const songsBlockFormSchema = v.object({
         id: v.string(),
         infos: v.string(),
         repeat: v.boolean(),
-        lyrics: lyricsFormSchema,
+        lyrics: v.nullable(
+          v.pipe(
+            lyricsFormSchema,
+            v.transform((input) => (input.length > 0 ? input : null)),
+          ),
+          null,
+        ),
       }),
     ),
   }),
