@@ -46,9 +46,14 @@ export async function getSongs() {
 
       return sortSongs(
         docs.map((doc) => {
-          const output = v.parse(songSchema, doc.data());
+          try {
+            const output = v.parse(songSchema, doc.data());
 
-          return { id: doc.id, ...output };
+            return { id: doc.id, ...output };
+          } catch (error) {
+            console.error(error);
+            throw error;
+          }
         }),
       );
     },
@@ -89,9 +94,14 @@ export async function getRecitations() {
 
       return sortRecitations(
         docs.map((doc) => {
-          const output = v.parse(recitationSchema, doc.data());
+          try {
+            const output = v.parse(recitationSchema, doc.data());
 
-          return { id: doc.id, ...output };
+            return { id: doc.id, ...output };
+          } catch (error) {
+            console.error(error);
+            throw error;
+          }
         }),
       );
     },
@@ -134,7 +144,12 @@ export async function getLiturgy(id: string) {
         return createDefaultLiturgy(id);
       }
 
-      return v.parse(liturgySchema, migrate(snapshot.data()));
+      try {
+        return v.parse(liturgySchema, migrate(snapshot.data()));
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     },
     staleTime: Infinity,
     gcTime: Infinity,
