@@ -39,7 +39,8 @@ export function BibleRefField<TFieldValues extends FieldValues = FieldValues>({
           autoHighlight
           filter={(item, query) => isSimilar(item.name, query)}
           onValueChange={(value) => {
-            field.onChange(value);
+            const onChange = (value: string) => field.onChange(value);
+            onChange(value);
           }}
         >
           <AutocompleteInput

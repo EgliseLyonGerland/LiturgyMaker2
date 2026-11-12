@@ -221,7 +221,7 @@ describe("liturgy storage and form schemas", () => {
       version: liturgyDocumentVersion,
       date: defaultLiturgy.date,
       blocks: [
-        { type: "songs", data: { items: [{ id: "", lyrics: [], infos: "", repeat: false }] } },
+        { type: "songs", data: { items: [{ id: "", lyrics: null, infos: "", repeat: false }] } },
       ],
     });
     expect(v.safeParse(liturgyFormSchema, data).success).toBe(false);

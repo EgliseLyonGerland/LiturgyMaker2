@@ -13,7 +13,7 @@ function getSong(data: SongsBlock["data"]["items"][number], songs: SongWithId[])
 
   return {
     ...song,
-    lyrics: data.lyrics.length > 0 ? data.lyrics : song.lyrics,
+    lyrics: data.lyrics ?? song.lyrics,
   };
 }
 

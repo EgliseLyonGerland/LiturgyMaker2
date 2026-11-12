@@ -48,9 +48,7 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
   const idName = `blocks.${index}.data.id` as const;
   const infosName = `blocks.${index}.data.infos` as const;
 
-  const {
-    field: { value, onChange },
-  } = useController({ control, name: idName });
+  const { field } = useController({ control, name: idName });
 
   const [query, setQuery] = useState("");
 
@@ -65,7 +63,7 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
     [recitations],
   );
 
-  const selectedItem = items.find((item) => item.id === value);
+  const selectedItem = items.find((item) => item.id === field.value);
 
   const fuse = useMemo(
     () =>
@@ -133,6 +131,7 @@ export function RecitationBlockForm({ id, index, recitations }: RecitationBlockF
               onInputValueChange={setQuery}
               onValueChange={(item) => {
                 if (item) {
+                  const onChange = (value: string) => field.onChange(value);
                   onChange(item.id);
                 }
               }}

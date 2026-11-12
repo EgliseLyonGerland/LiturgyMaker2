@@ -19,7 +19,7 @@ import { Separator } from "./ui/separator";
 
 interface SongInformationDrawerProps {
   song: SongWithId;
-  lyrics?: Lyrics;
+  lyrics?: Lyrics | null;
   trigger: DrawerTriggerProps["render"];
   footer?: React.ReactNode;
 }

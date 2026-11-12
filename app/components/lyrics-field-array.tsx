@@ -214,7 +214,8 @@ function PassageItem({
             const [firstText, ...restText] = splitText;
             const cursorPosition = selectionStart + splitText[0].length;
 
-            field.onChange(value.slice(0, selectionStart) + firstText + value.slice(selectionEnd));
+            const onChange = (value: string) => field.onChange(value);
+            onChange(value.slice(0, selectionStart) + firstText + value.slice(selectionEnd));
 
             onPaste(restText);
 
@@ -241,7 +242,8 @@ function PassageItem({
                     aria-label={`Refrain pour le passage ${index + 1}`}
                     checked={field.value === "chorus"}
                     onCheckedChange={(checked) => {
-                      field.onChange(checked ? "chorus" : "verse");
+                      const onChange = (value: Lyrics[number]["type"]) => field.onChange(value);
+                      onChange(checked ? "chorus" : "verse");
                     }}
                   />
                   <Label htmlFor={`passage.${id}.type`}>Refrain</Label>
