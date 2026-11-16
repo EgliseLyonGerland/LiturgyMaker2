@@ -1,0 +1,27 @@
+{
+  "name": "tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-strip-types index.ts"
+  },
+  "dependencies": {
+    "@types/google-spreadsheet": "4.0.0",
+    "configstore": "^5.0.1",
+    "date-fns": "3.6.0",
+    "firebase-admin": "13.0.2",
+    "firebase-tools": "13.29.1",
+    "google-auth-library": "9.15.0",
+    "google-spreadsheet": "4.1.1",
+    "inquirer": "9.2.16",
+    "open": "10.1.0",
+    "ora": "8.1.1",
+    "table": "6.8.2",
+    "yargs": "17.7.2"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.13",
+    "@types/yargs": "^17.0.35"
+  }
+}

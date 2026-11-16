@@ -10,7 +10,8 @@
     "lint": "oxlint",
     "fmt": "oxfmt",
     "preview": "vite preview",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "tools": "node tools/index.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

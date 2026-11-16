@@ -1,7 +1,9 @@
 allowBuilds:
   "@firebase/util": true
   protobufjs: true
+  re2: true
   simple-git-hooks: true
+
 minimumReleaseAgeExclude:
   - "@types/node@26.6.2"
   - lucide-react@1.48.0 || 1.66.0
@@ -14,3 +16,6 @@ minimumReleaseAgeExclude:
   - "@dnd-kit/state@0.5.3"
   - "@hookform/resolvers@7.0.0"
   - oxlint-tailwindcss@1.17.1
+
+packages:
+  - tools
