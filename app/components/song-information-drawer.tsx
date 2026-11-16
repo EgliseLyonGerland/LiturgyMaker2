@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { prepareLyrics } from "@/lib/lyrics-utils";
 import type { Lyrics, SongWithId } from "@/lib/schemas";
 
+import { LyricsDiff } from "./lyrics-diff";
 import Preview from "./preview";
 import {
   Drawer,
@@ -59,18 +60,22 @@ function ItemInformationDrawerContent({ song, lyrics, footer }: SongInformationD
         )}
 
         <div className="mb-10 flex flex-col gap-4">
-          {prepareLyrics(lyrics ?? song.lyrics).map(({ type, lines }, lyricIndex) => (
-            <div key={lyricIndex}>
-              {lines.map((line, lineIndex) => (
-                <div
-                  key={lineIndex}
-                  className={cn("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
-                >
-                  {line}
-                </div>
-              ))}
-            </div>
-          ))}
+          {lyrics != null ? (
+            <LyricsDiff original={song.lyrics} modified={lyrics} />
+          ) : (
+            prepareLyrics(song.lyrics).map(({ type, lines }, lyricIndex) => (
+              <div key={lyricIndex}>
+                {lines.map((line, lineIndex) => (
+                  <div
+                    key={lineIndex}
+                    className={cn("pl-4 -indent-4 sm:tracking-wide", type === "chorus" && "pl-8")}
+                  >
+                    {line}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
         </div>
       </div>
 

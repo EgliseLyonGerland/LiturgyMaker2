@@ -53,20 +53,25 @@ describe("SongInformationDrawer", () => {
     expect(html).toContain("<footer><button>Modifier les paroles</button></footer>");
   });
 
-  it("displays overridden lyrics instead of the originals", () => {
+  it("displays the original and overridden lyrics as a diff", () => {
     const html = render([
       { type: "verse", text: " Modified verse \n\n Second line " },
       { type: "chorus", text: "Modified chorus" },
     ]);
-    expect(html).toContain("Modified verse");
+    expect(html).toContain("Original");
+    expect(html).toContain("Modified");
     expect(html).toContain("Second line");
     expect(html).toContain("Modified chorus");
-    expect(html).not.toContain("Original verse");
+    expect(html).toContain("Ligne supprimée");
+    expect(html).toContain("Ligne ajoutée");
     expect(song.lyrics).toEqual([{ type: "verse", text: "Original verse" }]);
   });
 
-  it("honors an explicitly empty override", () => {
-    expect(render([])).not.toContain("Original verse");
+  it("displays the original lyrics as removed for an explicitly empty override", () => {
+    const html = render([]);
+    expect(html).toContain("Original verse");
+    expect(html).toContain("Ligne supprimée");
+    expect(html).not.toContain("Ligne ajoutée");
   });
 
   it("displays a fallback for missing authors without rendering an absent footer", () => {

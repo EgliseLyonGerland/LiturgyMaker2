@@ -6,7 +6,7 @@ function sanitize(text: string) {
 
 export function prepareLyrics(lyrics: Lyrics) {
   return lyrics.map((part) => ({
-    type: part.type,
+    ...part,
     lines: part.text
       .split("\n")
       .map(sanitize)

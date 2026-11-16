@@ -22,14 +22,22 @@ describe("isEqualLyrics()", () => {
           { type: "chorus", text: " Refrain " },
         ]),
       ).toEqual([
-        { type: "verse", lines: ["First line", "Second line"] },
-        { type: "chorus", lines: ["Refrain"] },
+        {
+          type: "verse",
+          text: " First line \n\n Second line \n \n",
+          lines: ["First line", "Second line"],
+        },
+        { type: "chorus", text: " Refrain ", lines: ["Refrain"] },
       ]);
     });
 
     it("keeps a short final word attached with a non-breaking space", () => {
       expect(prepareLyrics([{ type: "verse", text: "Gloire à\nDieu en\nDieu seul" }])).toEqual([
-        { type: "verse", lines: ["Gloire\u00a0à", "Dieu\u00a0en", "Dieu seul"] },
+        {
+          type: "verse",
+          text: "Gloire à\nDieu en\nDieu seul",
+          lines: ["Gloire\u00a0à", "Dieu\u00a0en", "Dieu seul"],
+        },
       ]);
     });
 
