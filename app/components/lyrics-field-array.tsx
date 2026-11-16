@@ -46,12 +46,13 @@ function LyricsFieldArray({ lens }: LyricsFieldArrayProps) {
 
   const handleSplit = (index: number) => {
     const text = fields[index].text;
-    const middle = Math.floor(text.length / 2);
-    const firstHalf = text.slice(0, middle);
-    const secondHalf = text.slice(middle);
+    const lines = text.split("\n");
+    const middle = Math.floor(lines.length / 2);
+    const firstHalf = lines.slice(0, middle);
+    const secondHalf = lines.slice(middle);
     remove(index);
-    insert(index, { type: "verse", text: secondHalf });
-    insert(index, { type: "verse", text: firstHalf });
+    insert(index, { type: "verse", text: secondHalf.join("\n") });
+    insert(index, { type: "verse", text: firstHalf.join("\n") });
   };
 
   return (
