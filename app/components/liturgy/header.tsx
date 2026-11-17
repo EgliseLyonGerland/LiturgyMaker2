@@ -3,7 +3,7 @@ import { addDays, format, subDays } from "date-fns";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  CodeIcon,
+  CogIcon,
   EllipsisVerticalIcon,
   SaveIcon,
 } from "lucide-react";
@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { codeDialogHandle } from "./code-dialog";
+import { generateSlidesDialogHandle } from "./generate-slides-dialog";
 
 const datePickerHandle = PopoverPrimitive.createHandle();
 
@@ -116,10 +116,10 @@ export function LiturgyHeader({ date, disabled, loading }: LiturgyHeaderProps) {
         <DropdownMenuContent className="w-auto min-w-40" align="end">
           <DropdownMenuGroup>
             <DialogTrigger
-              handle={codeDialogHandle}
+              handle={generateSlidesDialogHandle}
               render={
-                <DropdownMenuItem onClick={() => {}}>
-                  <CodeIcon /> Code de génération
+                <DropdownMenuItem>
+                  <CogIcon /> Générer les slides
                 </DropdownMenuItem>
               }
             />
