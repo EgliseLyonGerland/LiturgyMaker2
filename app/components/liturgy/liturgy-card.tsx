@@ -1,3 +1,4 @@
+import type { LiturgyBlockType } from "@liturgy-maker/shared";
 import { cn } from "cn";
 import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { createContext, useContext, type ComponentProps } from "react";
@@ -31,7 +32,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
 import { useLiturgyBlockContext } from "@/lib/liturgy-context";
-import type { LiturgyBlockType } from "@/lib/schemas";
 
 const colorByType: Record<LiturgyBlockType, Record<string, string>> = {
   reading: {

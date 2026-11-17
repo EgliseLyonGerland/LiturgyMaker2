@@ -1,0 +1,32 @@
+{
+  "name": "functions",
+  "version": "0.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "pnpm --filter @liturgy-maker/shared run build && tsc",
+    "build:watch": "pnpm --filter @liturgy-maker/shared run build && tsc --watch",
+    "serve": "pnpm run build && firebase emulators:start --only functions",
+    "shell": "pnpm run build && firebase functions:shell",
+    "start": "pnpm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "date-fns": "3.6.0",
+    "deep-diff": "1.0.2",
+    "firebase-admin": "12.2.0",
+    "firebase-functions": "5.0.1",
+    "google-auth-library": "9.11.0",
+    "nodemailer": "6.9.14"
+  },
+  "devDependencies": {
+    "@types/deep-diff": "1.0.5",
+    "@types/nodemailer": "6.4.15",
+    "firebase-functions-test": "3.3.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
+  },
+  "engines": {
+    "node": "24"
+  }
+}

@@ -1,8 +1,7 @@
 import * as v from "valibot";
 
-import { liturgyDocumentVersion, maxPrayerTopics } from "@/config";
-
 import { validate } from "./bible";
+import { liturgyDocumentVersion, maxPrayerTopics } from "./config";
 
 const bibleRefSchema = v.pipe(
   v.string(),

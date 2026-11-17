@@ -1,4 +1,4 @@
-const books: { name: string; alt?: string }[] = [
+export const books: { name: string; alt?: string }[] = [
   { name: "Genèse" },
   { name: "Exode" },
   { name: "Lévitique" },
@@ -66,5 +66,3 @@ const books: { name: string; alt?: string }[] = [
   { name: "Jude" },
   { name: "Apocalypse" },
 ];
-
-export { books };

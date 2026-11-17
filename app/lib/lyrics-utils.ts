@@ -1,4 +1,4 @@
-import type { Lyrics } from "./schemas";
+import type { Lyrics } from "@liturgy-maker/shared";
 
 function sanitize(text: string) {
   return text.trim().replace(/ (.{1,2})$/, " $1");

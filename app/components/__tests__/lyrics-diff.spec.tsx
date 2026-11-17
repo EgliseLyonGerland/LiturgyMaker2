@@ -1,7 +1,6 @@
+import type { Lyrics } from "@liturgy-maker/shared";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-
-import type { Lyrics } from "@/lib/schemas";
 
 import { LyricsDiff } from "../lyrics-diff";
 

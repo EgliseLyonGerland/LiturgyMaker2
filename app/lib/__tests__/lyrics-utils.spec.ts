@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
+import type { Lyrics } from "@liturgy-maker/shared";
 import { describe, expect, it } from "vitest";
 
 import { isEqualLyrics, prepareLyrics } from "../lyrics-utils";
-import type { Lyrics } from "../schemas";
 
 describe("isEqualLyrics()", () => {
   it("returns true for two empty lyrics arrays", () => {

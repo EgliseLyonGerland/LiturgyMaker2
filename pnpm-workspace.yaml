@@ -1,5 +1,6 @@
 allowBuilds:
   "@firebase/util": true
+  "@parcel/watcher": true
   protobufjs: true
   re2: true
   simple-git-hooks: true
@@ -18,4 +19,6 @@ minimumReleaseAgeExclude:
   - oxlint-tailwindcss@1.17.1
 
 packages:
+  - packages/*
   - tools
+  - functions

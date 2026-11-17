@@ -1,10 +1,11 @@
 import { useLens } from "@hookform/lenses";
+import { liturgyDocumentVersion } from "@liturgy-maker/shared";
+import type { Liturgy, Lyrics, RecitationContent } from "@liturgy-maker/shared";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { FormProvider, useForm, type FieldErrors } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 
-import { liturgyDocumentVersion } from "@/config";
 import {
   createDefaultAnnouncementsBlock,
   createDefaultOpenDoorsBlock,
@@ -14,7 +15,6 @@ import {
   createDefaultSongsBlock,
 } from "@/lib/default-liturgy";
 import { liturgyBlockContext } from "@/lib/liturgy-context";
-import type { Liturgy, Lyrics, RecitationContent } from "@/lib/schemas";
 
 import { AnnouncementsBlockForm } from "../liturgy/block-forms/announcements";
 import { OpenDoorsBlockForm } from "../liturgy/block-forms/open-doors";

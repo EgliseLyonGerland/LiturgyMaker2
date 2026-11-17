@@ -1,4 +1,4 @@
-import type { Liturgy, RecitationWithId, SongsBlock, SongWithId } from "./schemas";
+import type { Liturgy, RecitationWithId, SongsBlock, SongWithId } from "@liturgy-maker/shared";
 
 function isEmpty(block: Liturgy["blocks"][number]) {
   return block.type === "openDoors" && block.data.title.trim() === "";

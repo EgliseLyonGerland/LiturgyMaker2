@@ -1,6 +1,5 @@
+import type { Liturgy, LiturgyBlockType } from "@liturgy-maker/shared";
 import type { FieldPath } from "react-hook-form";
-
-import type { Liturgy, LiturgyBlockType } from "./schemas";
 
 export function getBlockFocusName(
   type: LiturgyBlockType,

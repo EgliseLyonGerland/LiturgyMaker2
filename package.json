@@ -20,6 +20,7 @@
     "@formkit/auto-animate": "^0.10.0",
     "@hookform/lenses": "^0.10.0",
     "@hookform/resolvers": "^7.0.0",
+    "@liturgy-maker/shared": "workspace:*",
     "@react-router/node": "^8.5.1",
     "@react-router/serve": "^8.5.1",
     "@tailwindcss/vite": "^4.3.3",

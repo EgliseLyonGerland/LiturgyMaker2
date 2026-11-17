@@ -1,11 +1,9 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { liturgyDocumentVersion, maxPrayerTopics } from "@liturgy-maker/shared";
 import { createFormControl } from "react-hook-form";
 import * as v from "valibot";
 import { describe, expect, it, vi } from "vitest";
 
-import { liturgyDocumentVersion, maxPrayerTopics } from "@/config";
-
-import { createDefaultLiturgy } from "../default-liturgy";
 import {
   liturgyFormSchema,
   liturgySchema,
@@ -15,6 +13,7 @@ import {
   recitationSchema,
   songFormSchema,
   songSchema,
+  type Liturgy,
   type Lyrics,
   type SongForm,
 } from "../schemas";
@@ -32,7 +31,12 @@ const song: SongForm = {
 };
 
 const lines = (count: number, separator = "\n") => Array(count).fill("Line").join(separator);
-const defaultLiturgy = createDefaultLiturgy("20261101");
+const defaultLiturgy: Liturgy = {
+  date: 0,
+  uid: "",
+  version: liturgyDocumentVersion,
+  blocks: [],
+};
 
 describe("sermon image validation", () => {
   const withImage = (image?: string) => ({

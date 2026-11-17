@@ -1,8 +1,4 @@
-import * as v from "valibot";
-
-import { liturgyDocumentVersion } from "@/config";
-
-import { converToDate } from "./liturgy-utils";
+import { liturgyDocumentVersion } from "@liturgy-maker/shared";
 import {
   announcementsBlockSchema,
   liturgySchema,
@@ -13,7 +9,10 @@ import {
   sermonBlockSchema,
   songsBlockSchema,
   type LiturgyBlockType,
-} from "./schemas";
+} from "@liturgy-maker/shared";
+import * as v from "valibot";
+
+import { converToDate } from "./liturgy-utils";
 
 export function createDefaultAnnouncementsBlock(): v.InferOutput<typeof announcementsBlockSchema> {
   return {

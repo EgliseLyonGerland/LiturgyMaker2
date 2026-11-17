@@ -15,6 +15,7 @@ build-ssr
 .firebase
 .react-router
 ~*
+.env.*
 
 # Editor directories and files
 .vscode/*

@@ -1,4 +1,4 @@
-import { liturgyDocumentVersion } from "@/config";
+import { liturgyDocumentVersion } from "@liturgy-maker/shared";
 
 import version2 from "./version2";
 import version3 from "./version3";

@@ -1,8 +1,8 @@
 import type { DrawerTriggerProps } from "@base-ui/react";
+import type { RecitationWithId } from "@liturgy-maker/shared";
 import { cn } from "cn";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { RecitationWithId } from "@/lib/schemas";
 
 import {
   Drawer,

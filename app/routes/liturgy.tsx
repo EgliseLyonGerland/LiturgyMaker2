@@ -1,5 +1,6 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { liturgyFormSchema, type Liturgy, type LiturgyBlockType } from "@liturgy-maker/shared";
 import { format, subDays } from "date-fns";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -56,7 +57,6 @@ import { liturgyBlockContext } from "@/lib/liturgy-context";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { converToDate, convertToId } from "@/lib/liturgy-utils";
 import { queryClient } from "@/lib/query-client";
-import { liturgyFormSchema, type Liturgy, type LiturgyBlockType } from "@/lib/schemas";
 import { userContext } from "@/lib/user-context";
 
 import type { Route } from "./+types/liturgy";

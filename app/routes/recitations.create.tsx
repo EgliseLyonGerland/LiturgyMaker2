@@ -1,5 +1,6 @@
 import { useLens } from "@hookform/lenses";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { recitationFormSchema } from "@liturgy-maker/shared";
 import { SaveIcon, XIcon } from "lucide-react";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -14,7 +15,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { addRecitation } from "@/lib/api";
-import { recitationFormSchema } from "@/lib/schemas";
 
 import type { Route } from "./+types/recitations.create";
 import { RecitationForm } from "./recitations.$recitationId";

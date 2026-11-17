@@ -1,5 +1,12 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import {
+  type Liturgy,
+  type LiturgyBlockType,
+  type LiturgyForm,
+  type RecitationWithId,
+  type SongWithId,
+} from "@liturgy-maker/shared";
 import { cn } from "cn";
 import { type LucideProps } from "lucide-react";
 import { useRef } from "react";
@@ -14,13 +21,6 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { liturgyBlockIcons, liturgyBlockNames } from "@/config";
-import {
-  type Liturgy,
-  type LiturgyBlockType,
-  type LiturgyForm,
-  type RecitationWithId,
-  type SongWithId,
-} from "@/lib/schemas";
 
 import { SortableButton } from "./sortable-button";
 

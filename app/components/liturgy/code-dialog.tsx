@@ -1,10 +1,10 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react";
+import type { Liturgy, RecitationWithId, SongWithId } from "@liturgy-maker/shared";
 import { useFormContext } from "react-hook-form";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useHighlightedCode } from "@/hooks/use-highlighted-code";
 import { generateCode } from "@/lib/code";
-import type { Liturgy, RecitationWithId, SongWithId } from "@/lib/schemas";
 
 import {
   CodeBlock,

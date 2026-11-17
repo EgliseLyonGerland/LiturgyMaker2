@@ -1,9 +1,9 @@
 import type { DrawerTriggerProps } from "@base-ui/react";
+import type { Lyrics, SongWithId } from "@liturgy-maker/shared";
 import { cn } from "cn";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { prepareLyrics } from "@/lib/lyrics-utils";
-import type { Lyrics, SongWithId } from "@/lib/schemas";
 
 import { LyricsDiff } from "./lyrics-diff";
 import Preview from "./preview";

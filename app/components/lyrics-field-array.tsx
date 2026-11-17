@@ -1,6 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import type { Lens } from "@hookform/lenses";
+import type { Lyrics, RecitationContent } from "@liturgy-maker/shared";
 import { cn } from "cn";
 import {
   ArrowDownIcon,
@@ -18,7 +19,6 @@ import { Field, FieldError } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import type { Lyrics, RecitationContent } from "@/lib/schemas";
 
 import { AddButton } from "./add-button";
 import { AddAboveIcon } from "./icons/add-above-icon";

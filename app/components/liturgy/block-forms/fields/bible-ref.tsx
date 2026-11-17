@@ -1,3 +1,4 @@
+import { books } from "@liturgy-maker/shared";
 import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
 
 import {
@@ -7,7 +8,6 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from "@/components/reui/autocomplete";
-import { books } from "@/config/bible";
 
 function isSimilar(value: string, prefix: string) {
   const collator = new Intl.Collator("fr", { sensitivity: "base" });

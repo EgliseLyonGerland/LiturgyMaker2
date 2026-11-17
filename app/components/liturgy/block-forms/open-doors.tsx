@@ -1,5 +1,7 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { maxPrayerTopics } from "@liturgy-maker/shared";
+import { type Liturgy, type OpenDoorsBlock } from "@liturgy-maker/shared";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
@@ -16,8 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { maxPrayerTopics } from "@/config";
-import { type Liturgy, type OpenDoorsBlock } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 

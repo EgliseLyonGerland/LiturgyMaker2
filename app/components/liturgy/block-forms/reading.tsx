@@ -1,5 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { type ReadingBlock, type Liturgy, validate } from "@liturgy-maker/shared";
 import { cn } from "cn";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
@@ -24,9 +25,8 @@ import {
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getPassage, validate } from "@/lib/bible";
+import { getPassage } from "@/lib/bible";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
-import { type ReadingBlock, type Liturgy } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 import { BibleRefField } from "./fields/bible-ref";

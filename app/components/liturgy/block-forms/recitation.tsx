@@ -1,3 +1,4 @@
+import { type RecitationBlock, type Liturgy, type RecitationWithId } from "@liturgy-maker/shared";
 import Fuse from "fuse.js";
 import { ChevronDownIcon, InfoIcon } from "lucide-react";
 import { get } from "radashi";
@@ -26,7 +27,6 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { highlightMatches } from "@/lib/fuzy";
-import { type RecitationBlock, type Liturgy, type RecitationWithId } from "@/lib/schemas";
 
 interface FieldValues extends Liturgy {
   blocks: RecitationBlock[];

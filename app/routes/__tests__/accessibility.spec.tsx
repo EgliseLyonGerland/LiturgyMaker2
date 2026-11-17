@@ -1,13 +1,13 @@
 import { useLens } from "@hookform/lenses";
+import type {
+  RecitationForm as RecitationFormValues,
+  SongForm as SongFormValues,
+} from "@liturgy-maker/shared";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useForm } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 
 import { Drawer } from "@/components/ui/drawer";
-import type {
-  RecitationForm as RecitationFormValues,
-  SongForm as SongFormValues,
-} from "@/lib/schemas";
 
 import { RecitationForm } from "../recitations.$recitationId";
 import RecitationsCreate from "../recitations.create";

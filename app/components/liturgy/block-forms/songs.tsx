@@ -2,6 +2,14 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { useLens, type Lens } from "@hookform/lenses";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import {
+  lyricsFormSchema,
+  type Liturgy,
+  type Lyrics,
+  type Song,
+  type SongsBlock,
+  type SongWithId,
+} from "@liturgy-maker/shared";
 import { cn } from "cn";
 import Fuse from "fuse.js";
 import {
@@ -81,14 +89,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { highlightMatches } from "@/lib/fuzy";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
 import { isEqualLyrics } from "@/lib/lyrics-utils";
-import {
-  lyricsFormSchema,
-  type Liturgy,
-  type Lyrics,
-  type Song,
-  type SongsBlock,
-  type SongWithId,
-} from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 

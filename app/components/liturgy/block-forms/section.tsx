@@ -1,3 +1,4 @@
+import { type Liturgy, type SectionBlock } from "@liturgy-maker/shared";
 import { get } from "radashi";
 import { useFormContext } from "react-hook-form";
 
@@ -9,7 +10,6 @@ import {
 } from "@/components/liturgy/liturgy-card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type Liturgy, type SectionBlock } from "@/lib/schemas";
 
 interface FieldValues extends Liturgy {
   blocks: SectionBlock[];

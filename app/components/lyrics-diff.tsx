@@ -1,8 +1,8 @@
+import type { Lyrics } from "@liturgy-maker/shared";
 import { cn } from "cn";
 import { diffArrays, diffWordsWithSpace } from "diff";
 
 import { prepareLyrics } from "@/lib/lyrics-utils";
-import type { Lyrics } from "@/lib/schemas";
 
 type Line = { text: string; chorus: boolean };
 type DiffLine = Line & {

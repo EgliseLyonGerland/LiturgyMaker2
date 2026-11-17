@@ -1,3 +1,4 @@
+import type { LiturgyBlockType } from "@liturgy-maker/shared";
 import {
   BookOpenTextIcon,
   CaptionsIcon,
@@ -8,12 +9,6 @@ import {
   UserGroupIcon,
   type LucideIcon,
 } from "lucide-react";
-
-import type { LiturgyBlockType } from "@/lib/schemas";
-
-export const liturgyDocumentVersion = 9;
-
-export const maxPrayerTopics = 3;
 
 export const liturgyBlockTypes: LiturgyBlockType[] = [
   "announcements",

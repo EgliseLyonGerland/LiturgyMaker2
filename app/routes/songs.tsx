@@ -1,3 +1,4 @@
+import type { SongWithId } from "@liturgy-maker/shared";
 import { cn } from "cn";
 import Fuse from "fuse.js";
 import { EllipsisVerticalIcon, PenIcon, PlusIcon, SearchIcon, TrashIcon } from "lucide-react";
@@ -34,7 +35,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigateBack } from "@/hooks/use-navigate-back";
 import { deleteSong, getSongs } from "@/lib/api";
 import { highlightMatches } from "@/lib/fuzy";
-import type { SongWithId } from "@/lib/schemas";
 
 import type { Route } from "./+types/songs";
 

@@ -1,4 +1,14 @@
 import {
+  liturgySchema,
+  recitationSchema,
+  songSchema,
+  type Liturgy,
+  type Recitation,
+  type RecitationWithId,
+  type Song,
+  type SongWithId,
+} from "@liturgy-maker/shared";
+import {
   addDoc,
   collection,
   deleteDoc,
@@ -15,16 +25,6 @@ import { createDefaultLiturgy } from "./default-liturgy";
 import { firebaseDb } from "./firebase";
 import migrate from "./migrate";
 import { queryClient } from "./query-client";
-import {
-  liturgySchema,
-  recitationSchema,
-  songSchema,
-  type Liturgy,
-  type Recitation,
-  type RecitationWithId,
-  type Song,
-  type SongWithId,
-} from "./schemas";
 
 function sortSongs(songs: SongWithId[]) {
   return songs.toSorted((left, right) =>

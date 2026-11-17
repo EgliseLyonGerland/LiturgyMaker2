@@ -1,5 +1,6 @@
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { type SermonBlock, type Liturgy } from "@liturgy-maker/shared";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { get } from "radashi";
 import { useRef } from "react";
@@ -24,7 +25,6 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type SermonBlock, type Liturgy } from "@/lib/schemas";
 
 import { SortableButton } from "../sortable-button";
 import { BibleRefField } from "./fields/bible-ref";

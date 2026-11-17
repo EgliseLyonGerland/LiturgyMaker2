@@ -1,5 +1,6 @@
 import { useLens, type Lens } from "@hookform/lenses";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { songFormSchema, songSchema, type SongForm as SongFormType } from "@liturgy-maker/shared";
 import { CopyrightIcon, SaveIcon, XIcon } from "lucide-react";
 import { get } from "radashi";
 import { useCallback } from "react";
@@ -29,7 +30,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { getSongs, updateSong } from "@/lib/api";
-import { songFormSchema, songSchema, type SongForm as SongFormType } from "@/lib/schemas";
 
 import type { Route } from "./+types/songs.$songId";
 
