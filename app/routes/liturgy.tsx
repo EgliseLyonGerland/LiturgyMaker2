@@ -27,7 +27,7 @@ import { RecitationBlockForm } from "@/components/liturgy/block-forms/recitation
 import { SectionBlockForm } from "@/components/liturgy/block-forms/section";
 import { SermonBlockForm } from "@/components/liturgy/block-forms/sermon";
 import { SongsBlockForm } from "@/components/liturgy/block-forms/songs";
-import { CodeDialog } from "@/components/liturgy/code-dialog";
+import { GenerateSlidesDialog } from "@/components/liturgy/generate-slides-dialog";
 import { LiturgyHeader } from "@/components/liturgy/header";
 import { LiturgyMenu } from "@/components/liturgy/liturgy-menu";
 import { Title } from "@/components/title";
@@ -310,7 +310,7 @@ function Content({ loaderData, params }: Route.ComponentProps) {
           />
         </div>
 
-        <CodeDialog date={date} songs={songs} recitations={recitations} />
+        <GenerateSlidesDialog date={date} songs={songs} recitations={recitations} />
       </FormProvider>
 
       {conflicted && (
