@@ -1,6 +1,5 @@
 import type { Liturgy } from "@liturgy-maker/shared";
 import { getFirestore } from "firebase-admin/firestore";
-import { getFunctions } from "firebase-admin/functions";
 import { getStorage } from "firebase-admin/storage";
 import { logger } from "firebase-functions";
 import {
@@ -9,9 +8,9 @@ import {
   onDocumentUpdated,
 } from "firebase-functions/v2/firestore";
 import { onTaskDispatched } from "firebase-functions/v2/tasks";
-import { GoogleAuth } from "google-auth-library";
 
 import deployPraiseExplorerApp from "./utils/deploy-praise-explorer-app";
+import enqueueTask from "./utils/enqueue-task";
 
 interface StoreItem {
   id: string;
@@ -22,41 +21,25 @@ interface StoreItem {
 const storage = getStorage();
 const db = getFirestore();
 
-const location = "europe-west1";
-
-async function getFunctionUrl(name: string) {
-  const auth = new GoogleAuth({
-    scopes: "https://www.googleapis.com/auth/cloud-platform",
-  });
-  const projectId = await auth.getProjectId();
-  const url =
-    "https://cloudfunctions.googleapis.com/v2beta/" +
-    `projects/${projectId}/locations/${location}/functions/${name}`;
-
-  const client = await auth.getClient();
-  const res = await client.request<{ serviceConfig?: { uri: string } }>({ url });
-  const uri = res.data?.serviceConfig?.uri;
-  if (!uri) {
-    throw new Error(`Unable to retreive uri for function at ${url}`);
-  }
-  return uri;
-}
-
 async function getStore(): Promise<StoreItem[]> {
   const file = storage.bucket().file("liturgies.json");
 
   try {
     const result = await file.download();
     return JSON.parse(result.toString()) as StoreItem[];
-  } catch {
-    return [];
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === 404) {
+      logger.info("liturgies.json not found; initializing an empty index");
+      return [];
+    }
+    throw error;
   }
 }
 
 async function persistStore(store: StoreItem[]) {
   store.sort((a, b) => b.date - a.date);
   const file = storage.bucket().file("liturgies.json");
-  await file.save(JSON.stringify(store));
+  await file.save(JSON.stringify(store), { contentType: "application/json" });
 }
 
 export const upsertLiturgiesTask = onTaskDispatched<{ liturgyId: string }>(
@@ -75,7 +58,13 @@ export const upsertLiturgiesTask = onTaskDispatched<{ liturgyId: string }>(
     const snapshot = await db.collection("liturgies").doc(liturgyId).get();
 
     if (!snapshot.exists) {
-      throw new Error(`Unable to find the liturgy ${liturgyId}`);
+      const filtered = store.filter((item) => item.id !== liturgyId);
+      if (filtered.length !== store.length) {
+        await persistStore(filtered);
+        await deployPraiseExplorerApp();
+      }
+      logger.info(`Liturgy ${liturgyId} no longer exists; removed from index`);
+      return;
     }
 
     const liturgy = snapshot.data() as Liturgy;
@@ -90,7 +79,10 @@ export const upsertLiturgiesTask = onTaskDispatched<{ liturgyId: string }>(
     };
 
     if (data.songs.length === 0) {
-      logger.log(`No songs found for liturgy ${liturgyId}`);
+      const filtered = store.filter((item) => item.id !== liturgyId);
+      await persistStore(filtered);
+      await deployPraiseExplorerApp();
+      logger.log(`No songs found for liturgy ${liturgyId}; removed from index`);
       return;
     }
 
@@ -138,29 +130,23 @@ export const deleteLiturgiesTask = onTaskDispatched<{ liturgyId: string }>(
 export const onLiturgyUpdated = onDocumentUpdated(
   { document: "liturgies/{liturgyId}" },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/upsertLiturgiesTask`);
-    const uri = await getFunctionUrl("upsertLiturgiesTask");
     const { liturgyId } = event.params;
-    await queue.enqueue({ liturgyId }, { uri });
+    await enqueueTask("upsertLiturgiesTask", { liturgyId });
   },
 );
 
 export const onLiturgyCreated = onDocumentCreated(
   { document: "liturgies/{liturgyId}" },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/upsertLiturgiesTask`);
-    const uri = await getFunctionUrl("upsertLiturgiesTask");
     const { liturgyId } = event.params;
-    await queue.enqueue({ liturgyId }, { uri });
+    await enqueueTask("upsertLiturgiesTask", { liturgyId });
   },
 );
 
 export const onLiturgyDeleted = onDocumentDeleted(
   { document: "liturgies/{liturgyId}" },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/deleteLiturgiesTask`);
-    const uri = await getFunctionUrl("deleteLiturgiesTask");
     const { liturgyId } = event.params;
-    await queue.enqueue({ liturgyId }, { uri });
+    await enqueueTask("deleteLiturgiesTask", { liturgyId });
   },
 );

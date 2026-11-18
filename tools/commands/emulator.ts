@@ -85,7 +85,7 @@ async function loadBackups() {
   );
 }
 
-function exportEmulators(projectId: string): Promise<void> {
+export function exportEmulators(projectId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,

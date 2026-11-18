@@ -42,12 +42,11 @@ export const notifyChanges = onDocumentWritten(
   async (event) => {
     const snapshot = event.data;
 
-    if (!snapshot) {
-      console.log("No data");
+    if (!snapshot?.after.exists) {
+      console.log("No data after write; notification skipped");
       return;
     }
 
-    // const original = snapshot.before.data();
     const created = !snapshot.before.exists;
     const data = snapshot.after.data() as LiturgyDocument;
 

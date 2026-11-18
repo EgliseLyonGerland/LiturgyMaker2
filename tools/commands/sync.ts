@@ -9,6 +9,7 @@ import ora from "ora";
 import type { Argv } from "yargs";
 
 import * as emulatorCommand from "./emulator.ts";
+import * as storageEmulatorCommand from "./storage-emulator.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -105,5 +106,11 @@ export const builder = function builder(yargs: Argv) {
       emulatorCommand.desc,
       emulatorCommand.builder,
       emulatorCommand.handler,
+    )
+    .command(
+      storageEmulatorCommand.command,
+      storageEmulatorCommand.desc,
+      storageEmulatorCommand.builder,
+      storageEmulatorCommand.handler,
     );
 };

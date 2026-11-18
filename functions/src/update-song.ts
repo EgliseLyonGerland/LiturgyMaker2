@@ -1,5 +1,4 @@
 import { getFirestore } from "firebase-admin/firestore";
-import { getFunctions } from "firebase-admin/functions";
 import { getStorage } from "firebase-admin/storage";
 import { logger } from "firebase-functions";
 import {
@@ -8,11 +7,9 @@ import {
   onDocumentUpdated,
 } from "firebase-functions/v2/firestore";
 import { onTaskDispatched } from "firebase-functions/v2/tasks";
-import { GoogleAuth } from "google-auth-library";
 
 import deployPraiseExplorerApp from "./utils/deploy-praise-explorer-app";
-
-type Maybe<T> = T | undefined;
+import enqueueTask from "./utils/enqueue-task";
 
 interface SongDocument {
   id: string;
@@ -21,43 +18,28 @@ interface SongDocument {
 const storage = getStorage();
 const db = getFirestore();
 
-const location = "europe-west1";
-
-async function getFunctionUrl(name: string) {
-  const auth = new GoogleAuth({
-    scopes: "https://www.googleapis.com/auth/cloud-platform",
-  });
-  const projectId = await auth.getProjectId();
-  const url =
-    "https://cloudfunctions.googleapis.com/v2beta/" +
-    `projects/${projectId}/locations/${location}/functions/${name}`;
-
-  const client = await auth.getClient();
-  const res = await client.request<{ serviceConfig?: { uri: string } }>({ url });
-  const uri = res.data?.serviceConfig?.uri;
-  if (!uri) {
-    throw new Error(`Unable to retreive uri for function at ${url}`);
-  }
-  return uri;
-}
-
-async function getSongsFromStorage(): Promise<SongDocument[]> {
+async function getStore(): Promise<SongDocument[]> {
   const file = storage.bucket().file("songs.json");
 
   try {
     const result = await file.download();
     return JSON.parse(result.toString()) as SongDocument[];
-  } catch {
-    const { docs } = await db.collection("songs").get();
-    const data = docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    file.save(JSON.stringify(data));
-    return data;
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === 404) {
+      logger.info("songs.json not found; initializing it from Firestore");
+      const { docs } = await db.collection("songs").get();
+      const data = docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      await file.save(JSON.stringify(data), { contentType: "application/json" });
+      return data;
+    }
+
+    throw error;
   }
 }
 
-async function saveSongsToStorage(songs: SongDocument[]) {
+async function persistStore(songs: SongDocument[]) {
   const file = storage.bucket().file("songs.json");
-  await file.save(JSON.stringify(songs));
+  await file.save(JSON.stringify(songs), { contentType: "application/json" });
 }
 
 export const updateSongTask = onTaskDispatched<{ songId: string }>(
@@ -71,28 +53,29 @@ export const updateSongTask = onTaskDispatched<{ songId: string }>(
     },
   },
   async (req) => {
-    const songs = await getSongsFromStorage();
+    const store = await getStore();
     const { songId } = req.data;
     const snapshot = await db.collection("songs").doc(songId).get();
+    const index = store.findIndex((item) => item.id === songId);
 
-    const data = {
-      id: songId,
-      ...snapshot.data(),
-    } as Maybe<SongDocument>;
-
-    if (!data) {
-      throw new Error(`Unable to find the song ${songId}`);
+    if (!snapshot.exists) {
+      if (index > -1) {
+        store.splice(index, 1);
+        await persistStore(store);
+        await deployPraiseExplorerApp();
+      }
+      logger.info(`Song ${songId} no longer exists; removed from index`);
+      return;
     }
-
-    const index = songs.findIndex((item) => item.id === songId);
+    const data = { ...snapshot.data(), id: songId };
 
     if (index > -1) {
-      songs[index] = data;
+      store[index] = data;
     } else {
-      songs.push(data);
+      store.push(data);
     }
 
-    await saveSongsToStorage(songs);
+    await persistStore(store);
     await deployPraiseExplorerApp();
 
     logger.log("Done");
@@ -110,7 +93,7 @@ export const deleteSongTask = onTaskDispatched<{ songId: string }>(
     },
   },
   async (req) => {
-    const songs = await getSongsFromStorage();
+    const songs = await getStore();
     const { songId } = req.data;
     const index = songs.findIndex((item) => item.id === songId);
 
@@ -118,7 +101,7 @@ export const deleteSongTask = onTaskDispatched<{ songId: string }>(
       songs.splice(index, 1);
     }
 
-    await saveSongsToStorage(songs);
+    await persistStore(songs);
     await deployPraiseExplorerApp();
 
     logger.log("Done");
@@ -130,10 +113,8 @@ export const onSongUpdated = onDocumentUpdated(
     document: "songs/{songId}",
   },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/updateSongTask`);
-    const uri = await getFunctionUrl("updateSongTask");
     const { songId } = event.params;
-    await queue.enqueue({ songId }, { uri });
+    await enqueueTask("updateSongTask", { songId });
   },
 );
 
@@ -142,10 +123,8 @@ export const onSongCreated = onDocumentCreated(
     document: "songs/{songId}",
   },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/updateSongTask`);
-    const uri = await getFunctionUrl("updateSongTask");
     const { songId } = event.params;
-    await queue.enqueue({ songId }, { uri });
+    await enqueueTask("updateSongTask", { songId });
   },
 );
 
@@ -154,9 +133,7 @@ export const onSongDeleted = onDocumentDeleted(
     document: "songs/{songId}",
   },
   async (event) => {
-    const queue = getFunctions().taskQueue(`locations/${location}/functions/deleteSongTask`);
-    const uri = await getFunctionUrl("deleteSongTask");
     const { songId } = event.params;
-    await queue.enqueue({ songId }, { uri });
+    await enqueueTask("deleteSongTask", { songId });
   },
 );

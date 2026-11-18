@@ -9,7 +9,7 @@ import * as syncCommand from "./commands/sync.ts";
 
 await yargs(hideBin(process.argv))
   .middleware(async (argv) => {
-    if (argv._[0] === "sync" && argv._[1] === "emulator") {
+    if (argv._[0] === "sync" && (argv._[1] === "emulator" || argv._[1] === "storage-emulator")) {
       return;
     }
     try {
