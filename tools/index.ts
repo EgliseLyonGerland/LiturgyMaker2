@@ -1,6 +1,6 @@
 import process from "node:process";
 
-import firebaseAdmin from "firebase-admin";
+import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -13,9 +13,9 @@ await yargs(hideBin(process.argv))
       return;
     }
     try {
-      if (firebaseAdmin.apps.length === 0) {
-        firebaseAdmin.initializeApp({
-          credential: firebaseAdmin.credential.applicationDefault(),
+      if (getApps().length === 0) {
+        initializeApp({
+          credential: applicationDefault(),
           projectId: "liturgymaker",
         });
       }

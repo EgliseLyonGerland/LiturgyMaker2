@@ -3,7 +3,7 @@ import path, { dirname } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import firebaseAdmin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import inquirer from "inquirer";
 import ora from "ora";
 import type { Argv } from "yargs";
@@ -44,7 +44,7 @@ async function confirm(message: string): Promise<boolean> {
 }
 
 async function backupCommand(): Promise<void> {
-  const db = firebaseAdmin.firestore();
+  const db = getFirestore();
 
   await collections.reduce(
     (p, name) =>
@@ -76,7 +76,7 @@ async function restoreCommand({ env }: RestoreOptions): Promise<void> {
     process.exit();
   }
 
-  const db = firebaseAdmin.firestore();
+  const db = getFirestore();
 
   await Promise.all(
     collections.map((name) => {

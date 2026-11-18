@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   prompt: vi.fn(),
   initializeApp: vi.fn(),
   deleteApp: vi.fn(),
+  getFirestore: vi.fn(),
   collection: vi.fn(),
   recursiveDelete: vi.fn(),
   batch: vi.fn(),
@@ -20,9 +21,11 @@ const mocks = vi.hoisted(() => ({
 vi.mock("node:fs/promises", () => ({ readFile: mocks.readFile }));
 vi.mock("node:child_process", () => ({ spawn: mocks.spawn }));
 vi.mock("inquirer", () => ({ default: { prompt: mocks.prompt } }));
-vi.mock("firebase-admin", () => ({
-  default: { initializeApp: mocks.initializeApp },
+vi.mock("firebase-admin/app", () => ({
+  initializeApp: mocks.initializeApp,
+  deleteApp: mocks.deleteApp,
 }));
+vi.mock("firebase-admin/firestore", () => ({ getFirestore: mocks.getFirestore }));
 vi.mock("../../utils/emulator-auth.ts", () => ({ fixEmulatorUser: mocks.fixEmulatorUser }));
 
 import { handler } from "../emulator.ts";
@@ -60,13 +63,11 @@ beforeEach(() => {
     doc: (id: string) => ({ path: `${name}/${id}` }),
   }));
   mocks.batch.mockReturnValue({ set: mocks.set, commit: mocks.commit });
-  mocks.initializeApp.mockReturnValue({
-    firestore: () => ({
-      collection: mocks.collection,
-      recursiveDelete: mocks.recursiveDelete,
-      batch: mocks.batch,
-    }),
-    delete: mocks.deleteApp,
+  mocks.initializeApp.mockReturnValue({ name: "backup-emulator" });
+  mocks.getFirestore.mockReturnValue({
+    collection: mocks.collection,
+    recursiveDelete: mocks.recursiveDelete,
+    batch: mocks.batch,
   });
   mocks.spawn.mockImplementation(() => {
     const child = new EventEmitter();
@@ -82,14 +83,7 @@ describe("sync emulator", () => {
       expect(process.env.FIRESTORE_EMULATOR_HOST).toBe("127.0.0.1:8080");
       expect(options).toEqual({ projectId: "demo-backup-test" });
       expect(name).toBe("backup-emulator");
-      return {
-        firestore: () => ({
-          collection: mocks.collection,
-          recursiveDelete: mocks.recursiveDelete,
-          batch: mocks.batch,
-        }),
-        delete: mocks.deleteApp,
-      };
+      return { name: "backup-emulator" };
     });
 
     await handler({ yes: true });
@@ -119,6 +113,8 @@ describe("sync emulator", () => {
       mocks.commit.mock.invocationCallOrder.at(-1)!,
     );
     expect(mocks.deleteApp).toHaveBeenCalledOnce();
+    expect(mocks.getFirestore).toHaveBeenCalledWith({ name: "backup-emulator" });
+    expect(mocks.deleteApp).toHaveBeenCalledWith({ name: "backup-emulator" });
     expect(process.env.FIRESTORE_EMULATOR_HOST).toBe("production.invalid:443");
   });
 

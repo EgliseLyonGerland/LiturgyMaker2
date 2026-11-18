@@ -10,7 +10,7 @@
     "@types/google-spreadsheet": "4.0.0",
     "configstore": "^5.0.1",
     "date-fns": "3.6.0",
-    "firebase-admin": "13.0.2",
+    "firebase-admin": "14.5.1",
     "firebase-tools": "13.29.1",
     "google-auth-library": "9.15.0",
     "google-spreadsheet": "4.1.1",
@@ -23,5 +23,8 @@
   "devDependencies": {
     "@types/inquirer": "^8.2.13",
     "@types/yargs": "^17.0.35"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

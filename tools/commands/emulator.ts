@@ -5,7 +5,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import firebaseAdmin from "firebase-admin";
+import { deleteApp, initializeApp, type App } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import inquirer from "inquirer";
 
 import { fixEmulatorUser } from "../utils/emulator-auth.ts";
@@ -198,10 +199,10 @@ export async function handler({ yes }: { yes: boolean }): Promise<void> {
 
     const previousHost = process.env.FIRESTORE_EMULATOR_HOST;
     process.env.FIRESTORE_EMULATOR_HOST = firestoreHost;
-    let app: firebaseAdmin.app.App | undefined;
+    let app: App | undefined;
     try {
-      app = firebaseAdmin.initializeApp({ projectId }, "backup-emulator");
-      const db = app.firestore();
+      app = initializeApp({ projectId }, "backup-emulator");
+      const db = getFirestore(app);
       for (const { name, documents } of backups) {
         const collection = db.collection(name);
         await db.recursiveDelete(collection);
@@ -221,7 +222,9 @@ export async function handler({ yes }: { yes: boolean }): Promise<void> {
       } else {
         process.env.FIRESTORE_EMULATOR_HOST = previousHost;
       }
-      await app?.delete();
+      if (app) {
+        await deleteApp(app);
+      }
     }
   } finally {
     if (functionsRunning) {
