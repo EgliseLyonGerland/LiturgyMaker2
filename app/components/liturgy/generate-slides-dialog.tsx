@@ -1,7 +1,13 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react";
 import type { Liturgy, RecitationWithId, SongWithId } from "@liturgy-maker/shared";
 import { format } from "date-fns";
-import { CodeIcon, DownloadIcon, ExternalLinkIcon } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  CodeIcon,
+  DownloadIcon,
+  ExternalLinkIcon,
+  InfoIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
@@ -18,8 +24,14 @@ import { toast } from "@/components/ui/toast";
 import { generateCode } from "@/lib/code";
 import { getSlidesGeneratorDownloadUrl, slidesGeneratorReleaseUrl } from "@/lib/slides-generator";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 import { Alert, AlertTitle } from "../ui/alert";
-import { Separator } from "../ui/separator";
 import { CodeDialog, codeDialogHandle } from "./code-dialog";
 
 export const generateSlidesDialogHandle = DialogPrimitive.createHandle();
@@ -34,7 +46,7 @@ export function GenerateSlidesDialog(props: GenerateSlidesDialogProps) {
   return (
     <Dialog handle={generateSlidesDialogHandle}>
       <DialogContent
-        className="max-h-[calc(100svh-2rem)] grid-rows-[auto_minmax(0,1fr)] sm:max-w-2xl"
+        className="h-[calc(100svh-2rem)] max-h-200 grid-rows-[auto_minmax(0,1fr)] sm:max-w-2xl"
         keepMounted={false}
       >
         <DialogHeader className="pr-6">
@@ -59,121 +71,161 @@ function Content(props: GenerateSlidesDialogProps) {
     <>
       <div className="min-h-0 overflow-y-auto pr-2">
         <p className="mb-4">
-          Pour générer les slides vous devez disposer d’un Mac équipé de Keynote. Suivez ensuite les
-          étapes ci-dessous.
+          Pour générer les slides, munissez-vous d’un Mac sur lequel Keynote est installé, puis
+          suivez les instructions ci-dessous.
         </p>
-        <ol className="list-decimal space-y-6 pl-6 marker:font-semibold marker:text-primary">
-          <li className="space-y-2 pl-1">
-            <h3 className="font-medium">Télécharger le fichier .json</h3>
-            <p className="mb-4 text-muted-foreground">
-              Ce fichier .json contient les informations nécessaires pour générer vos slides. Vous
-              n’avez pas besoin de l’ouvrir ni de le modifier. Repérez simplement où il est
-              enregistré, généralement dans le dossier Téléchargements.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
+        <Accordion defaultValue={["json"]} multiple={false} keepMounted>
+          <AccordionItem value="json">
+            <AccordionHeader>
+              <AccordionTrigger>
+                <StepTitle number={1}>Télécharger le fichier .json</StepTitle>
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Ce fichier .json contient les informations nécessaires pour générer vos slides. Vous
+                n’avez pas besoin de l’ouvrir ni de le modifier. Repérez simplement où il est
+                enregistré, généralement dans le dossier Téléchargements.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={`data:application/json;charset=utf-8,${encodeURIComponent(code)}`}
+                      download={`liturgie-${format(date, "yyyy-MM-dd")}.json`}
+                    />
+                  }
+                >
+                  <DownloadIcon />
+                  Télécharger le fichier .json
+                </Button>
+                <DialogTrigger
+                  handle={codeDialogHandle}
+                  render={
+                    <Button size="icon" variant="ghost" className="hidden md:inline-flex">
+                      <CodeIcon /> <span className="sr-only">Afficher le code</span>
+                    </Button>
+                  }
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="keynote">
+            <AccordionHeader>
+              <AccordionTrigger>
+                <StepTitle number={2}>Télécharger le modèle Keynote</StepTitle>
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Téléchargez le fichier Keynote depuis le lien ci-dessous puis ouvrez-le. Laissez ce
+                document ouvert car c’est dans celui-ci que les slides seront créées. Supprimez les
+                slides déjà présentes dans le modèle si nécessaire.
+              </p>
               <Button
                 nativeButton={false}
                 render={
                   <a
-                    href={`data:application/json;charset=utf-8,${encodeURIComponent(code)}`}
-                    download={`liturgie-${format(date, "yyyy-MM-dd")}.json`}
+                    href="https://drive.google.com/file/d/1GprojDkA9y_sVaS8arQztDFEkOwe-CcR/view"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   />
                 }
               >
-                <DownloadIcon />
-                Télécharger le fichier .json
+                Télécharger le modèle Keynote
+                <ExternalLinkIcon />
+                <span className="sr-only"> (nouvel onglet)</span>
               </Button>
-              <DialogTrigger
-                handle={codeDialogHandle}
-                render={
-                  <Button size="icon" variant="ghost" className="hidden md:inline-flex">
-                    <CodeIcon /> <span className="sr-only">Afficher le code</span>
-                  </Button>
-                }
-              />
-            </div>
-          </li>
-          <Separator />
-          <li className="space-y-2 pl-1">
-            <h3 className="font-medium">Télécharger le modèle Keynote</h3>
-            <p className="mb-4 text-muted-foreground">
-              Téléchargez le fichier Keynote depuis le lien ci-dessous puis ouvrez-le. Laissez ce
-              document ouvert car c’est dans celui-ci que les slides seront créées. Supprimez les
-              slides déjà présentes dans le modèle si nécessaire.
-            </p>
+              <Alert className="border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-900 dark:bg-orange-950 dark:text-orange-50">
+                <AlertTriangleIcon />
+                <AlertTitle>
+                  Supprimez les slides déjà présentes dans le modèle, à l’exception de celles qui
+                  apparaissent fermées dans le panneau de navigation à gauche.
+                </AlertTitle>
+              </Alert>
+            </AccordionContent>
+          </AccordionItem>
 
-            <Button
-              nativeButton={false}
-              variant="outline"
-              render={
-                <a
-                  href="https://drive.google.com/file/d/1GprojDkA9y_sVaS8arQztDFEkOwe-CcR/view"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              }
-            >
-              Télécharger le modèle Keynote
-              <ExternalLinkIcon />
-              <span className="sr-only"> (nouvel onglet)</span>
-            </Button>
+          <AccordionItem value="application">
+            <AccordionHeader>
+              <AccordionTrigger>
+                <StepTitle number={3}>Télécharger l’application</StepTitle>
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Cliquez sur le bouton ci-dessous pour télécharger directement la dernière version de
+                l’application. Double-cliquez ensuite sur le fichier .zip téléchargé pour le
+                décompresser.
+              </p>
+              <DownloadApplicationButton />
+              <Alert className="border-blue-200 bg-orange-50 text-orange-900 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-50">
+                <InfoIcon />
+                <AlertTitle>
+                  Si vous avez téléchargé l’application lors d’une précédente utilisation, vous
+                  pouvez ignorer cette étape et réutiliser cette version.
+                </AlertTitle>
+              </Alert>
+            </AccordionContent>
+          </AccordionItem>
 
-            <Alert className="mt-4 border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-900 dark:bg-orange-950 dark:text-orange-50">
-              <AlertTitle>
-                Attention : ne supprimez pas les slides qui apparaissent fermées dans le panneau de
-                navigation de gauche
-              </AlertTitle>
-            </Alert>
-          </li>
-          <Separator />
-          <li className="space-y-2 pl-1">
-            <h3 className="font-medium">Télécharger l’application</h3>
-            <p className="mb-4 text-muted-foreground">
-              Cliquez sur le bouton ci-dessous pour télécharger directement la dernière version de
-              l’application. Double-cliquez ensuite sur le fichier .zip téléchargé pour le
-              décompresser.
-            </p>
-
-            <DownloadApplicationButton />
-
-            <Alert className="mt-4 border-blue-200 bg-orange-50 text-orange-900 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-50">
-              <AlertTitle>
-                Vous pouvez ignorer cette étape si vous avez déjà l’application.
-              </AlertTitle>
-            </Alert>
-          </li>
-          <Separator />
-          <li className="space-y-2 pl-1">
-            <h3 className="font-medium">Lancer l’application</h3>
-            <p className="mb-4 text-muted-foreground">
-              Vous pouvez désormais lancer l’application en double-cliquant dessus. Une fenêtre doit
-              s'ouvrir vous demandant de choisir le fichier .json téléchargé à l’étape 1.
-            </p>
-            <p className="mb-4 text-muted-foreground">
-              Quand votre Mac demande si l’application peut contrôler Keynote, cliquez sur{" "}
-              <strong>Autoriser</strong> ou <strong>OK</strong>. Cet accès est nécessaire pour créer
-              les slides.
-            </p>
-            <p className="mb-4 text-muted-foreground">
-              Revenez ensuite au document Keynote laissé ouvert dans lequel vous pouvez observer les
-              slides se créer au fur et à mesure. Patientez jusqu’à la fin de la génération sans
-              fermer le document.
-            </p>
-            <Alert className="mt-4 border-blue-200 bg-orange-50 text-orange-900 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-50">
-              <AlertTitle>
-                Il se peut que votre Mac affiche un avertissement de sécurité qui empêche
-                l’ouverture de l’application. Dans ce cas, faites un{" "}
-                <strong>clic droit sur l’application</strong>, puis choisissez{" "}
-                <strong>Ouvrir</strong>. Confirmez avec <strong>Ouvrir</strong> si votre Mac vous
-                demande de vérifier sa provenance.
-              </AlertTitle>
-            </Alert>
-          </li>
-          <Separator />
-        </ol>
+          <AccordionItem value="launch">
+            <AccordionHeader>
+              <AccordionTrigger>
+                <StepTitle number={4}>Générer les slides</StepTitle>
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Lancez l’application en double-cliquant dessus. Une fenêtre du Finder s’ouvrira et
+                vous invitera à sélectionner le fichier .json téléchargé à l’étape 1.
+              </p>
+              <p className="text-muted-foreground">
+                Si votre Mac vous demande si l’application peut contrôler Keynote, cliquez sur{" "}
+                <strong>Autoriser</strong> ou <strong>OK</strong>. Cet accès est nécessaire pour
+                créer les slides.
+              </p>
+              <p className="text-muted-foreground">
+                Revenez ensuite au document Keynote laissé ouvert pour observer les slides se créer
+                au fur et à mesure. Patientez jusqu’à la fin de la génération sans fermer le
+                document.
+              </p>
+              <p className="text-muted-foreground">Vous pouvez maintenant diffuser les slides 🎉</p>
+              <Alert className="border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-900 dark:bg-orange-950 dark:text-orange-50">
+                <AlertTitle>Si macOS bloque l’ouverture de l’application</AlertTitle>
+                <ol className="mt-2 list-decimal space-y-2 pl-5 font-normal">
+                  <li>
+                    Dans le Finder, faites un <strong>clic droit sur l’application</strong>, puis
+                    choisissez <strong>Ouvrir</strong>. Confirmez en cliquant à nouveau sur{" "}
+                    <strong>Ouvrir</strong> si macOS vous le demande.
+                  </li>
+                  <li>
+                    Si cette méthode ne fonctionne pas, ouvrez <strong>Réglages Système</strong> →{" "}
+                    <strong>Confidentialité et sécurité</strong>. Dans la section Sécurité, cliquez
+                    sur <strong>Ouvrir quand même</strong> à côté du message concernant
+                    l’application, puis confirmez son ouverture.
+                  </li>
+                </ol>
+              </Alert>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
       <CodeDialog {...props} />
     </>
+  );
+}
+
+function StepTitle({ number, children }: { number: number; children: string }) {
+  return (
+    <span className="flex items-center gap-3">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
+        {number}
+      </span>
+      {children}
+    </span>
   );
 }
 
@@ -204,7 +256,6 @@ function DownloadApplicationButton() {
     <>
       <Button
         type="button"
-        variant="outline"
         disabled={downloading}
         aria-busy={downloading}
         onClick={downloadApplication}

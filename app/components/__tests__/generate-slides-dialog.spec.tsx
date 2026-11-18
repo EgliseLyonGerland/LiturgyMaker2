@@ -56,18 +56,23 @@ describe("GenerateSlidesDialog", () => {
   it("guides the user through the downloads, Mac permissions and generation in order", () => {
     const html = renderToStaticMarkup(<TestDialog />);
 
-    expect(html).toMatch(/<button[^>]*type="button"[^>]*>.*?Télécharger l’application<\/button>/);
+    expect(html).toContain("Télécharger l’application");
     expect(html).toContain(
       'href="https://drive.google.com/file/d/1GprojDkA9y_sVaS8arQztDFEkOwe-CcR/view"',
     );
     expect(html.match(/target="_blank" rel="noopener noreferrer"/g)).toHaveLength(1);
-    expect(html.match(/<li /g)).toHaveLength(4);
-    expect(html.indexOf("Télécharger le modèle Keynote")).toBeLessThan(
-      html.indexOf("Lancer l’application"),
-    );
-    expect(html.indexOf("Télécharger le fichier .json")).toBeLessThan(
-      html.indexOf("Lancer l’application"),
-    );
+    expect(html.match(/data-slot="accordion-item"/g)).toHaveLength(4);
+    for (const step of [
+      "Télécharger le fichier .json",
+      "Télécharger le modèle Keynote",
+      "Télécharger l’application",
+      "Générer les slides",
+    ]) {
+      expect(html).toContain(step);
+    }
+    const finalStepPosition = html.lastIndexOf("Générer les slides");
+    expect(html.lastIndexOf("Télécharger le modèle Keynote")).toBeLessThan(finalStepPosition);
+    expect(html.lastIndexOf("Télécharger le fichier .json")).toBeLessThan(finalStepPosition);
     for (const instruction of [
       "clic droit sur l’application",
       "contrôler Keynote",
@@ -83,6 +88,21 @@ describe("GenerateSlidesDialog", () => {
   it("offers a button to open the code preview", () => {
     const html = renderToStaticMarkup(<TestDialog />);
 
-    expect(html).toMatch(/<button[^>]*aria-haspopup="dialog"[^>]*>Afficher le code<\/button>/);
+    expect(html).toMatch(
+      /<button[^>]*aria-haspopup="dialog"[^>]*>.*?<span class="sr-only">Afficher le code<\/span><\/button>/,
+    );
+  });
+
+  it("shows both macOS security methods in order, with the settings method as an alternative", () => {
+    const html = renderToStaticMarkup(<TestDialog />);
+
+    const rightClickInstruction = html.indexOf("clic droit sur l’application");
+    const settingsInstruction = html.indexOf("Si cette méthode ne fonctionne pas");
+
+    expect(html).toContain("Confirmez en cliquant à nouveau sur");
+    expect(html).toContain("Confidentialité et sécurité");
+    expect(html).toContain("<strong>Ouvrir quand même</strong>");
+    expect(rightClickInstruction).toBeGreaterThan(-1);
+    expect(settingsInstruction).toBeGreaterThan(rightClickInstruction);
   });
 });
