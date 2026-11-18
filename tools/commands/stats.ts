@@ -50,10 +50,6 @@ interface SongsOptions {
   dryRun: boolean;
 }
 
-const creds = JSON.parse(
-  readFileSync(path.join(__dirname, "../../config/~egliselyongerland-642b3dfa5d11.json"), "utf8"),
-) as ServiceAccount;
-
 async function songsCommand({ dryRun }: SongsOptions) {
   const liturgies = JSON.parse(readFileSync(`${backupDir}/liturgies.json`, "utf8")) as Liturgy[];
   const songs = JSON.parse(readFileSync(`${backupDir}/songs.json`, "utf8")) as Song[];
@@ -114,6 +110,9 @@ async function songsCommand({ dryRun }: SongsOptions) {
     return;
   }
 
+  const creds = JSON.parse(
+    readFileSync(path.join(__dirname, "../../config/~egliselyongerland-642b3dfa5d11.json"), "utf8"),
+  ) as ServiceAccount;
   const auth = new JWT({
     email: creds.client_email,
     key: creds.private_key,

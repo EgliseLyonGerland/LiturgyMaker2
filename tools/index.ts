@@ -4,11 +4,14 @@ import firebaseAdmin from "firebase-admin";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-import * as statsCommand from "./commands/stats";
-import * as syncCommand from "./commands/sync";
+import * as statsCommand from "./commands/stats.ts";
+import * as syncCommand from "./commands/sync.ts";
 
-yargs(hideBin(process.argv))
-  .middleware(async () => {
+await yargs(hideBin(process.argv))
+  .middleware(async (argv) => {
+    if (argv._[0] === "sync" && argv._[1] === "emulator") {
+      return;
+    }
     try {
       if (firebaseAdmin.apps.length === 0) {
         firebaseAdmin.initializeApp({
@@ -32,4 +35,4 @@ yargs(hideBin(process.argv))
   .recommendCommands()
   .strict()
   .help()
-  .parse();
+  .parseAsync();

@@ -8,6 +8,8 @@ import inquirer from "inquirer";
 import ora from "ora";
 import type { Argv } from "yargs";
 
+import * as emulatorCommand from "./emulator.ts";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const command = "sync <command>";
@@ -97,5 +99,11 @@ async function restoreCommand({ env }: RestoreOptions): Promise<void> {
 export const builder = function builder(yargs: Argv) {
   return yargs
     .command("backup", "backup data", {}, backupCommand)
-    .command("restore", "Restore backup data", { env: { type: "string" } }, restoreCommand);
+    .command("restore", "Restore backup data", { env: { type: "string" } }, restoreCommand)
+    .command(
+      emulatorCommand.command,
+      emulatorCommand.desc,
+      emulatorCommand.builder,
+      emulatorCommand.handler,
+    );
 };
