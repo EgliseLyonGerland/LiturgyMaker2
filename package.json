@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
-    "dev-server": "pnpm --filter functions run build && firebase emulators:start --import=.firebase/export",
+    "dev-server": "pnpm --filter functions run build && firebase emulators:start --config firebase.emulator.json --import=.firebase/export",
     "build": "react-router build",
     "lint": "oxlint",
     "fmt": "oxfmt",

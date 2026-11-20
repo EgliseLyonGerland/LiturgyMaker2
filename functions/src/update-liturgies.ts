@@ -1,4 +1,4 @@
-import type { Liturgy } from "@liturgy-maker/shared";
+import { type Liturgy } from "@liturgy-maker/shared";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { logger } from "firebase-functions";
