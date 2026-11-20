@@ -25,10 +25,27 @@ import type { Route } from "./+types/root";
 
 import "./style.css";
 
-setDefaultOptions({ locale: fr });
+const formatRelativeLocale = {
+  lastWeek: "eeee 'dernier'",
+  yesterday: "'hier'",
+  today: "'aujourd’hui'",
+  tomorrow: "'demain''",
+  nextWeek: "eeee 'prochain'",
+  other: "P",
+};
+
+const locale = {
+  ...fr,
+  formatRelative: (token: keyof typeof formatRelativeLocale) => formatRelativeLocale[token],
+};
+
+setDefaultOptions({ locale });
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.googleapis.com",
+  },
   {
     rel: "preconnect",
     href: "https://fonts.gstatic.com",

@@ -10,7 +10,9 @@ import {
   type SongsBlock,
   type SongWithId,
 } from "@liturgy-maker/shared";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "cn";
+import { format, formatDistance } from "date-fns";
 import Fuse from "fuse.js";
 import {
   AlertTriangleIcon,
@@ -31,6 +33,7 @@ import {
   useFormContext,
   Watch,
 } from "react-hook-form";
+import { useParams } from "react-router";
 import * as v from "valibot";
 import { create } from "zustand";
 
@@ -86,8 +89,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useBeforeUnload } from "@/hooks/use-before-unload";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getSongsStats } from "@/lib/api";
 import { highlightMatches } from "@/lib/fuzy";
 import { getBlockFocusName } from "@/lib/liturgy-form-utils";
+import { getNextLiturgyId } from "@/lib/liturgy-utils";
 import { isEqualLyrics } from "@/lib/lyrics-utils";
 
 import { SortableButton } from "../sortable-button";
@@ -435,6 +440,8 @@ function Item({ id, index, name, songs, sortable, onRemove }: ItemProps) {
                   }
                 />
 
+                {selectedItem ? <LastUsage songId={selectedItem.id} /> : null}
+
                 <ComboboxContent>
                   <ComboboxInput
                     showTrigger={false}
@@ -666,5 +673,42 @@ function EditLyricsDrawerContent({ lens, song }: EditLyricsDrawerProps) {
         </form>
       </div>
     </>
+  );
+}
+
+function LastUsage({ songId }: { songId: string }) {
+  const { liturgyId } = useParams();
+  const nextLiturgyId = getNextLiturgyId();
+
+  const { data } = useQuery({
+    queryKey: ["songsStats"],
+    queryFn: getSongsStats,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
+  const [now] = useState(() => new Date());
+
+  if (liturgyId !== nextLiturgyId) {
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const last = data
+    .filter((item) => item.id !== liturgyId && item.songs.includes(songId))
+    .sort((a, b) => b.date - a.date)[0];
+
+  if (!last) {
+    return null;
+  }
+
+  return (
+    <span className="text-xs text-muted-foreground">
+      Dernière utilisation le {format(new Date(last.date), "dd/MM/yyyy")} (
+      {formatDistance(new Date(last.date), now)})
+    </span>
   );
 }

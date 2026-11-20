@@ -20,10 +20,11 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
+import { getBytes, ref } from "firebase/storage";
 import * as v from "valibot";
 
 import { createDefaultLiturgy } from "./default-liturgy";
-import { firebaseDb } from "./firebase";
+import { firebaseDb, firebaseStorage } from "./firebase";
 import { queryClient } from "./query-client";
 
 function sortSongs(songs: SongWithId[]) {
@@ -181,4 +182,24 @@ export async function updateLiturgy(id: string, data: Liturgy, overwrite = false
   });
 
   queryClient.setQueryData(["liturgies", id], { ...data, revision });
+}
+
+const liturgiesIndexSchema = v.array(
+  v.object({
+    id: v.string(),
+    date: v.number(),
+    songs: v.array(v.string()),
+  }),
+);
+
+export async function getSongsStats() {
+  const bytes = await getBytes(ref(firebaseStorage, "liturgies.json"));
+  const json: unknown = JSON.parse(new TextDecoder().decode(bytes));
+
+  try {
+    return v.parse(liturgiesIndexSchema, json);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
