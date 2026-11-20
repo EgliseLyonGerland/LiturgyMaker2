@@ -6,6 +6,7 @@ import {
   initializeAuth,
 } from "firebase/auth";
 import { connectFirestoreEmulator, initializeFirestore } from "firebase/firestore";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 import { firebaseConfig } from "@/config/firebase";
 
@@ -16,10 +17,12 @@ const firebaseAuth = initializeAuth(firebaseApp, {
   persistence: browserLocalPersistence,
 });
 const firebaseDb = initializeFirestore(firebaseApp, {});
+const firebaseStorage = getStorage(firebaseApp);
 
 if (import.meta.env.DEV) {
   connectAuthEmulator(firebaseAuth, "http://localhost:9099");
   connectFirestoreEmulator(firebaseDb, "localhost", 8080);
+  connectStorageEmulator(firebaseStorage, "localhost", 9199);
 }
 
-export { firebaseAuth, firebaseDb };
+export { firebaseAuth, firebaseDb, firebaseStorage };

@@ -2,6 +2,14 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
+## Firebase Storage
+
+`getSongsStats()` reads the `liturgies.json` index from Firebase Storage. The
+deployed Storage rules must allow authenticated users to read this file. For
+browser access, configure the bucket's CORS settings to allow GET requests from
+the application's origins; see the [Cloud Storage CORS documentation](https://cloud.google.com/storage/docs/cross-origin).
+In development, the application connects to the Storage emulator on port 9199.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
