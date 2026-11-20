@@ -30,7 +30,7 @@ function toVersion(version: number, data: any) {
   return data;
 }
 
-export default function migrate(doc: any) {
+export function migrate(doc: any) {
   const { version = 1 } = doc;
 
   if (version >= liturgyDocumentVersion) {

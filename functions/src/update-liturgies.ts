@@ -1,4 +1,4 @@
-import { type Liturgy } from "@liturgy-maker/shared";
+import { migrate, type Liturgy } from "@liturgy-maker/shared";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { logger } from "firebase-functions";
@@ -21,6 +21,19 @@ interface StoreItem {
 const storage = getStorage();
 const db = getFirestore();
 
+function liturgyToStoreItem(id: string, liturgy: Liturgy) {
+  const migrated = migrate(liturgy) as Liturgy;
+
+  return {
+    id,
+    date: migrated.date,
+    songs: migrated.blocks
+      .filter((block) => block.type === "songs")
+      .map((block) => block.data.items.map((song) => song.id).filter(Boolean))
+      .flat(),
+  };
+}
+
 async function getStore(): Promise<StoreItem[]> {
   const file = storage.bucket().file("liturgies.json");
 
@@ -30,7 +43,12 @@ async function getStore(): Promise<StoreItem[]> {
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === 404) {
       logger.info("liturgies.json not found; initializing an empty index");
-      return [];
+
+      const { docs } = await db.collection("liturgies").get();
+      const data = docs.map<StoreItem>((doc) => liturgyToStoreItem(doc.id, doc.data() as Liturgy));
+      file.save(JSON.stringify(data));
+
+      return data;
     }
     throw error;
   }
@@ -69,14 +87,7 @@ export const upsertLiturgiesTask = onTaskDispatched<{ liturgyId: string }>(
 
     const liturgy = snapshot.data() as Liturgy;
 
-    const data: StoreItem = {
-      id: liturgyId,
-      date: liturgy.date,
-      songs: liturgy.blocks
-        .filter((block) => block.type === "songs")
-        .map((block) => block.data.items.map((song) => song.id).filter(Boolean))
-        .flat(),
-    };
+    const data: StoreItem = liturgyToStoreItem(liturgyId, liturgy);
 
     if (data.songs.length === 0) {
       const filtered = store.filter((item) => item.id !== liturgyId);

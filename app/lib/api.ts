@@ -1,5 +1,6 @@
 import {
   liturgySchema,
+  migrate,
   recitationSchema,
   songSchema,
   type Liturgy,
@@ -23,7 +24,6 @@ import * as v from "valibot";
 
 import { createDefaultLiturgy } from "./default-liturgy";
 import { firebaseDb } from "./firebase";
-import migrate from "./migrate";
 import { queryClient } from "./query-client";
 
 function sortSongs(songs: SongWithId[]) {

@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
-import migrate from "..";
+import { migrate } from "..";
 import version2 from "../version2";
 import version3 from "../version3";
 import version4 from "../version4";
